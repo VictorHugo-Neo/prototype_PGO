@@ -22,10 +22,10 @@ class User(Base):
     type = Column(Enum(TypeUser), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    guidance_advisor = relationship("Guidance", 
+    guidelines_advisor = relationship("Guidance", 
                                     foreign_keys= "Guidance.advisor_id",
                                     back_populates="advisor")
-    guidance_student = relationship("Guidance",
+    guidelines_student = relationship("Guidance",
                                     foreign_keys="Guidance.student_id",
                                     back_populates = "student")
 
@@ -40,10 +40,10 @@ class Guidance(Base):
     
     advisor = relationship("User",
                            foreign_keys=[advisor_id],
-                           back_populates="guidance_advisor")
-    student_id = relationship("User",
+                           back_populates="guidelines_advisor")
+    student = relationship("User",
                               foreign_keys=[student_id],
-                              back_populates="advisor_student")
+                              back_populates="guidelines_student")
     tasks = relationship("Task",back_populates="guidance")
 
 class Task(Base):
