@@ -7,4 +7,4 @@ def test_database_connection():
             result = connection.execute(text("SELECT 1"))
             assert result.scalar() == 1
     except Exception as e:
-        pytest.fail(f"failed to connect to the database: {e}")
+        assert False, f"Database connection failed: {e}"
