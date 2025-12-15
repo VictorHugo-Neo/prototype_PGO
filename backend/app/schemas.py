@@ -32,6 +32,18 @@ class UserResponse(UserBase):
     
     model_config = ConfigDict(from_attributes=True)
 
+class GuidanceCreate(BaseModel):
+    theme: str 
+    advisor_id: int
+    student_id: int
+
+class GuidanceResponse(BaseModel):
+    id: int
+    theme: str
+    class Config:
+        from_attributes = True
+        
 class TaskUpdateStatus(BaseModel):
     status: StatusTask
+    
 
