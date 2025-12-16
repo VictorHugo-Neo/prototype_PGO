@@ -13,4 +13,4 @@ def create_guidance(guidance: schemas.GuidanceCreate, db: Session = Depends(get_
 
 @router.post("/tasks/", response_model=schemas.TaskResponse)
 def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
-    return crud.create_task(db=db, task_date=task.model_dump())
+    return crud.create_task(db=db, task=task)

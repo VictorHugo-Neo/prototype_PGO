@@ -11,7 +11,7 @@ class UserBase(BaseModel):
 class TaskBase(BaseModel):
     title: str
     description: Optional[str] = None
-    time_stimate: Optional[datetime] = None
+    time_estimate: Optional[datetime] = None
     order: Optional[int] = 0
 
 class UserCreate(UserBase):

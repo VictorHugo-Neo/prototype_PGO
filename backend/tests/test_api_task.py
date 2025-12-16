@@ -4,7 +4,7 @@ import random
 
 client = TestClient(app)
 
-def test_create_guidance():
+def test_guidance_task():
     suffix = random.randint(1000,9999)
     
     advisor = client.post("/users/", json={
@@ -26,4 +26,12 @@ def test_create_guidance():
         
     })
     assert guidance.status_code == 200
+    guidance_id = guidance.json()["id"]
     
+    task = client.post("/tasks/", json={
+        "title": "Test Task",
+        "guidance_id": guidance_id,
+        "order":1
+    })
+    assert task.json()['status'] == "pending"
+    assert task.status_code == 200

@@ -23,7 +23,7 @@ def create_guidance(db: Session, guidance_date: dict):
     return db_guidance
 
 def create_task(db: Session, task: schemas.TaskCreate):
-    db_task = models.Task(**task.model_dumb())
+    db_task = models.Task(**task.model_dump())
     db.add(db_task)
     db.commit()
     db.refresh(db_task)

@@ -9,7 +9,7 @@ class TypeUser(str, enum.Enum):
     STUDENT = 'student'
 
 class StatusTask(str, enum.Enum):
-    PENDING = 'peding'
+    PENDING = 'pending'
     IN_PROGRESS = 'in_progress'
     COMPLETED = 'completed'
     LATE = 'late'
