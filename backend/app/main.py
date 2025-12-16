@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from .config import settings
-from .routers import users
+from .routers import users, task
 
 
 Base.metadata.create_all(bind=engine)
@@ -26,3 +26,4 @@ def read_root():
     return {"message":"Prototype PGO", "docs": "/docs"}
 
 app.include_router(users.router)
+app.include_router(task.router)

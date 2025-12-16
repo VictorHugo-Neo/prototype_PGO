@@ -11,7 +11,7 @@ class UserBase(BaseModel):
 class TaskBase(BaseModel):
     title: str
     description: Optional[str] = None
-    time_stimate: Optional[datetime] = None
+    time_estimate: Optional[datetime] = None
     order: Optional[int] = 0
 
 class UserCreate(UserBase):
@@ -31,3 +31,18 @@ class UserResponse(UserBase):
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+
+class GuidanceCreate(BaseModel):
+    theme: str 
+    advisor_id: int
+    student_id: int
+
+class GuidanceResponse(BaseModel):
+    id: int
+    theme: str
+    model_config = ConfigDict(from_attributes=True)
+        
+class TaskUpdateStatus(BaseModel):
+    status: StatusTask
+    
+
