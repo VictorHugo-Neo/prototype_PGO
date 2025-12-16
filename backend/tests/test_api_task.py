@@ -35,3 +35,8 @@ def test_guidance_task():
     })
     assert task.json()['status'] == "pending"
     assert task.status_code == 200
+    task_id = task.json()["id"]
+    
+    updated_task = client.patch(f"/tasks/{task_id}/status", json={"status":"completed"})
+    assert updated_task.status_code == 200
+    assert updated_task.json()["status"] == "completed"
