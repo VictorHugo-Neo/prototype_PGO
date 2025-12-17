@@ -1,11 +1,15 @@
-
-function APP(){
-  return(
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <h1 className="text-3xl font-bold text-blue-600">
-        Teste PGO FRONTEND
-      </h1>
-    </div>
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Dashboard from "./pages/Dashboard"
+import Trail from "./pages/Trail"
+function App(){
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path= "/" element={<div className="p-4">Home (login)</div>}/>
+        <Route path= "/Dashboard" element={<Dashboard/>} />
+        <Route path= "/Trail" element={<Trail/>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
-export default APP;
+export default App
