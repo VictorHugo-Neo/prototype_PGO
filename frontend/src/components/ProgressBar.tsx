@@ -1,20 +1,16 @@
 interface ProgressBarProps {
-    progress: number;
+  progress: number; 
 }
 
-export function ProgressBar({progress}: ProgressBarProps){
-    let colorClass = "bg-green-500"
-    if (progress < 30) colorClass = "bg-yellow-500"
+export function ProgressBar({ progress }: ProgressBarProps) {
+  const safeProgress = Math.min(100, Math.max(0, progress));
 
-    return(
-        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-            <div
-                data-testid="progress-fill"
-                className={`${colorClass}`}
-            >
-
-            </div>
-        </div>
-    )
-
+  return (
+    <div className="w-full bg-gray-200 rounded-full h-2.5" role="progressbar" aria-valuenow={safeProgress}>
+      <div 
+        className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" 
+        style={{ width: `${safeProgress}%` }}
+      ></div>
+    </div>
+  );
 }
