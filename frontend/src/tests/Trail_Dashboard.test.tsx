@@ -6,7 +6,7 @@ import Trail from '../pages/Trail'
 describe('Routing', () => {
     it('renders home by default', () => {
         render(<Dashboard />);
-        expect(screen.getByText(/Dashboard Advisor/i)).toBeInTheDocument();
+        expect(screen.getByText(/Carregando painel.../i)).toBeInTheDocument();
     });
     it('renders home by default', () => {
         render(<Trail />);
