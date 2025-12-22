@@ -46,3 +46,9 @@ class TaskUpdateStatus(BaseModel):
     status: StatusTask
     
 
+class ChatRequest(BaseModel):
+    message: str
+    student_id: Optional[int] = None
+
+class ChatResponse(BaseModel):
+    response: str

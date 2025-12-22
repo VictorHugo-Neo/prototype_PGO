@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from .config import settings
-from .routers import users, task
-
+from .routers import users, task, chat
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title=settings.PROJETC_NAME)
@@ -27,3 +26,4 @@ def read_root():
 
 app.include_router(users.router)
 app.include_router(task.router)
+app.include_router(chat.router)
