@@ -52,3 +52,14 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+    
+class UserCreate(UserBase):
+    password: str 
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class LoginData(BaseModel):
+    email: str
+    password: str
