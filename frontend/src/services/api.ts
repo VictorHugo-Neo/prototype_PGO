@@ -18,7 +18,7 @@ export const sendMessageToAI = async (message: string): Promise<string> => {
       message: message,
       student_id: 1 
     });
-    return response.data.resposta;
+    return response.data.response;
   } catch (error) {
     console.error("Erro na IA:", error);
     return "Desculpe, não consegui conectar ao servidor da IA no momento.";

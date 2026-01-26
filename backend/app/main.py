@@ -5,7 +5,7 @@ from .config import settings
 from .routers import users, task, chat
 
 Base.metadata.create_all(bind=engine)
-app = FastAPI(title=settings.PROJETC_NAME)
+app = FastAPI(title=settings.PROJECT_NAME)
 
 origins = [
     "http://localhost:3000", # React default

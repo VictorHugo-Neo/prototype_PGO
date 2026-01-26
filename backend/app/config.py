@@ -3,7 +3,7 @@ from functools import lru_cache
 from pydantic import ConfigDict
 
 class Settings(BaseSettings):
-    PROJETC_NAME: str
+    PROJECT_NAME: str
     API_V1_STR: str
     DATABASE_URL: str
     SECRET_KEY: str
