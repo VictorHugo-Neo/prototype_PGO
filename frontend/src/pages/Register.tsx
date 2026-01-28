@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Lock, Mail, GraduationCap, School, CheckCircle } from 'lucide-react';
+import { authService } from '../services/api';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -16,12 +17,27 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica de cadastro aqui
-    console.log("Cadastrando:", role, formData);
-    navigate('/'); // Volta para login após cadastro
-  };
+    if (formData.password !== formData.confirmPassword){ //melhorar validação
+      alert('As senhas não coincidem!');
+      return;
+    }
+    try{
+      await authService.register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        type: role === 'student' ? 'student' : 'advisor' // traduz para o inglês - backend
+      })
+      alert('Cadastro realizado com sucesso! Faça o seu Login.')
+      navigate('/') // tela de login
+    }catch (error: any){
+      console.error(error)
+      const msg = error.response?.data?.detail || "Erro ao realizar cadastro"
+      alert(msg)
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">

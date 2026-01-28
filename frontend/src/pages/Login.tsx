@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Lock, ArrowRight, GraduationCap, School } from 'lucide-react';
+import { authService } from '../services/api';
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,13 +15,19 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulação de login (Substituir pela chamada à API real depois)
-    setTimeout(() => {
-      setIsLoading(false);
-      // Redireciona baseado no perfil
-      if (role === 'student') navigate('/trilha');
-      else navigate('/dashboard');
-    }, 1000);
+    try{
+      await authService.login(email, password)
+      if(role === 'student'){
+        navigate('/tasks')
+      }else{
+        navigate('/guidance')
+      }
+    } catch (error: any){
+      console.error(error)
+      const msg = error.response?.data?.detail || "Erro ao realizar login"
+      alert(msg)
+      setIsLoading(false)
+    }
   };
 
   return (
