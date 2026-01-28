@@ -3,6 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 from .models import TypeUser, StatusTask
 
+# --- Base Schemas ---
 class UserBase(BaseModel):
     name: str
     email: EmailStr
@@ -14,17 +15,9 @@ class TaskBase(BaseModel):
     time_estimate: Optional[datetime] = None
     order: Optional[int] = 0
 
+# --- User Schemas ---
 class UserCreate(UserBase):
-    pass
-
-class TaskCreate(TaskBase):
-    guidance_id: int
-
-class TaskResponse(TaskBase):
-    id: int
-    status: StatusTask
-    
-    model_config = ConfigDict(from_attributes=True) 
+    password: str  
 
 class UserResponse(UserBase):
     id: int
@@ -32,6 +25,15 @@ class UserResponse(UserBase):
     
     model_config = ConfigDict(from_attributes=True)
 
+class LoginData(BaseModel):
+    email: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+# --- Guidance Schemas ---
 class GuidanceCreate(BaseModel):
     theme: str 
     advisor_id: int
@@ -41,25 +43,23 @@ class GuidanceResponse(BaseModel):
     id: int
     theme: str
     model_config = ConfigDict(from_attributes=True)
-        
+
+# --- Task Schemas ---
+class TaskCreate(TaskBase):
+    guidance_id: int
+
+class TaskResponse(TaskBase):
+    id: int
+    status: StatusTask
+    model_config = ConfigDict(from_attributes=True)
+
 class TaskUpdateStatus(BaseModel):
     status: StatusTask
-    
 
+# --- Chat Schemas ---
 class ChatRequest(BaseModel):
     message: str
     student_id: Optional[int] = None
 
 class ChatResponse(BaseModel):
     response: str
-    
-class UserCreate(UserBase):
-    password: str 
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class LoginData(BaseModel):
-    email: str
-    password: str
