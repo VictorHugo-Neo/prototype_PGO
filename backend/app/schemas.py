@@ -25,6 +25,11 @@ class UserResponse(UserBase):
     
     model_config = ConfigDict(from_attributes=True)
 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+
 class LoginData(BaseModel):
     email: str
     password: str

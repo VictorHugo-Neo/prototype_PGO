@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 from .security import get_password_hash
+from . import utils
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
@@ -42,3 +43,19 @@ def update_status_task(db: Session, task_id: int, new_status: models.StatusTask)
         db.commit()
         db.refresh(task)
     return task 
+
+def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        return None
+    
+    if user_update.name:
+        db_user.name = user_update.name
+    if user_update.email:
+        db_user.email = user_update.email
+    if user_update.password:
+        db_user.hashed_password = utils.get_password_hash(user_update.password)
+    
+    db.commit()
+    db.refresh(db_user)
+    return db_user
