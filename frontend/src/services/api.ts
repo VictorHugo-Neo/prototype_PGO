@@ -1,29 +1,30 @@
 import axios from "axios";
 
-
 // conect backend
 export const api = axios.create({
-    baseURL: 'http://localhost:8000'
+  baseURL: 'http://localhost:8000'
 })
 
-// conect IA
-export const iaService = axios.create({
-    baseURL: "http://localhost:8000"
-})
-
+// conect IA (Interceptador)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('pgo_token');
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
+  
+  return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
-interface LoginResponse{
-  acess_token: string
+// --- CORREÇÃO AQUI: Interface com dois 's' ---
+interface LoginResponse {
+  access_token: string  // <--- CORRIGIDO (era acess_token)
   token_type: string
 }
-interface RegisterData{
+
+interface RegisterData {
   name: string
   email: string
   password: string
@@ -45,24 +46,28 @@ export const sendMessageToAI = async (message: string): Promise<string> => {
 
 export const authService = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await api.post('/auth/login', {email,password})
+    const response = await api.post('/auth/login', {email, password})
 
-    //token no navegador para usar posteriormente
-    if (response.data.acess_token){
-      localStorage.setItem('pgo_token',response.data.acess_token)
+    // --- CORREÇÃO AQUI: Verificando a chave correta ---
+    // O backend envia 'access_token', não 'acess_token'
+    if (response.data.access_token) { 
+      localStorage.setItem('pgo_token', response.data.access_token)
     }
+    
     return response.data
   },
 
-  register: async(data:RegisterData) => {
+  register: async(data: RegisterData) => {
     const response = await api.post('/users/', data)
     return response.data;
   },
+  
   logout: () => {
     localStorage.removeItem('pgo_token')
   }
 }
-export const userService ={
+
+export const userService = {
   getMe: async () => {
     const response = await api.get('/users/me')
     return response.data
