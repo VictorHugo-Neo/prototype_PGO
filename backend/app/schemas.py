@@ -68,3 +68,17 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+
+class UserSimple(BaseModel):
+    id: int
+    name: str
+    email: str
+    model_config = ConfigDict(from_attributes=True)
+
+class GuidanceList(BaseModel):
+    id: int
+    theme: str
+    created_at: datetime
+    student: UserSimple  
+
+    model_config = ConfigDict(from_attributes=True)

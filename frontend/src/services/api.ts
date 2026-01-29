@@ -78,3 +78,27 @@ export const userService = {
     return response.data
   }
 }
+
+export interface StudentGuidance {
+  id: number;
+  theme: string;
+  created_at: string;
+  student: {
+    id: number;
+    name: string;
+    email: string;
+  }
+}
+
+export const guidanceService = {
+  // Busca lista de alunos do professor logado
+  getMyStudents: async (): Promise<StudentGuidance[]> => {
+    const response = await api.get('/guidances/my-students');
+    return response.data;
+  },
+
+  // Cria um novo vínculo (para teste rápido)
+  linkStudent: async (theme: string, studentEmail: string) => {
+    console.log("Funcionalidade de vincular pendente de UI");
+  }
+};
