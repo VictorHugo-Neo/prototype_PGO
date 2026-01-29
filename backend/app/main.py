@@ -1,16 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .config import settings
-from .routers import users, task, chat, auth, guidance
+
+from .routers import users, auth, guidance, chat, task 
 
 Base.metadata.create_all(bind=engine)
-app = FastAPI(title=settings.PROJECT_NAME)
+
+app = FastAPI()
 
 origins = [
-    "http://localhost:3000", # React default
-    "http://localhost:5173", # Vite default
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -19,13 +21,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-
-def read_root():
-    return {"message":"Prototype PGO", "docs": "/docs"}
-
+# Incluindo as rotas
 app.include_router(users.router)
-app.include_router(task.router)
-app.include_router(chat.router)
 app.include_router(auth.router)
 app.include_router(guidance.router)
+app.include_router(chat.router)
+app.include_router(task.router) 
+
+@app.get("/")
+def read_root():
+    return {"message": "API do Projeto de Gestão de Orientação está rodando!"}

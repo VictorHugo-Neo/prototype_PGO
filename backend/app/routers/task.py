@@ -1,28 +1,50 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from .. import crud, schemas, models
+from .. import crud, models, schemas, deps
 from ..database import get_db
 
-router = APIRouter(tags=["tasks_guidance"])
+# 1. ADICIONAMOS O PREFIXO AQUI
+# Assim todas as rotas abaixo começarão automaticamente com "/tasks"
+router = APIRouter(prefix="/tasks", tags=["tasks"])
 
-@router.post("/guidances/", response_model=schemas.GuidanceResponse)
+# Rota final: GET /tasks/guidance/{id}
+@router.get("/guidance/{guidance_id}", response_model=List[schemas.TaskResponse])
+def read_tasks_by_guidance(
+    guidance_id: int, 
+    db: Session = Depends(get_db),
+    current_user = Depends(deps.get_current_user)
+):
+    tasks = db.query(models.Task).filter(models.Task.guidance_id == guidance_id).all()
+    return tasks
 
-def create_guidance(guidance: schemas.GuidanceCreate, db: Session = Depends(get_db)):
-    return crud.create_guidance(db=db, guidance_date=guidance.model_dump())
+# Rota final: POST /tasks/
+@router.post("/", response_model=schemas.TaskResponse)
+def create_task(
+    task: schemas.TaskCreate, 
+    db: Session = Depends(get_db),
+    current_user = Depends(deps.get_current_user)
+):
+    # Cria a tarefa no banco
+    db_task = models.Task(**task.model_dump())
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
 
-@router.post("/tasks/", response_model=schemas.TaskResponse)
-def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
-    return crud.create_task(db=db, task=task)
-
-@router.get("/guidances/{guidance_id}/tasks/",response_model=List[schemas.TaskResponse])
-
-def read_tasks(guidance_id: int, db: Session = Depends(get_db)):
-    return crud.get_tasks_by_guidance(db=db, guidance_id = guidance_id)
-
-@router.patch("/tasks/{task_id}/status",response_model=schemas.TaskResponse)
-def updated_task_status(task_id: int, status_updated: schemas.TaskUpdateStatus, db: Session = Depends(get_db)):
-    updated = crud.update_status_task(db, task_id, status_updated.status)
-    if not updated:
-        raise HTTPException(status_code=404, detail = "Task not found")
-    return updated
+# Rota final: PATCH /tasks/{id}/status
+@router.patch("/{task_id}/status", response_model=schemas.TaskResponse)
+def update_task_status(
+    task_id: int,
+    status_update: schemas.TaskUpdateStatus,
+    db: Session = Depends(get_db),
+    current_user = Depends(deps.get_current_user)
+):
+    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+        
+    task.status = status_update.status
+    db.commit()
+    db.refresh(task)
+    return task

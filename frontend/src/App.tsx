@@ -1,10 +1,12 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
-import Dashboard from "./pages/Dashboard"
-import Trail from "./pages/Trail"
-import { ChatWidget } from "./components/ChatWidget"
-import Login from "./pages/Login"
-import Register from "./pages/Register"
-import Profile from "./pages/Profile"
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Trail from './pages/Trail';
+import Profile from './pages/Profile';
+// 1. IMPORTANTE: Importe a página nova aqui em cima
+import StudentDetails from './pages/StudentDetails'; 
+import { ChatWidget } from './components/ChatWidget';
 
 function App() {
   return (
@@ -16,6 +18,7 @@ function App() {
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/Trail" element={<Trail />} />
           <Route path ="/Profile" element={<Profile />} />
+          <Route path="/guidance/:id" element={<StudentDetails />} />
         </Routes>
         <ChatWidget/>
       </div>

@@ -90,15 +90,40 @@ export interface StudentGuidance {
   }
 }
 
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'late';
+  guidance_id: number;
+}
+
 export const guidanceService = {
-  // Busca lista de alunos do professor logado
   getMyStudents: async (): Promise<StudentGuidance[]> => {
     const response = await api.get('/guidances/my-students');
     return response.data;
   },
+  // Pegar detalhes de um aluno específico
+  getById: async (id: string) => {
+    const response = await api.get(`/guidances/${id}`);
+    return response.data;
+  }
+};
 
-  // Cria um novo vínculo (para teste rápido)
-  linkStudent: async (theme: string, studentEmail: string) => {
-    console.log("Funcionalidade de vincular pendente de UI");
+export const taskService = {
+  // Listar tarefas dessa orientação
+  getByGuidance: async (guidanceId: string) => {
+    const response = await api.get(`/tasks/guidance/${guidanceId}`);
+    return response.data;
+  },
+  // Criar tarefa
+  create: async (data: { title: string; description: string; guidance_id: number }) => {
+    const response = await api.post('/tasks/', data);
+    return response.data;
+  },
+  // Atualizar Status
+  updateStatus: async (taskId: number, status: string) => {
+    const response = await api.patch(`/tasks/${taskId}/status`, { status });
+    return response.data;
   }
 };

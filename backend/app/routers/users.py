@@ -44,10 +44,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.get("/{email}", response_model=schemas.UserResponse)
 def read_user(email: str, db: Session = Depends(get_db)):
-    """ 
-    Se esta rota viesse antes do /me, o FastAPI acharia que 
-    'me' é um email e daria erro 404 ou 500.
-    """
+    
     db_user = crud.get_user_by_email(db, email=email)
     if db_user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")

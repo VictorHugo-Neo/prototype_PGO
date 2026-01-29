@@ -95,7 +95,7 @@ export default function Dashboard() {
             <div className="relative">
               <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
               <input 
-                type="text" 
+                type="text"  
                 placeholder="Buscar aluno..." 
                 className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
               />
@@ -125,7 +125,7 @@ export default function Dashboard() {
                     <tr 
                       key={item.id} 
                       className="hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => console.log("Ir para detalhes do aluno", item.student.id)}
+                      onClick={() => navigate(`/guidance/${item.id}`)}
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
