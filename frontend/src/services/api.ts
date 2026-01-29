@@ -62,3 +62,14 @@ export const authService = {
     localStorage.removeItem('pgo_token')
   }
 }
+export const userService ={
+  getMe: async () => {
+    const response = await api.get('/users/me')
+    return response.data
+  },
+
+  updateMe: async (data: {name?: string; email?: string; password?: string}) => {
+    const response = await api.put('/users/me', data)
+    return response.data
+  }
+}
