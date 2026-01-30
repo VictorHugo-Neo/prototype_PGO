@@ -96,6 +96,7 @@ export interface Task {
   description: string;
   status: 'pending' | 'in_progress' | 'completed' | 'late';
   guidance_id: number;
+  time_estimate?: string;
 }
 
 export const guidanceService = {
@@ -124,7 +125,7 @@ export const taskService = {
     return response.data;
   },
   // Criar tarefa
-  create: async (data: { title: string; description: string; guidance_id: number }) => {
+  create: async (data: { title: string; description: string; guidance_id: number; time_estimate?: string }) => {
     const response = await api.post('/tasks/', data);
     return response.data;
   },
