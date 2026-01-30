@@ -105,3 +105,15 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+
+class AttachmentCreate(BaseModel):
+    filename: str
+    task_id: int
+
+class AttachmentResponse(BaseModel):
+    id: int
+    filename: str
+    file_path: str
+    created_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)

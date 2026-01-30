@@ -61,7 +61,8 @@ class Task(Base):
     
     guidance = relationship("Guidance",back_populates="tasks")
     comments = relationship("Comment", back_populates="task", order_by="Comment.created_at")
-
+    attachments = relationship("Attachment", back_populates="task")
+    
 class Comment(Base): 
     __tablename__ = 'comments'
 
@@ -76,3 +77,16 @@ class Comment(Base):
     # Relacionamentos
     task = relationship("Task", back_populates="comments")
     user = relationship("User") # Para sabermos o nome de quem comentou
+
+class Attachment(Base):
+    __tablename__ = 'attachments'
+
+    id = Column(Integer, primary_key=True, index=True)
+    filename = Column(String, nullable=False) # Nome original do arquivo (ex: TCC_Versao1.pdf)
+    file_path = Column(String, nullable=False) # Caminho no servidor (ex: static/uploads/uuid.pdf)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    task_id = Column(Integer, ForeignKey("tasks.id"))
+    
+    # Relacionamento com Tarefa
+    task = relationship("Task", back_populates="attachments")
