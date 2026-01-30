@@ -75,16 +75,21 @@ export const sendMessageToAI = async (message: string): Promise<string> => {
 
 export const authService = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await api.post('/auth/login', {email, password})
+    // Agora enviamos como Form Data (Padrão OAuth2)
+    const formData = new URLSearchParams();
+    formData.append('username', email); // O backend espera o campo 'username' com o email
+    formData.append('password', password);
+
+    const response = await api.post('/auth/login', formData, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    });
+
     if (response.data.access_token) { 
       localStorage.setItem('pgo_token', response.data.access_token)
     }
     return response.data
-  },
-
-  register: async(data: RegisterData) => {
-    const response = await api.post('/users/', data)
-    return response.data;
   },
   
   logout: () => {

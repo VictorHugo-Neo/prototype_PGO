@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from . import models, schemas
+from . import models, schemas, security
 from .security import get_password_hash
 from . import utils
 
@@ -59,3 +59,15 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def authenticate_user(db: Session, email: str, password: str):
+    # Busca o usuário pelo email
+    user = get_user_by_email(db, email=email)
+    if not user:
+        return False
+    
+    # Verifica se a senha bate com o hash salvo
+    if not security.verify_password(password, user.hashed_password):
+        return False
+    
+    return user
