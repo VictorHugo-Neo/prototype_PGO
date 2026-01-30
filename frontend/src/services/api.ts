@@ -115,6 +115,10 @@ export const guidanceService = {
       theme: theme 
     });
     return response.data;
+  },
+  getStudentGuidance: async () => {
+    const response = await api.get('/guidances/me');
+    return response.data;
   }
 };
 
