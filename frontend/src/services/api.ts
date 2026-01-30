@@ -107,6 +107,13 @@ export const guidanceService = {
   getById: async (id: string) => {
     const response = await api.get(`/guidances/${id}`);
     return response.data;
+  },
+  linkStudent: async (email: string, theme: string) => {
+    const response = await api.post('/guidances/link', { 
+      student_email: email, 
+      theme: theme 
+    });
+    return response.data;
   }
 };
 

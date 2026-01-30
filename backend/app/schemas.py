@@ -82,3 +82,7 @@ class GuidanceList(BaseModel):
     student: UserSimple  
 
     model_config = ConfigDict(from_attributes=True)
+
+class GuidanceLink(BaseModel):
+    student_email: EmailStr
+    theme: str
