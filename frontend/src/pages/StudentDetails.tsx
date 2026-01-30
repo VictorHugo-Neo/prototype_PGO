@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, MessageSquare, Send, X } from 'lucide-react';
-import { guidanceService, taskService, commentService, userService } from '../services/api';
-import type { Task, Comment } from '../services/api';
+import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, MessageSquare, Send, X, Paperclip, Download } from 'lucide-react';
+import { guidanceService, taskService, commentService, userService, attachmentService } from '../services/api';
+import type { Task, Comment, Attachment } from '../services/api';
 
 // --- Interface para Colunas ---
 interface KanbanColumnProps {
@@ -35,6 +35,10 @@ export default function StudentDetails() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
 
+  // Estados novos para anexos
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  
   useEffect(() => {
     if (id) {
       loadData();
@@ -79,11 +83,37 @@ export default function StudentDetails() {
     }
   };
 
-  // --- Lógica de Comentários ---
+  // --- Lógica de Comentários e Anexos ---
   const handleTaskClick = async (task: Task) => {
     setSelectedTask(task);
-    const taskComments = await commentService.getByTask(task.id);
+    
+    // Carrega comentários e anexos em paralelo
+    const [taskComments, taskAttachments] = await Promise.all([
+      commentService.getByTask(task.id),
+      attachmentService.getByTask(task.id)
+    ]);
+    
     setComments(taskComments);
+    setAttachments(taskAttachments);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !selectedTask) return;
+    
+    const file = e.target.files[0];
+    setIsUploading(true);
+
+    try {
+      await attachmentService.upload(selectedTask.id, file);
+      // Recarrega a lista
+      const updatedList = await attachmentService.getByTask(selectedTask.id);
+      setAttachments(updatedList);
+      alert("Arquivo enviado com sucesso!");
+    } catch (error) {
+      alert("Erro ao enviar arquivo.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSendComment = async (e: React.FormEvent) => {
@@ -222,9 +252,45 @@ export default function StudentDetails() {
             <div className="w-1/2 flex flex-col bg-white">
               <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
                 <MessageSquare size={18} className="text-blue-600"/>
-                <h3 className="font-semibold text-gray-700">Comentários & Feedback</h3>
+                <h3 className="font-semibold text-gray-700">Atividade e Arquivos</h3>
+              </div>
+
+              {/* AREA DE ANEXOS */}
+              <div className="p-4 border-b border-gray-100 bg-white">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-xs font-bold text-gray-400 uppercase">Anexos</h4>
+                  <label className="cursor-pointer text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 flex items-center gap-1 transition-colors">
+                    <Paperclip size={12} />
+                    {isUploading ? 'Enviando...' : 'Adicionar'}
+                    <input type="file" className="hidden" onChange={handleFileUpload} disabled={isUploading}/>
+                  </label>
+                </div>
+
+                <div className="space-y-2">
+                  {attachments.length === 0 && (
+                    <p className="text-xs text-gray-400 italic">Nenhum arquivo anexado.</p>
+                  )}
+                  {attachments.map((file) => (
+                    <div key={file.id} className="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-100 text-sm">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Paperclip size={14} className="text-gray-400 flex-shrink-0" />
+                        <span className="truncate text-gray-700">{file.filename}</span>
+                      </div>
+                      <a 
+                        href={`http://localhost:8000/${file.file_path}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 p-1"
+                        title="Baixar"
+                      >
+                        <Download size={14} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
               </div>
               
+              {/* LISTA DE COMENTÁRIOS (HISTÓRICO) */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {comments.length === 0 ? (
                   <div className="text-center text-gray-400 mt-10 text-sm">Nenhum comentário ainda.<br/>Inicie a conversa!</div>
@@ -243,6 +309,7 @@ export default function StudentDetails() {
                 )}
               </div>
 
+              {/* INPUT DE ENVIO */}
               <form onSubmit={handleSendComment} className="p-4 border-t border-gray-100 flex gap-2">
                 <input 
                   type="text" 

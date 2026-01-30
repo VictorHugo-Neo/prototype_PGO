@@ -35,7 +35,7 @@ export interface Task {
   description: string;
   status: 'pending' | 'in_progress' | 'completed' | 'late';
   guidance_id: number;
-  time_estimate?: string; // Data de entrega da tarefa
+  time_estimate?: string;
 }
 
 export interface Comment {
@@ -50,12 +50,21 @@ export interface StudentGuidance {
   id: number;
   theme: string;
   created_at: string;
-  defense_date?: string; // <--- O CAMPO QUE FALTAVA (Interrogação pois pode ser nulo)
+  defense_date?: string;
   student: {
     id: number;
     name: string;
     email: string;
   }
+}
+
+// Interface Nova
+export interface Attachment {
+  id: number;
+  filename: string;
+  file_path: string;
+  created_at: string;
+  task_id: number;
 }
 
 // --- 3. Serviços (Funções que chamam o Backend) ---
@@ -64,7 +73,7 @@ export const sendMessageToAI = async (message: string): Promise<string> => {
   try {
     const response = await api.post('/chat/', { 
       message: message,
-      student_id: 1 // Idealmente pegar do contexto do usuário
+      student_id: 1 
     });
     return response.data.response;
   } catch (error) {
@@ -75,9 +84,9 @@ export const sendMessageToAI = async (message: string): Promise<string> => {
 
 export const authService = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    // Agora enviamos como Form Data (Padrão OAuth2)
+    // Envia como Form Data (Correção para Swagger/OAuth2)
     const formData = new URLSearchParams();
-    formData.append('username', email); // O backend espera o campo 'username' com o email
+    formData.append('username', email); 
     formData.append('password', password);
 
     const response = await api.post('/auth/login', formData, {
@@ -110,25 +119,21 @@ export const userService = {
 }
 
 export const guidanceService = {
-  // Lista todos os alunos (para o Dashboard do Professor)
   getMyStudents: async (): Promise<StudentGuidance[]> => {
     const response = await api.get('/guidances/my-students');
     return response.data;
   },
   
-  // Pega detalhes de uma orientação específica
   getById: async (id: string) => {
     const response = await api.get(`/guidances/${id}`);
     return response.data;
   },
 
-  // Busca a orientação do próprio aluno logado
   getStudentGuidance: async () => {
     const response = await api.get('/guidances/me');
     return response.data;
   },
   
-  // Cria vínculo com aluno via email
   linkStudent: async (email: string, theme: string) => {
     const response = await api.post('/guidances/link', { 
       student_email: email, 
@@ -137,7 +142,6 @@ export const guidanceService = {
     return response.data;
   },
 
-  // Atualiza dados da orientação (Ex: Data da Banca)
   update: async (id: number, data: { defense_date?: string, theme?: string }) => {
     const response = await api.patch(`/guidances/${id}`, data);
     return response.data;
@@ -166,6 +170,26 @@ export const commentService = {
   },
   create: async (taskId: number, content: string) => {
     const response = await api.post('/comments/', { task_id: taskId, content });
+    return response.data;
+  }
+};
+
+// Serviço Novo
+export const attachmentService = {
+  upload: async (taskId: number, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file); 
+    
+    const response = await api.post(`/attachments/task/${taskId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getByTask: async (taskId: number): Promise<Attachment[]> => {
+    const response = await api.get(`/attachments/task/${taskId}`);
     return response.data;
   }
 };
