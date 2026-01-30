@@ -22,7 +22,6 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: int
     created_at: datetime
-    
     model_config = ConfigDict(from_attributes=True)
 
 class UserUpdate(BaseModel):
@@ -38,15 +37,39 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class UserSimple(BaseModel):
+    id: int
+    name: str
+    email: str
+    model_config = ConfigDict(from_attributes=True)
+
 # --- Guidance Schemas ---
 class GuidanceCreate(BaseModel):
     theme: str 
     advisor_id: int
     student_id: int
 
+# Schema para Atualização (PATCH)
+class GuidanceUpdate(BaseModel):
+    theme: Optional[str] = None
+    defense_date: Optional[datetime] = None
+
+class GuidanceLink(BaseModel):
+    student_email: EmailStr
+    theme: str
+
 class GuidanceResponse(BaseModel):
     id: int
     theme: str
+    model_config = ConfigDict(from_attributes=True)
+
+class GuidanceList(BaseModel):
+    id: int
+    theme: str
+    defense_date: Optional[datetime] = None 
+    created_at: datetime
+    student: UserSimple  
+
     model_config = ConfigDict(from_attributes=True)
 
 # --- Task Schemas ---
@@ -61,32 +84,7 @@ class TaskResponse(TaskBase):
 class TaskUpdateStatus(BaseModel):
     status: StatusTask
 
-# --- Chat Schemas ---
-class ChatRequest(BaseModel):
-    message: str
-    student_id: Optional[int] = None
-
-class ChatResponse(BaseModel):
-    response: str
-
-class UserSimple(BaseModel):
-    id: int
-    name: str
-    email: str
-    model_config = ConfigDict(from_attributes=True)
-
-class GuidanceList(BaseModel):
-    id: int
-    theme: str
-    created_at: datetime
-    student: UserSimple  
-
-    model_config = ConfigDict(from_attributes=True)
-
-class GuidanceLink(BaseModel):
-    student_email: EmailStr
-    theme: str
-
+# --- Comment Schemas ---
 class CommentCreate(BaseModel):
     content: str
     task_id: int
@@ -95,7 +93,15 @@ class CommentResponse(BaseModel):
     id: int
     content: str
     created_at: datetime
-    user_name: str 
-    user_id: int  
+    user_name: str
+    user_id: int
     
     model_config = ConfigDict(from_attributes=True)
+
+# --- Chat Schemas ---
+class ChatRequest(BaseModel):
+    message: str
+    student_id: Optional[int] = None
+
+class ChatResponse(BaseModel):
+    response: str

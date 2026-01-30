@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Users, BookOpen, Search, Plus, Calendar, X } from 'lucide-react'; // Adicionado X
+import { Users, BookOpen, Search, Plus, Calendar, X } from 'lucide-react';
 import { guidanceService, userService } from '../services/api';
 import type { StudentGuidance } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -22,12 +22,10 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     try {
-      // Carrega dados do usuário e dos alunos em paralelo
       const [user, data] = await Promise.all([
         userService.getMe(),
         guidanceService.getMyStudents()
       ]);
-      
       setUserName(user.name);
       setStudents(data);
     } catch (error) {
@@ -46,7 +44,7 @@ export default function Dashboard() {
       setIsModalOpen(false);
       setNewStudentEmail('');
       setNewStudentTheme('');
-      loadDashboardData(); // Recarrega a lista
+      loadDashboardData(); 
     } catch (error: any) {
       const msg = error.response?.data?.detail || "Erro ao vincular aluno.";
       alert(msg);
@@ -54,6 +52,17 @@ export default function Dashboard() {
       setLinking(false);
     }
   };
+
+  // --- CÁLCULO DE PRÓXIMAS BANCAS ---
+  const upcomingDefenses = students.filter(s => 
+    s.defense_date && new Date(s.defense_date) > new Date()
+  ).length;
+
+  // Formatador de data auxiliar
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit', year: '2-digit'});
+  }
 
   if (loading) {
     return (
@@ -81,7 +90,7 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Cards (Mantidos iguais) */}
+        {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-lg"><Users size={24} /></div>
@@ -90,7 +99,6 @@ export default function Dashboard() {
               <h3 className="text-2xl font-bold text-gray-800">{students.length}</h3>
             </div>
           </div>
-          
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className="p-3 bg-green-50 text-green-600 rounded-lg"><BookOpen size={24} /></div>
             <div>
@@ -98,13 +106,12 @@ export default function Dashboard() {
               <h3 className="text-2xl font-bold text-gray-800">{students.length}</h3>
             </div>
           </div>
-
-           {/* Card placeholder para estatística futura */}
-           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 opacity-60">
+          {/* Card Atualizado com Contador Real */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className="p-3 bg-orange-50 text-orange-600 rounded-lg"><Calendar size={24} /></div>
             <div>
               <p className="text-sm text-gray-500">Próximas Bancas</p>
-              <h3 className="text-2xl font-bold text-gray-800">0</h3>
+              <h3 className="text-2xl font-bold text-gray-800">{upcomingDefenses}</h3>
             </div>
           </div>
         </div>
@@ -120,7 +127,7 @@ export default function Dashboard() {
                 <tr>
                   <th className="px-6 py-4">Aluno</th>
                   <th className="px-6 py-4">Tema</th>
-                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Banca</th> {/* Nova Coluna */}
                   <th className="px-6 py-4 text-right">Ações</th>
                 </tr>
               </thead>
@@ -151,7 +158,13 @@ export default function Dashboard() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{item.theme}</td>
                       <td className="px-6 py-4">
-                        <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Em dia</span>
+                        {item.defense_date ? (
+                           <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                             {formatDate(item.defense_date)}
+                           </span>
+                        ) : (
+                           <span className="text-xs text-gray-400">Não agendada</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right text-blue-600 text-sm font-medium">Ver Detalhes</td>
                     </tr>
@@ -162,7 +175,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* --- MODAL DE VINCULAR ALUNO --- */}
+        {/* MODAL DE VINCULAR ALUNO */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl relative">

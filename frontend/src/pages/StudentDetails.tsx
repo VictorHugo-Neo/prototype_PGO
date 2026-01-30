@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, MoreVertical, Calendar, MessageSquare, Send, X } from 'lucide-react';
+import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, MessageSquare, Send, X } from 'lucide-react';
 import { guidanceService, taskService, commentService, userService } from '../services/api';
 import type { Task, Comment } from '../services/api';
 
@@ -11,7 +11,7 @@ interface KanbanColumnProps {
   color: string;
   icon: React.ReactNode;
   onMove: (id: number) => void;
-  onClickTask: (task: Task) => void; // Novo evento de clique
+  onClickTask: (task: Task) => void;
   nextLabel: string;
 }
 
@@ -22,7 +22,7 @@ export default function StudentDetails() {
   const [guidance, setGuidance] = useState<any>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [myUserId, setMyUserId] = useState<number>(0); // Para saber qual balão é o meu
+  const [myUserId, setMyUserId] = useState<number>(0);
   
   // Modal de Nova Tarefa
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -43,8 +43,12 @@ export default function StudentDetails() {
   }, [id]);
 
   const loadUser = async () => {
-    const user = await userService.getMe();
-    setMyUserId(user.id);
+    try {
+      const user = await userService.getMe();
+      setMyUserId(user.id);
+    } catch (error) {
+      console.error("Erro ao carregar usuário", error);
+    }
   }
 
   const loadData = async () => {
@@ -60,6 +64,18 @@ export default function StudentDetails() {
       navigate('/dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- Função para Atualizar Data da Banca ---
+  const handleUpdateDefenseDate = async (newDate: string) => {
+    try {
+      // Atualiza no backend
+      await guidanceService.update(Number(id), { defense_date: newDate });
+      // Atualiza visualmente
+      setGuidance({ ...guidance, defense_date: newDate });
+    } catch (error) {
+      alert("Erro ao atualizar data da banca (apenas orientadores podem fazer isso).");
     }
   };
 
@@ -115,10 +131,25 @@ export default function StudentDetails() {
           <button onClick={() => navigate(-1)} className="flex items-center text-gray-500 hover:text-blue-600 mb-2 text-sm">
             <ArrowLeft size={16} className="mr-1" /> Voltar
           </button>
+          
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">{guidance?.student?.name}</h1>
-              <p className="text-gray-500 text-sm mt-1">Tema: <span className="font-medium text-blue-600">{guidance?.theme}</span></p>
+              <p className="text-gray-500 text-sm mt-1 mb-2">Tema: <span className="font-medium text-blue-600">{guidance?.theme}</span></p>
+              
+              {/* --- CAMPO DE DATA DA BANCA --- */}
+              <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 w-fit">
+                <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                  <Calendar size={12}/> Banca:
+                </label>
+                <input 
+                  type="datetime-local"
+                  className="text-sm bg-transparent text-gray-700 focus:outline-none font-medium"
+                  value={guidance?.defense_date ? new Date(guidance.defense_date).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => handleUpdateDefenseDate(e.target.value)}
+                />
+              </div>
+
             </div>
             <button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm">
               <Plus size={20} /> Nova Tarefa
@@ -232,7 +263,7 @@ export default function StudentDetails() {
   );
 }
 
-// --- Componente Coluna (Atualizado com onClickTask) ---
+// --- Componente Coluna ---
 function KanbanColumn({ title, tasks, color, icon, onMove, onClickTask, nextLabel }: KanbanColumnProps) {
   const formatDate = (dateString?: string) => dateString ? new Date(dateString).toLocaleDateString('pt-BR') : null;
 
@@ -245,7 +276,7 @@ function KanbanColumn({ title, tasks, color, icon, onMove, onClickTask, nextLabe
         {tasks.map((task) => (
           <div 
             key={task.id} 
-            onClick={() => onClickTask(task)} // <--- CLIQUE NO CARD ABRE CHAT
+            onClick={() => onClickTask(task)}
             className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative cursor-pointer"
           >
             <div className="flex justify-between items-start mb-2">
@@ -259,7 +290,7 @@ function KanbanColumn({ title, tasks, color, icon, onMove, onClickTask, nextLabe
             )}
             {nextLabel && (
               <button 
-                onClick={(e) => { e.stopPropagation(); onMove(task.id); }} // StopPropagation para não abrir o chat ao mover
+                onClick={(e) => { e.stopPropagation(); onMove(task.id); }}
                 className="w-full text-xs font-medium bg-gray-50 hover:bg-blue-50 text-blue-600 py-2 rounded transition-colors border border-gray-100 mt-auto"
               >
                 Mover para {nextLabel}

@@ -35,6 +35,7 @@ class Guidance(Base):
     
     id = Column(Integer, primary_key = True, index=True)
     theme = Column(String)
+    defense_date = Column(DateTime, nullable=True)
     advisor_id = Column(Integer, ForeignKey('users.id'))
     student_id = Column(Integer, ForeignKey('users.id'))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
