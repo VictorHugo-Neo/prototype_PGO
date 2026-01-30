@@ -86,3 +86,16 @@ class GuidanceList(BaseModel):
 class GuidanceLink(BaseModel):
     student_email: EmailStr
     theme: str
+
+class CommentCreate(BaseModel):
+    content: str
+    task_id: int
+
+class CommentResponse(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    user_name: str 
+    user_id: int  
+    
+    model_config = ConfigDict(from_attributes=True)

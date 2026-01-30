@@ -59,4 +59,19 @@ class Task(Base):
     guidance_id = Column(Integer, ForeignKey("guidances.id"))
     
     guidance = relationship("Guidance",back_populates="tasks")
-        
+    comments = relationship("Comment", back_populates="task", order_by="Comment.created_at")
+
+class Comment(Base): 
+    __tablename__ = 'comments'
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Chaves Estrangeiras
+    task_id = Column(Integer, ForeignKey("tasks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    # Relacionamentos
+    task = relationship("Task", back_populates="comments")
+    user = relationship("User") # Para sabermos o nome de quem comentou

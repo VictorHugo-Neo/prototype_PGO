@@ -135,3 +135,22 @@ export const taskService = {
     return response.data;
   }
 };
+export interface Comment {
+  id: number;
+  content: string;
+  created_at: string;
+  user_name: string;
+  user_id: number;
+}
+
+// ... serviços
+export const commentService = {
+  getByTask: async (taskId: number): Promise<Comment[]> => {
+    const response = await api.get(`/comments/task/${taskId}`);
+    return response.data;
+  },
+  create: async (taskId: number, content: string) => {
+    const response = await api.post('/comments/', { task_id: taskId, content });
+    return response.data;
+  }
+};
