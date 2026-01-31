@@ -117,3 +117,12 @@ class AttachmentResponse(BaseModel):
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+
+class NotificationResponse(BaseModel):
+    id: int
+    message: str
+    read: bool
+    created_at: datetime
+    link: Optional[str] = None
+    
+    model_config = ConfigDict(from_attributes=True)

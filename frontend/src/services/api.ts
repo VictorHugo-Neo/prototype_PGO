@@ -67,6 +67,14 @@ export interface Attachment {
   task_id: number;
 }
 
+export interface Notification {
+  id: number;
+  message: string;
+  read: boolean;
+  created_at: string;
+  link?: string;
+}
+
 // --- 3. Serviços (Funções que chamam o Backend) ---
 
 export const sendMessageToAI = async (message: string): Promise<string> => {
@@ -191,5 +199,14 @@ export const attachmentService = {
   getByTask: async (taskId: number): Promise<Attachment[]> => {
     const response = await api.get(`/attachments/task/${taskId}`);
     return response.data;
+  }
+};
+export const notificationService = {
+  getAll: async (): Promise<Notification[]> => {
+    const response = await api.get('/notifications/');
+    return response.data;
+  },
+  markAsRead: async (id: number) => {
+    await api.patch(`/notifications/${id}/read`);
   }
 };

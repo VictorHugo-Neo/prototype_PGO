@@ -31,7 +31,7 @@ def create_comment(
     db: Session = Depends(get_db),
     current_user = Depends(deps.get_current_user)
 ):
-    # Cria o comentário vinculado ao usuário logado
+    # 1. Cria o comentário normal
     db_comment = models.Comment(
         content=comment.content,
         task_id=comment.task_id,
@@ -41,6 +41,29 @@ def create_comment(
     db.commit()
     db.refresh(db_comment)
     
+
+    # Cria a notificação para o outro usuário envolvido na orientação
+    task = db.query(models.Task).filter(models.Task.id == comment.task_id).first()
+    if task and task.guidance:
+        # Se quem comentou foi o ALUNO, notifica o ORIENTADOR
+        # Se quem comentou foi o ORIENTADOR, notifica o ALUNO
+        if current_user.id == task.guidance.student_id:
+            recipient_id = task.guidance.advisor_id
+            msg = f"Aluno {current_user.name} comentou na tarefa: {task.title}"
+        else:
+            recipient_id = task.guidance.student_id
+            msg = f"Orientador {current_user.name} comentou na tarefa: {task.title}"
+        
+        # Cria a notificação no banco
+        new_notif = models.Notification(
+            user_id=recipient_id,
+            message=msg,
+            link=f"/guidance/{task.guidance_id}" # Link para o front saber onde ir
+        )
+        db.add(new_notif)
+        db.commit()
+    
+    # Retorna o comentário criado
     return schemas.CommentResponse(
         id=db_comment.id,
         content=db_comment.content,

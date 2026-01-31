@@ -90,3 +90,17 @@ class Attachment(Base):
     
     # Relacionamento com Tarefa
     task = relationship("Task", back_populates="attachments")
+
+class Notification(Base):
+    __tablename__ = 'notifications'
+
+    id = Column(Integer, primary_key=True, index=True)
+    message = Column(String, nullable=False)
+    read = Column(Boolean, default=False) # Se já foi lida
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Quem vai receber a notificação
+    user_id = Column(Integer, ForeignKey("users.id"))
+    
+    # Opcional: Link para saber onde clicar (ex: guidance/1)
+    link = Column(String, nullable=True)
