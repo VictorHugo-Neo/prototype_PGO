@@ -75,6 +75,14 @@ export interface Notification {
   link?: string;
 }
 
+export interface Meeting {
+  id: number;
+  date: string;
+  topic: string;
+  status: 'pending' | 'confirmed' | 'rejected';
+  guidance_id: number;
+}
+
 // --- 3. Serviços (Funções que chamam o Backend) ---
 
 export const sendMessageToAI = async (message: string): Promise<string> => {
@@ -208,5 +216,22 @@ export const notificationService = {
   },
   markAsRead: async (id: number) => {
     await api.patch(`/notifications/${id}/read`);
+  }
+};
+
+export const meetingService = {
+  create: async (data: { date: string; topic: string; guidance_id: number }) => {
+    const response = await api.post('/meetings/', data);
+    return response.data;
+  },
+  
+  getByGuidance: async (guidanceId: string): Promise<Meeting[]> => {
+    const response = await api.get(`/meetings/guidance/${guidanceId}`);
+    return response.data;
+  },
+
+  updateStatus: async (id: number, status: 'confirmed' | 'rejected') => {
+    const response = await api.patch(`/meetings/${id}/status`, { status });
+    return response.data;
   }
 };

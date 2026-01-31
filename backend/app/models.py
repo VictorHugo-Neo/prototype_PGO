@@ -47,6 +47,7 @@ class Guidance(Base):
                               foreign_keys=[student_id],
                               back_populates="guidelines_student")
     tasks = relationship("Task",back_populates="guidance")
+    meetings = relationship("Meeting", back_populates="guidance")
 
 class Task(Base):
     __tablename__ = 'tasks'
@@ -104,3 +105,16 @@ class Notification(Base):
     
     # Opcional: Link para saber onde clicar (ex: guidance/1)
     link = Column(String, nullable=True)
+
+class Meeting(Base):
+    __tablename__ = 'meetings'
+
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(DateTime, nullable=False)
+    topic = Column(String, nullable=False)
+    status = Column(String, default="pending") # pending, confirmed, rejected
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    guidance_id = Column(Integer, ForeignKey("guidances.id"))
+    
+    guidance = relationship("Guidance", back_populates="meetings")

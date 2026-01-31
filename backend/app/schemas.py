@@ -126,3 +126,20 @@ class NotificationResponse(BaseModel):
     link: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
+
+class MeetingCreate(BaseModel):
+    date: datetime
+    topic: str
+    guidance_id: int
+
+class MeetingUpdateStatus(BaseModel):
+    status: str # confirmed, rejected
+
+class MeetingResponse(BaseModel):
+    id: int
+    date: datetime
+    topic: str
+    status: str
+    created_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, MessageSquare, Send, X, Paperclip, Download, Bell } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'; // <--- Importação do Drag & Drop
+import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, MessageSquare, Send, X, Paperclip, Download, Bell, Check, XCircle } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { guidanceService, taskService, commentService, userService, attachmentService, notificationService } from '../services/api';
-import type { Task, Comment, Attachment, Notification } from '../services/api';
+import { guidanceService, taskService, commentService, userService, attachmentService, notificationService, meetingService } from '../services/api'; // <--- Adicione meetingService
+import type { Task, Comment, Attachment, Notification, Meeting } from '../services/api'; // <--- Adicione Meeting
 
 export default function StudentDetails() {
   const { id } = useParams(); 
@@ -13,13 +13,22 @@ export default function StudentDetails() {
   const [guidance, setGuidance] = useState<any>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Dados do Usuário Logado (para saber se é orientador)
   const [myUserId, setMyUserId] = useState<number>(0);
+  const [myUserType, setMyUserType] = useState<string>('');
   
   // Notificações
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotif, setShowNotif] = useState(false);
 
-  // Modais
+  // Reuniões (NOVO)
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
+  const [newMeetingDate, setNewMeetingDate] = useState('');
+  const [newMeetingTopic, setNewMeetingTopic] = useState('');
+
+  // Modais de Tarefa
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
@@ -45,6 +54,7 @@ export default function StudentDetails() {
     try {
       const user = await userService.getMe();
       setMyUserId(user.id);
+      setMyUserType(user.type); // Guardamos o tipo para mostrar botões de aprovação
     } catch (error) {
       console.error("Erro ao carregar usuário", error);
     }
@@ -52,14 +62,16 @@ export default function StudentDetails() {
 
   const loadData = async () => {
     try {
-      const [gData, tData, notifs] = await Promise.all([
+      const [gData, tData, notifs, meetData] = await Promise.all([
         guidanceService.getById(id!),
         taskService.getByGuidance(id!),
-        notificationService.getAll()
+        notificationService.getAll(),
+        meetingService.getByGuidance(id!) // <--- Carrega reuniões
       ]);
       setGuidance(gData);
       setTasks(tData);
       setNotifications(notifs);
+      setMeetings(meetData);
     } catch (error) {
       console.error(error);
       navigate('/dashboard');
@@ -68,40 +80,56 @@ export default function StudentDetails() {
     }
   };
 
-  // --- LÓGICA DE DRAG & DROP (NOVO) ---
+  // --- LÓGICA DE REUNIÕES (NOVO) ---
+  const handleCreateMeeting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMeetingDate || !newMeetingTopic) return;
+    try {
+      await meetingService.create({
+        date: newMeetingDate,
+        topic: newMeetingTopic,
+        guidance_id: Number(id)
+      });
+      alert("Solicitação enviada!");
+      setNewMeetingDate('');
+      setNewMeetingTopic('');
+      // Recarrega lista
+      const updated = await meetingService.getByGuidance(id!);
+      setMeetings(updated);
+    } catch (error) {
+      alert("Erro ao solicitar reunião.");
+    }
+  };
+
+  const handleUpdateMeetingStatus = async (meetingId: number, status: 'confirmed' | 'rejected') => {
+    try {
+      await meetingService.updateStatus(meetingId, status);
+      // Atualiza lista localmente
+      setMeetings(meetings.map(m => m.id === meetingId ? {...m, status} : m));
+    } catch (error) {
+      alert("Erro ao atualizar status.");
+    }
+  };
+  // ---------------------------------
+
   const onDragEnd = async (result: DropResult) => {
     const { source, destination, draggableId } = result;
-
-    // Se soltou fora de uma coluna válida, não faz nada
     if (!destination) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
-    // Se soltou no mesmo lugar, não faz nada
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
-      return;
-    }
-
-    const newStatus = destination.droppableId; // O ID da coluna é o status ('pending', etc)
+    const newStatus = destination.droppableId;
     const taskId = Number(draggableId);
 
-    // 1. Atualização Otimista (Visual instantâneo)
-    const updatedTasks = tasks.map(t => 
-      t.id === taskId ? { ...t, status: newStatus as any } : t
-    );
+    const updatedTasks = tasks.map(t => t.id === taskId ? { ...t, status: newStatus as any } : t);
     setTasks(updatedTasks);
 
-    // 2. Atualização no Backend
     try {
       await taskService.updateStatus(taskId, newStatus);
     } catch (error) {
       console.error("Erro ao mover tarefa", error);
-      alert("Erro ao salvar a movimentação. Recarregando...");
-      loadData(); // Reverte em caso de erro
+      loadData();
     }
   };
-  // -------------------------------------
 
   const handleNotificationClick = async (notif: Notification) => {
     if (!notif.read) {
@@ -192,30 +220,42 @@ export default function StudentDetails() {
                 <ArrowLeft size={16} className="mr-1" /> Voltar
             </button>
 
-            <div className="relative">
-              <button onClick={() => setShowNotif(!showNotif)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 relative transition-colors">
-                <Bell size={20} className="text-gray-600" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                )}
+            <div className="flex items-center gap-4">
+              {/* Botão de Agendar Reunião */}
+              <button 
+                onClick={() => setIsMeetingModalOpen(true)}
+                className="flex items-center gap-2 text-gray-600 hover:text-blue-600 text-sm font-medium bg-gray-50 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
+              >
+                <Calendar size={18} />
+                Agendar Reunião
               </button>
-              {showNotif && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
-                  <div className="p-3 border-b border-gray-100 bg-gray-50 font-semibold text-gray-700 text-xs uppercase">Notificações</div>
-                  <div className="max-h-64 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="p-6 text-center text-gray-400 text-sm">Nenhuma notificação nova.</div>
-                    ) : (
-                      notifications.map(n => (
-                        <div key={n.id} onClick={() => handleNotificationClick(n)} className={`p-3 border-b border-gray-50 cursor-pointer hover:bg-blue-50 transition-colors ${!n.read ? 'bg-blue-50/40' : ''}`}>
-                          <p className={`text-sm ${!n.read ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>{n.message}</p>
-                          <span className="text-[10px] text-gray-400 mt-1 block">{new Date(n.created_at).toLocaleDateString()}</span>
-                        </div>
-                      ))
-                    )}
+
+              {/* Sino de Notificação */}
+              <div className="relative">
+                <button onClick={() => setShowNotif(!showNotif)} className="p-2 bg-gray-50 rounded-full hover:bg-gray-100 relative transition-colors">
+                  <Bell size={20} className="text-gray-600" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                  )}
+                </button>
+                {showNotif && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                    <div className="p-3 border-b border-gray-100 bg-gray-50 font-semibold text-gray-700 text-xs uppercase">Notificações</div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-center text-gray-400 text-sm">Nenhuma notificação nova.</div>
+                      ) : (
+                        notifications.map(n => (
+                          <div key={n.id} onClick={() => handleNotificationClick(n)} className={`p-3 border-b border-gray-50 cursor-pointer hover:bg-blue-50 transition-colors ${!n.read ? 'bg-blue-50/40' : ''}`}>
+                            <p className={`text-sm ${!n.read ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>{n.message}</p>
+                            <span className="text-[10px] text-gray-400 mt-1 block">{new Date(n.created_at).toLocaleDateString()}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
           
@@ -223,6 +263,7 @@ export default function StudentDetails() {
             <div>
               <h1 className="text-2xl font-bold text-gray-800">{guidance?.student?.name}</h1>
               <p className="text-gray-500 text-sm mt-1 mb-2">Tema: <span className="font-medium text-blue-600">{guidance?.theme}</span></p>
+              
               <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 w-fit">
                 <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><Calendar size={12}/> Banca:</label>
                 <input type="datetime-local" className="text-sm bg-transparent text-gray-700 focus:outline-none font-medium" value={guidance?.defense_date ? new Date(guidance.defense_date).toISOString().slice(0, 16) : ''} onChange={(e) => handleUpdateDefenseDate(e.target.value)} />
@@ -239,39 +280,79 @@ export default function StudentDetails() {
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex-1 overflow-x-auto p-6">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-            
-            <KanbanColumn 
-              id="pending" 
-              title="A Fazer" 
-              tasks={tasks.filter(t => t.status === 'pending')} 
-              color="bg-gray-100" 
-              icon={<Clock size={18} />} 
-              onClickTask={handleTaskClick} 
-            />
-            
-            <KanbanColumn 
-              id="in_progress" 
-              title="Em Andamento" 
-              tasks={tasks.filter(t => t.status === 'in_progress')} 
-              color="bg-blue-50" 
-              icon={<PlayCircle size={18} className="text-blue-600"/>} 
-              onClickTask={handleTaskClick} 
-            />
-            
-            <KanbanColumn 
-              id="completed" 
-              title="Concluído" 
-              tasks={tasks.filter(t => t.status === 'completed')} 
-              color="bg-green-50" 
-              icon={<CheckCircle size={18} className="text-green-600"/>} 
-              onClickTask={handleTaskClick} 
-            />
-
+            <KanbanColumn id="pending" title="A Fazer" tasks={tasks.filter(t => t.status === 'pending')} color="bg-gray-100" icon={<Clock size={18} />} onClickTask={handleTaskClick} />
+            <KanbanColumn id="in_progress" title="Em Andamento" tasks={tasks.filter(t => t.status === 'in_progress')} color="bg-blue-50" icon={<PlayCircle size={18} className="text-blue-600"/>} onClickTask={handleTaskClick} />
+            <KanbanColumn id="completed" title="Concluído" tasks={tasks.filter(t => t.status === 'completed')} color="bg-green-50" icon={<CheckCircle size={18} className="text-green-600"/>} onClickTask={handleTaskClick} />
           </div>
         </div>
       </DragDropContext>
 
-      {/* Modais de Criar Tarefa e Detalhes (Mantidos iguais, omitidos para brevidade mas devem estar no arquivo final) */}
+      {/* MODAL DE REUNIÕES (NOVO) */}
+      {isMeetingModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-2xl shadow-2xl relative max-h-[90vh] overflow-hidden flex flex-col">
+            <button onClick={() => setIsMeetingModalOpen(false)} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"><X size={20} /></button>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Calendar className="text-blue-600"/> Agendamento de Reuniões</h2>
+            
+            {/* Formulário de Nova Solicitação */}
+            <form onSubmit={handleCreateMeeting} className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-100">
+              <h3 className="text-sm font-bold text-gray-700 mb-3">Solicitar Nova Reunião</h3>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="text-xs text-gray-500 font-medium mb-1 block">Data e Hora</label>
+                  <input type="datetime-local" required value={newMeetingDate} onChange={e => setNewMeetingDate(e.target.value)} className="w-full border p-2 rounded text-sm" />
+                </div>
+                <div className="flex-[2]">
+                  <label className="text-xs text-gray-500 font-medium mb-1 block">Assunto</label>
+                  <input type="text" required value={newMeetingTopic} onChange={e => setNewMeetingTopic(e.target.value)} placeholder="Ex: Revisão do Cap. 1" className="w-full border p-2 rounded text-sm" />
+                </div>
+                <div className="flex items-end">
+                  <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium h-[38px]">Solicitar</button>
+                </div>
+              </div>
+            </form>
+
+            {/* Lista de Reuniões */}
+            <div className="flex-1 overflow-y-auto">
+              <h3 className="text-sm font-bold text-gray-700 mb-3">Histórico de Agendamentos</h3>
+              {meetings.length === 0 ? (
+                <p className="text-center text-gray-400 py-8 text-sm">Nenhuma reunião agendada.</p>
+              ) : (
+                <div className="space-y-3">
+                  {meetings.map(m => (
+                    <div key={m.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="text-center bg-gray-100 px-3 py-1 rounded">
+                          <span className="block text-xs font-bold text-gray-500">{new Date(m.date).toLocaleDateString()}</span>
+                          <span className="block text-xs text-gray-400">{new Date(m.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800 text-sm">{m.topic}</p>
+                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full inline-block mt-1 
+                            ${m.status === 'confirmed' ? 'bg-green-100 text-green-700' : 
+                              m.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            {m.status === 'confirmed' ? 'Confirmada' : m.status === 'rejected' ? 'Recusada' : 'Pendente'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Ações para o Orientador */}
+                      {myUserType === 'advisor' && m.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <button onClick={() => handleUpdateMeetingStatus(m.id, 'confirmed')} title="Confirmar" className="p-1.5 bg-green-50 text-green-600 rounded hover:bg-green-100"><Check size={16}/></button>
+                          <button onClick={() => handleUpdateMeetingStatus(m.id, 'rejected')} title="Recusar" className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100"><XCircle size={16}/></button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAIS ANTIGOS (TAREFA E DETALHES) */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
@@ -332,9 +413,9 @@ export default function StudentDetails() {
   );
 }
 
-// --- Componente Coluna (Atualizado com Droppable) ---
+// --- Coluna Droppable (Mantida igual) ---
 interface KanbanColumnProps {
-  id: string; // ID da coluna (status)
+  id: string;
   title: string;
   tasks: Task[];
   color: string;
@@ -350,35 +431,16 @@ function KanbanColumn({ id, title, tasks, color, icon, onClickTask }: KanbanColu
       <div className="flex items-center gap-2 mb-4 text-gray-700 font-semibold">
         {icon} <h3>{title}</h3> <span className="ml-auto bg-white px-2 py-0.5 rounded-full text-xs shadow-sm text-gray-500 border border-gray-100">{tasks.length}</span>
       </div>
-      
-      {/* Área onde podemos soltar itens */}
       <Droppable droppableId={id}>
         {(provided, snapshot) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className={`flex-1 space-y-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-100/50 rounded-lg' : ''}`}
-          >
+          <div ref={provided.innerRef} {...provided.droppableProps} className={`flex-1 space-y-3 transition-colors ${snapshot.isDraggingOver ? 'bg-blue-100/50 rounded-lg' : ''}`}>
             {tasks.map((task, index) => (
               <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
                 {(provided, snapshot) => (
-                  <div 
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    onClick={() => onClickTask(task)}
-                    style={{ ...provided.draggableProps.style }}
-                    className={`bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative cursor-pointer ${snapshot.isDragging ? 'rotate-2 shadow-xl ring-2 ring-blue-500 z-50' : ''}`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-gray-800 break-words pr-2">{task.title}</h4>
-                    </div>
+                  <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} onClick={() => onClickTask(task)} style={{ ...provided.draggableProps.style }} className={`bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative cursor-pointer ${snapshot.isDragging ? 'rotate-2 shadow-xl ring-2 ring-blue-500 z-50' : ''}`}>
+                    <div className="flex justify-between items-start mb-2"><h4 className="font-medium text-gray-800 break-words pr-2">{task.title}</h4></div>
                     <p className="text-xs text-gray-500 line-clamp-3 mb-3 break-words">{task.description || "Sem descrição"}</p>
-                    {task.time_estimate && (
-                      <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 p-1.5 rounded w-fit">
-                        <Calendar size={12} className="text-blue-500"/> <span>{formatDate(task.time_estimate)}</span>
-                      </div>
-                    )}
+                    {task.time_estimate && (<div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 p-1.5 rounded w-fit"><Calendar size={12} className="text-blue-500"/> <span>{formatDate(task.time_estimate)}</span></div>)}
                   </div>
                 )}
               </Draggable>

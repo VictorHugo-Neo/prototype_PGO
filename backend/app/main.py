@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import engine, Base
 
-from .routers import users, auth, guidance, chat, task, comment, attachment, notification
+from .routers import users, auth, guidance, chat, task, comment, attachment, notification, meeting
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,6 +32,7 @@ app.include_router(comment.router)
 app.include_router(attachment.router)
 app.include_router(attachment.router)
 app.include_router(notification.router)
+app.include_router(meeting.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
