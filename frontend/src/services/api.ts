@@ -235,3 +235,10 @@ export const meetingService = {
     return response.data;
   }
 };
+
+export const aiService = {
+  generateTasks: async (guidanceId: number) => {
+    const response = await api.post(`/ai/generate-tasks/${guidanceId}`);
+    return response.data;
+  }
+};
