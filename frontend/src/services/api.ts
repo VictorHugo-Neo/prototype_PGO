@@ -292,3 +292,10 @@ export const reportService = {
     link.remove();
   }
 };
+
+export const statsService = {
+  getDashboard: async () => {
+    const response = await api.get('/stats/dashboard');
+    return response.data;
+  }
+};
