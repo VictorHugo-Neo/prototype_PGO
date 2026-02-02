@@ -29,6 +29,15 @@ export interface RegisterData {
   type: 'student' | 'advisor'
 }
 
+// Interface de Usuário (Atualizada com avatar)
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  type: 'student' | 'advisor';
+  avatar_path?: string; // <--- Campo Novo
+}
+
 export interface Task {
   id: number;
   title: string;
@@ -55,10 +64,15 @@ export interface StudentGuidance {
     id: number;
     name: string;
     email: string;
+    avatar_path?: string; // <--- Atualizado para refletir no dashboard também
+  }
+  advisor: {
+    id: number;
+    name: string;
+    avatar_path?: string;
   }
 }
 
-// Interface Nova
 export interface Attachment {
   id: number;
   filename: string;
@@ -123,7 +137,7 @@ export const authService = {
 }
 
 export const userService = {
-  getMe: async () => {
+  getMe: async (): Promise<User> => {
     const response = await api.get('/users/me')
     return response.data
   },
@@ -131,6 +145,16 @@ export const userService = {
   updateMe: async (data: {name?: string; email?: string; password?: string}) => {
     const response = await api.put('/users/me', data)
     return response.data
+  },
+
+  // 👇 NOVO MÉTODO DE UPLOAD DE AVATAR
+  uploadAvatar: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/users/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   }
 }
 
@@ -190,7 +214,6 @@ export const commentService = {
   }
 };
 
-// Serviço Novo
 export const attachmentService = {
   upload: async (taskId: number, file: File) => {
     const formData = new FormData();
@@ -209,6 +232,7 @@ export const attachmentService = {
     return response.data;
   }
 };
+
 export const notificationService = {
   getAll: async (): Promise<Notification[]> => {
     const response = await api.get('/notifications/');

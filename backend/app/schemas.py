@@ -21,7 +21,11 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id: int
-    created_at: datetime
+    name: str
+    email: str
+    type: str
+    avatar_path: Optional[str] = None # <--- ADICIONE ESTA LINHA
+    
     model_config = ConfigDict(from_attributes=True)
 
 class UserUpdate(BaseModel):
@@ -41,6 +45,8 @@ class UserSimple(BaseModel):
     id: int
     name: str
     email: str
+    avatar_path: Optional[str] = None
+
     model_config = ConfigDict(from_attributes=True)
 
 # --- Guidance Schemas ---
@@ -143,3 +149,4 @@ class MeetingResponse(BaseModel):
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+
