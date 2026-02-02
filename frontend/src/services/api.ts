@@ -97,20 +97,6 @@ export interface Meeting {
   guidance_id: number;
 }
 
-// --- 3. Serviços (Funções que chamam o Backend) ---
-
-export const sendMessageToAI = async (message: string): Promise<string> => {
-  try {
-    const response = await api.post('/chat/', { 
-      message: message,
-      student_id: 1 
-    });
-    return response.data.response;
-  } catch (error) {
-    console.error("Erro na IA:", error);
-    return "Desculpe, não consegui conectar ao servidor da IA.";
-  }
-}
 
 export const authService = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
@@ -261,9 +247,17 @@ export const meetingService = {
 };
 
 export const aiService = {
+  // Rota de gerar tarefas (Botão roxo do topo)
   generateTasks: async (guidanceId: number) => {
     const response = await api.post(`/ai/generate-tasks/${guidanceId}`);
     return response.data;
+  },
+
+  // 👇 AQUI ESTAVA O PROBLEMA! TEM QUE SER /ai/consult/
+  askConsultant: async (guidanceId: number, question: string) => {
+    // Atenção: A rota correta é /ai/consult/ e não /chat/
+    const response = await api.post(`/ai/consult/${guidanceId}`, { question });
+    return response.data; 
   }
 };
 

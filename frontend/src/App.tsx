@@ -4,9 +4,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Trail from './pages/Trail';
 import Profile from './pages/Profile';
-// 1. IMPORTANTE: Importe a página nova aqui em cima
 import StudentDetails from './pages/StudentDetails'; 
-import { ChatWidget } from './components/ChatWidget';
+// REMOVIDO: import { ChatWidget } ... (Não deve ficar aqui)
 
 function App() {
   return (
@@ -18,11 +17,14 @@ function App() {
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/Trail" element={<Trail />} />
           <Route path ="/Profile" element={<Profile />} />
+          {/* Esta rota está correta, ela passa o ID para o StudentDetails */}
           <Route path="/guidance/:id" element={<StudentDetails />} />
         </Routes>
-        <ChatWidget/>
+        
+        
       </div>
     </BrowserRouter>
   )
 }
-export default App
+
+export default App;
