@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, MessageSquare, Send, X, Paperclip, Download, Bell, Check, XCircle, Sparkles } from 'lucide-react'; // <--- Adicione Sparkles
+import { ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, MessageSquare, Send, X, Paperclip, Download, Bell, Check, XCircle, Sparkles, FileText } from 'lucide-react'; // <--- Adicione Sparkles
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { guidanceService, taskService, commentService, userService, attachmentService, notificationService, meetingService, aiService } from '../services/api'; // <--- Adicione aiService
+import { guidanceService, taskService, commentService, userService, attachmentService, notificationService, meetingService, aiService, reportService } from '../services/api'; // <--- Adicione aiService
 import type { Task, Comment, Attachment, Notification, Meeting } from '../services/api';
 
 export default function StudentDetails() {
@@ -170,7 +170,13 @@ export default function StudentDetails() {
     try { await commentService.create(selectedTask.id, newComment); const updated = await commentService.getByTask(selectedTask.id); setComments(updated); setNewComment(''); } 
     catch (error) { alert("Erro ao comentar"); }
   };
-
+  const handleDownloadReport = async () => {
+    try {
+      await reportService.download(Number(id));
+    } catch (error) {
+      alert("Erro ao baixar relatório.");
+    }
+  };
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle) return;
@@ -213,7 +219,14 @@ export default function StudentDetails() {
                 <Sparkles size={20} className={isGeneratingAI ? "animate-spin" : ""} />
                 {isGeneratingAI ? 'Criando Tarefas...' : 'Gerar com IA'}
               </button>
-
+              <button 
+                onClick={handleDownloadReport}
+                className="flex items-center gap-2 text-gray-600 hover:text-red-600 text-sm font-medium bg-gray-50 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors"
+                title="Baixar Relatório Oficial"
+              >
+                <FileText size={18} />
+                PDF
+              </button>
               <button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><Plus size={20} /> Nova Tarefa</button>
             </div>
           </div>

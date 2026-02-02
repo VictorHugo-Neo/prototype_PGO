@@ -242,3 +242,29 @@ export const aiService = {
     return response.data;
   }
 };
+
+export const reportService = {
+  download: async (guidanceId: number) => {
+    const response = await api.get(`/report/${guidanceId}`, {
+      responseType: 'blob', // Importante: Diz ao axios que é um arquivo
+    });
+    
+    // Cria um link temporário para forçar o download no navegador
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Tenta pegar o nome do arquivo do header ou define um padrão
+    const contentDisposition = response.headers['content-disposition'];
+    let fileName = 'relatorio.pdf';
+    if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
+    }
+    
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+};
