@@ -100,21 +100,25 @@ export interface Meeting {
 
 export const authService = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    // Envia como Form Data (Correção para Swagger/OAuth2)
     const formData = new URLSearchParams();
     formData.append('username', email); 
     formData.append('password', password);
 
     const response = await api.post('/auth/login', formData, {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
 
     if (response.data.access_token) { 
       localStorage.setItem('pgo_token', response.data.access_token)
     }
     return response.data
+  },
+
+  // ADICIONE ESTA FUNÇÃO NOVA:
+  register: async (data: RegisterData) => {
+    // Ajuste a rota conforme seu backend. Geralmente é /auth/register ou /users/
+    const response = await api.post('/auth/signup', data); 
+    return response.data;
   },
   
   logout: () => {
