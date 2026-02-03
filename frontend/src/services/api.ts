@@ -118,10 +118,14 @@ export const authService = {
     return response.data
   },
 
-  // ADICIONE ESTA FUNÇÃO NOVA:
   register: async (data: RegisterData) => {
-    // Ajuste a rota conforme seu backend. Geralmente é /auth/register ou /users/
-    const response = await api.post('/auth/signup', data); 
+    // 🚨 CORREÇÃO: A rota correta no seu Swagger é /users/
+    const response = await api.post('/users/', {
+      email: data.email,
+      password: data.password,
+      name: data.name
+      // Remova outros campos se o backend não aceitar, mas geralmente é isso
+    }); 
     return response.data;
   },
   
