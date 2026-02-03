@@ -1,3 +1,4 @@
+import { API_BASE_URL} from '../services/api';
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -18,7 +19,7 @@ import {
   notificationService, 
   meetingService, 
   aiService, 
-  reportService
+  reportService   
 } from '../services/api';
 import type { Task, Comment, Attachment, Notification, Meeting } from '../services/api';
 
@@ -181,7 +182,7 @@ export default function StudentDetails() {
                         {guidance?.student?.avatar_path && !imgError ? (
                             <img 
                               key={guidance.student.avatar_path} 
-                              src={`http://localhost:8000/${guidance.student.avatar_path.replace(/\\/g, '/')}`} 
+                              src={`${API_BASE_URL}/${guidance.student.avatar_path.replace(/\\/g, '/')}`} 
                               alt="Avatar" 
                               className="w-full h-full object-cover" 
                               onError={() => setImgError(true)} 
@@ -314,7 +315,7 @@ export default function StudentDetails() {
                 </div>
                 <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
                   {attachments.length === 0 && <p className="text-xs text-gray-400 italic">Nenhum arquivo anexado.</p>}
-                  {attachments.map(f=>(<div key={f.id} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded border border-gray-100 hover:border-blue-200 transition-colors"><span className="truncate max-w-[200px] text-gray-600">{f.filename}</span><a href={`http://localhost:8000/${f.file_path}`} target="_blank" className="text-blue-600 hover:bg-blue-50 p-1 rounded"><Download size={14}/></a></div>))}
+                  {attachments.map(f=>(<div key={f.id} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded border border-gray-100 hover:border-blue-200 transition-colors"><span className="truncate max-w-[200px] text-gray-600">{f.filename}</span><a href={`${API_BASE_URL}${f.file_path}`} target="_blank" className="text-blue-600 hover:bg-blue-50 p-1 rounded"><Download size={14}/></a></div>))}
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">

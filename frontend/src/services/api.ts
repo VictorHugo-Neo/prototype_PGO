@@ -1,9 +1,13 @@
 import axios from "axios";
 
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+console.log("🔍 URL Conectada:", API_BASE_URL);
+
 // --- 1. Configuração da API e Interceptador ---
 export const api = axios.create({
-  baseURL: 'http://localhost:8000'
-})
+  baseURL: API_BASE_URL // Usa a constante
+});
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('pgo_token');

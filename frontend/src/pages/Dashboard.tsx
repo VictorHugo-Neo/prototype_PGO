@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Calendar, CheckSquare, Plus, ArrowRight } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'; // <--- Gráficos
-import { guidanceService, statsService } from '../services/api';
+import { API_BASE_URL, guidanceService, statsService } from '../services/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -134,7 +134,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
                     {guidance.student.avatar_path ? (
-                         <img src={`http://localhost:8000/${guidance.student.avatar_path.replace(/\\/g, '/')}`} className="w-full h-full object-cover" />
+                         <img src={`${API_BASE_URL}/${guidance.student.avatar_path.replace(/\\/g, '/')}`} className="w-full h-full object-cover" />
                     ) : (
                         <span className="text-lg font-bold text-gray-500">{guidance.student.name.substring(0,2).toUpperCase()}</span>
                     )}
