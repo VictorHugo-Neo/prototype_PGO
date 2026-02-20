@@ -6,7 +6,6 @@ from ..database import get_db
 
 router = APIRouter(prefix="/meetings", tags=["meetings"])
 
-# 1. Solicitar Reunião (Aluno ou Professor)
 @router.post("/", response_model=schemas.MeetingResponse)
 def create_meeting(
     meeting: schemas.MeetingCreate,
@@ -29,11 +28,9 @@ def create_meeting(
     db.commit()
     db.refresh(db_meeting)
     
-    # (Opcional: Aqui você poderia adicionar uma Notificação automática para o outro usuário!)
     
     return db_meeting
 
-# 2. Listar Reuniões de uma Orientação
 @router.get("/guidance/{guidance_id}", response_model=List[schemas.MeetingResponse])
 def get_meetings_by_guidance(
     guidance_id: int,
@@ -45,7 +42,6 @@ def get_meetings_by_guidance(
         .order_by(models.Meeting.date.asc())\
         .all()
 
-# 3. Confirmar ou Rejeitar (Apenas Orientador deveria confirmar, mas deixaremos aberto por enquanto)
 @router.patch("/{meeting_id}/status", response_model=schemas.MeetingResponse)
 def update_meeting_status(
     meeting_id: int,

@@ -6,7 +6,7 @@ from ..database import get_db
 
 router = APIRouter(prefix="/guidances", tags=["guidance"])
 
-# 1. Rota para o Aluno descobrir sua orientação
+
 @router.get("/me", response_model=schemas.GuidanceList)
 def get_my_guidance_as_student(
     db: Session = Depends(get_db),
@@ -24,7 +24,7 @@ def get_my_guidance_as_student(
         
     return guidance
 
-# 2. Lista de alunos do Orientador
+
 @router.get("/my-students", response_model=List[schemas.GuidanceList])
 def get_my_students(
     db: Session = Depends(get_db),
@@ -39,7 +39,7 @@ def get_my_students(
 
     return guidances
 
-# 3. Vincular Aluno
+
 @router.post("/link", response_model=schemas.GuidanceResponse)
 def link_student_by_email(
     link_data: schemas.GuidanceLink,
@@ -75,11 +75,11 @@ def link_student_by_email(
     
     return new_guidance
 
-# 4. Detalhes (CORRIGIDA: Removemos o guidance_update daqui)
+
 @router.get("/{guidance_id}", response_model=schemas.GuidanceList)
 def get_guidance_detail(
     guidance_id: int,
-    # REMOVIDO: guidance_update: schemas.GuidanceUpdate, 
+    
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
@@ -98,7 +98,7 @@ def get_guidance_detail(
         
     return guidance
 
-# 5. Atualizar Orientação (PATCH - ADICIONADA AGORA)
+
 # Esta é a rota que salva a DATA DA BANCA
 @router.patch("/{guidance_id}", response_model=schemas.GuidanceList)
 def update_guidance(

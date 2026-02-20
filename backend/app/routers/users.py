@@ -8,7 +8,7 @@ import uuid
 from .. import crud, schemas, deps, models
 from ..database import get_db
 
-# O prefixo /users já está definido aqui
+
 router = APIRouter(prefix="/users", tags=["users"])
 
 # Configuração da pasta de Avatars
@@ -21,7 +21,7 @@ def read_users_me(current_user: models.User = Depends(deps.get_current_user)):
     """ Retorna o usuário logado """
     return current_user
 
-# 👇 NOVA ROTA DE UPLOAD DE AVATAR (Adicionada aqui)
+
 @router.post("/me/avatar", response_model=schemas.UserResponse)
 def upload_avatar(
     file: UploadFile = File(...),
@@ -29,24 +29,22 @@ def upload_avatar(
     current_user: models.User = Depends(deps.get_current_user)
 ):
     """ Faz upload da foto de perfil do usuário logado """
-    
-    # 1. Validação simples de tipo (opcional)
+
     if not file.content_type.startswith("image/"):
         raise HTTPException(400, "Apenas arquivos de imagem são permitidos.")
 
-    # 2. Gera um nome único para o arquivo
     file_extension = os.path.splitext(file.filename)[1]
     unique_filename = f"user_{current_user.id}_{uuid.uuid4()}{file_extension}"
     file_path = os.path.join(AVATAR_DIR, unique_filename)
 
-    # 3. Salva o arquivo no disco
+
     try:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
         raise HTTPException(500, f"Erro ao salvar arquivo: {str(e)}")
 
-    # 4. Atualiza o caminho no banco de dados
+
     current_user.avatar_path = file_path # O SQLAlchemy detecta a mudança aqui
     db.commit()     # Salva no banco
     db.refresh(current_user) # Atualiza o objeto com os dados do banco

@@ -5,7 +5,6 @@ import Dashboard from './pages/Dashboard';
 import Trail from './pages/Trail';
 import Profile from './pages/Profile';
 import StudentDetails from './pages/StudentDetails'; 
-// REMOVIDO: import { ChatWidget } ... (Não deve ficar aqui)
 
 function App() {
   return (

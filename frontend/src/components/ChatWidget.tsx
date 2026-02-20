@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
 import { aiService } from '../services/api';
 
-// 👇 Adicionamos uma interface para receber o ID dinâmico
 interface ChatWidgetProps {
   guidanceId: number;
 }
@@ -40,7 +39,7 @@ export function ChatWidget({ guidanceId }: ChatWidgetProps) {
     setIsLoading(true);
 
     try {
-      // 👇 AGORA SIM: Usa o ID que veio via props, não o fixo '1'
+
       const data = await aiService.askConsultant(guidanceId, userText);
       
       setMessages(prev => [...prev, {

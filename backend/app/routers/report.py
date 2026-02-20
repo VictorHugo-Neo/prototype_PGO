@@ -18,26 +18,25 @@ def generate_pdf_report(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    # 1. Busca os dados
+
     guidance = db.query(models.Guidance).filter(models.Guidance.id == guidance_id).first()
     if not guidance:
         raise HTTPException(status_code=404, detail="Orientação não encontrada")
         
     tasks = db.query(models.Task).filter(models.Task.guidance_id == guidance_id).all()
     meetings = db.query(models.Meeting).filter(models.Meeting.guidance_id == guidance_id).all()
-    
-    # 2. Configura o Buffer (arquivo na memória)
+
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     elements = []
     styles = getSampleStyleSheet()
     
-    # 3. Cabeçalho
+
     title_style = styles['Title']
     elements.append(Paragraph(f"Relatório de Orientação - PGO", title_style))
     elements.append(Spacer(1, 12))
     
-    # Informações Gerais
+
     info_text = f"""
     <b>Aluno:</b> {guidance.student.name}<br/>
     <b>Orientador:</b> {guidance.advisor.name}<br/>
@@ -47,13 +46,13 @@ def generate_pdf_report(
     elements.append(Paragraph(info_text, styles['Normal']))
     elements.append(Spacer(1, 24))
     
-    # 4. Tabela de Tarefas
+
     elements.append(Paragraph("Histórico de Tarefas", styles['Heading2']))
     
     if not tasks:
         elements.append(Paragraph("Nenhuma tarefa registrada.", styles['Normal']))
     else:
-        # Cabeçalho da Tabela
+
         data = [['Título', 'Status', 'Prazo']]
         for t in tasks:
             status_map = {'pending': 'Pendente', 'in_progress': 'Em Andamento', 'completed': 'Concluído'}
@@ -73,7 +72,7 @@ def generate_pdf_report(
     
     elements.append(Spacer(1, 24))
 
-    # 5. Tabela de Reuniões
+
     elements.append(Paragraph("Registro de Reuniões", styles['Heading2']))
     
     if not meetings:
@@ -96,7 +95,7 @@ def generate_pdf_report(
         ]))
         elements.append(tm)
 
-    # 6. Gera o PDF
+
     doc.build(elements)
     buffer.seek(0)
     

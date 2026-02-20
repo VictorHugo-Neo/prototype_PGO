@@ -78,14 +78,14 @@ class Comment(Base):
 
     # Relacionamentos
     task = relationship("Task", back_populates="comments")
-    user = relationship("User") # Para sabermos o nome de quem comentou
+    user = relationship("User") 
 
 class Attachment(Base):
     __tablename__ = 'attachments'
 
     id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String, nullable=False) # Nome original do arquivo (ex: TCC_Versao1.pdf)
-    file_path = Column(String, nullable=False) # Caminho no servidor (ex: static/uploads/uuid.pdf)
+    filename = Column(String, nullable=False) 
+    file_path = Column(String, nullable=False) 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     task_id = Column(Integer, ForeignKey("tasks.id"))
@@ -104,7 +104,7 @@ class Notification(Base):
     # Quem vai receber a notificação
     user_id = Column(Integer, ForeignKey("users.id"))
     
-    # Opcional: Link para saber onde clicar (ex: guidance/1)
+    
     link = Column(String, nullable=True)
 
 class Meeting(Base):

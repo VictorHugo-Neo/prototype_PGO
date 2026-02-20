@@ -32,7 +32,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Usuário criado com sucesso!"}
 @router.post("/login", response_model=schemas.Token)
 def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(), # <--- Mudamos aqui para aceitar o Swagger
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(database.get_db)
 ):
 

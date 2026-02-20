@@ -42,11 +42,11 @@ def create_comment(
     db.refresh(db_comment)
     
 
-    # Cria a notificação para o outro usuário envolvido na orientação
+    
     task = db.query(models.Task).filter(models.Task.id == comment.task_id).first()
     if task and task.guidance:
-        # Se quem comentou foi o ALUNO, notifica o ORIENTADOR
-        # Se quem comentou foi o ORIENTADOR, notifica o ALUNO
+        
+        
         if current_user.id == task.guidance.student_id:
             recipient_id = task.guidance.advisor_id
             msg = f"Aluno {current_user.name} comentou na tarefa: {task.title}"
@@ -58,12 +58,12 @@ def create_comment(
         new_notif = models.Notification(
             user_id=recipient_id,
             message=msg,
-            link=f"/guidance/{task.guidance_id}" # Link para o front saber onde ir
+            link=f"/guidance/{task.guidance_id}" 
         )
         db.add(new_notif)
         db.commit()
     
-    # Retorna o comentário criado
+   
     return schemas.CommentResponse(
         id=db_comment.id,
         content=db_comment.content,

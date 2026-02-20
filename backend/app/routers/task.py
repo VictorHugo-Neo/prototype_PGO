@@ -4,8 +4,8 @@ from typing import List
 from .. import crud, models, schemas, deps
 from ..database import get_db
 
-# 1. ADICIONAMOS O PREFIXO AQUI
-# Assim todas as rotas abaixo começarão automaticamente com "/tasks"
+
+
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 # Rota final: GET /tasks/guidance/{id}
