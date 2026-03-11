@@ -12,12 +12,12 @@ def create_meeting(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    # Verifica se a orientação existe
+    
     guidance = db.query(models.Guidance).filter(models.Guidance.id == meeting.guidance_id).first()
     if not guidance:
         raise HTTPException(status_code=404, detail="Orientação não encontrada")
     
-    # Cria o pedido
+    
     db_meeting = models.Meeting(
         date=meeting.date,
         topic=meeting.topic,

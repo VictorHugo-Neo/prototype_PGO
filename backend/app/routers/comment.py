@@ -14,7 +14,7 @@ def read_comments(
 ):
     comments = db.query(models.Comment).filter(models.Comment.task_id == task_id).all()
     
-    # Monta a resposta com o nome do usuário
+    
     return [
         schemas.CommentResponse(
             id=c.id,
@@ -31,7 +31,7 @@ def create_comment(
     db: Session = Depends(get_db),
     current_user = Depends(deps.get_current_user)
 ):
-    # 1. Cria o comentário normal
+    
     db_comment = models.Comment(
         content=comment.content,
         task_id=comment.task_id,
@@ -54,7 +54,7 @@ def create_comment(
             recipient_id = task.guidance.student_id
             msg = f"Orientador {current_user.name} comentou na tarefa: {task.title}"
         
-        # Cria a notificação no banco
+        
         new_notif = models.Notification(
             user_id=recipient_id,
             message=msg,

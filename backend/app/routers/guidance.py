@@ -99,7 +99,7 @@ def get_guidance_detail(
     return guidance
 
 
-# Esta é a rota que salva a DATA DA BANCA
+
 @router.patch("/{guidance_id}", response_model=schemas.GuidanceList)
 def update_guidance(
     guidance_id: int,
@@ -107,7 +107,7 @@ def update_guidance(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    # Apenas o orientador pode alterar
+    
     if current_user.type != models.TypeUser.ADVISOR:
         raise HTTPException(status_code=403, detail="Apenas orientadores podem alterar dados da orientação.")
 
@@ -119,7 +119,7 @@ def update_guidance(
     if not db_guidance:
         raise HTTPException(status_code=404, detail="Orientação não encontrada.")
 
-    # Atualiza campos
+    
     if guidance_update.theme:
         db_guidance.theme = guidance_update.theme
     if guidance_update.defense_date:

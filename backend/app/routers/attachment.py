@@ -11,7 +11,7 @@ router = APIRouter(prefix="/attachments", tags=["attachments"])
 
 
 UPLOAD_DIR = "static/uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True) # Garante que a pasta existe
+os.makedirs(UPLOAD_DIR, exist_ok=True) 
 
 @router.post("/task/{task_id}", response_model=schemas.AttachmentResponse)
 async def upload_file(
@@ -20,7 +20,7 @@ async def upload_file(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    # 1. Verifica se a tarefa existe
+    
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Tarefa não encontrada")
@@ -41,8 +41,8 @@ async def upload_file(
 
 
     db_attachment = models.Attachment(
-        filename=file.filename, # Nome original (para exibir pro usuário)
-        file_path=file_path,    # Caminho real
+        filename=file.filename, 
+        file_path=file_path,    
         task_id=task_id
     )
     

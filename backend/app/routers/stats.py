@@ -51,7 +51,7 @@ def get_dashboard_stats(
             
             progress = int((completed / total * 100)) if total > 0 else 0
             student_performance.append({
-                "name": g.student.name.split()[0], # Primeiro nome
+                "name": g.student.name.split()[0], 
                 "progress": progress
             })
         
@@ -62,9 +62,9 @@ def get_dashboard_stats(
         "total_students": total_students,
         "pending_meetings": pending_meetings,
         "task_stats": [
-            {"name": "Pendente", "value": task_dist["pending"], "color": "#9CA3AF"}, # Cinza
-            {"name": "Em Andamento", "value": task_dist["in_progress"], "color": "#3B82F6"}, # Azul
-            {"name": "Concluído", "value": task_dist["completed"], "color": "#10B981"}, # Verde
+            {"name": "Pendente", "value": task_dist["pending"], "color": "#9CA3AF"}, 
+            {"name": "Em Andamento", "value": task_dist["in_progress"], "color": "#3B82F6"}, 
+            {"name": "Concluído", "value": task_dist["completed"], "color": "#10B981"}, 
         ],
         "student_ranking": student_performance
     }

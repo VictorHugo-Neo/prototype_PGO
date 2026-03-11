@@ -11,7 +11,7 @@ def get_my_notifications(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    # Pega as últimas 20 notificações do usuário logado
+    
     return db.query(models.Notification)\
         .filter(models.Notification.user_id == current_user.id)\
         .order_by(models.Notification.created_at.desc())\

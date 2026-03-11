@@ -8,7 +8,6 @@ from ..database import get_db
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
-# Rota final: GET /tasks/guidance/{id}
 @router.get("/guidance/{guidance_id}", response_model=List[schemas.TaskResponse])
 def read_tasks_by_guidance(
     guidance_id: int, 
@@ -18,21 +17,19 @@ def read_tasks_by_guidance(
     tasks = db.query(models.Task).filter(models.Task.guidance_id == guidance_id).all()
     return tasks
 
-# Rota final: POST /tasks/
 @router.post("/", response_model=schemas.TaskResponse)
 def create_task(
     task: schemas.TaskCreate, 
     db: Session = Depends(get_db),
     current_user = Depends(deps.get_current_user)
 ):
-    # Cria a tarefa no banco
+    
     db_task = models.Task(**task.model_dump())
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
     return db_task
 
-# Rota final: PATCH /tasks/{id}/status
 @router.patch("/{task_id}/status", response_model=schemas.TaskResponse)
 def update_task_status(
     task_id: int,

@@ -11,9 +11,9 @@ from ..database import get_db
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-# Configuração da pasta de Avatars
+
 AVATAR_DIR = "static/avatars"
-os.makedirs(AVATAR_DIR, exist_ok=True) # Garante que a pasta existe
+os.makedirs(AVATAR_DIR, exist_ok=True) 
 
 
 @router.get("/me", response_model=schemas.UserResponse)
@@ -45,9 +45,9 @@ def upload_avatar(
         raise HTTPException(500, f"Erro ao salvar arquivo: {str(e)}")
 
 
-    current_user.avatar_path = file_path # O SQLAlchemy detecta a mudança aqui
-    db.commit()     # Salva no banco
-    db.refresh(current_user) # Atualiza o objeto com os dados do banco
+    current_user.avatar_path = file_path 
+    db.commit()     
+    db.refresh(current_user) 
     
     return current_user
 
@@ -59,7 +59,6 @@ def update_user_me(
 ):
     """ Atualiza o usuário logado (Nome, Email, Senha) """
     
-    # Verifica duplicidade de email na edição
     if user_update.email and user_update.email != current_user.email:
         existing_user = crud.get_user_by_email(db, email=user_update.email)
         if existing_user:

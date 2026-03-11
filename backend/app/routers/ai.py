@@ -14,7 +14,6 @@ client = Groq(api_key=settings.GROQ_API_KEY)
 class AIQuery(BaseModel):
     question: str
 
-# --- Rota 1: Gerar Tarefas (Mantida igual) ---
 @router.post("/generate-tasks/{guidance_id}")
 def generate_tasks_ai(
     guidance_id: int,
@@ -35,7 +34,7 @@ def generate_tasks_ai(
         return {"ok": True}
     except: raise HTTPException(500, "Erro IA")
 
-# --- Rota 2: Consultor (CORRIGIDA - user.name) ---
+
 @router.post("/consult/{guidance_id}")
 def consult_project_ai(
     guidance_id: int,
@@ -43,18 +42,18 @@ def consult_project_ai(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    # 1. Busca Dados
+    
     guidance = db.query(models.Guidance).filter(models.Guidance.id == guidance_id).first()
     if not guidance: raise HTTPException(404, "Orientação não encontrada")
     
     tasks = db.query(models.Task).filter(models.Task.guidance_id == guidance_id).all()
     
-    # Busca TODOS os comentários e anexos
+    
     task_ids = [t.id for t in tasks]
     all_comments = db.query(models.Comment).filter(models.Comment.task_id.in_(task_ids)).order_by(models.Comment.created_at).all()
     all_attachments = db.query(models.Attachment).filter(models.Attachment.task_id.in_(task_ids)).all()
 
-    # 2. Identifica Usuário
+    
     role_desc = "Visitante"
     if current_user.id == guidance.advisor_id: role_desc = "ORIENTADOR (Professor)"
     elif current_user.id == guidance.student_id: role_desc = "ALUNO"
@@ -86,11 +85,11 @@ def consult_project_ai(
         else:
             tasks_details_str += "Arquivos: Nenhum\n"
 
-        # Chat (A CORREÇÃO ESTÁ AQUI EMBAIXO 👇)
+        
         if t_comments:
             tasks_details_str += "Histórico de Conversa:\n"
             for c in t_comments:
-                # Usamos c.user.name (relação do banco) em vez de c.user_name
+                
                 author_name = c.user.name if c.user else "Desconhecido"
                 tasks_details_str += f"   - [{author_name}]: {c.content}\n"
         else:
@@ -98,7 +97,7 @@ def consult_project_ai(
         
         tasks_details_str += "--------------------------------------------------\n"
 
-    # 4. Prompt
+    
     system_prompt = f"""
     VOCÊ É O ASSISTENTE VIRTUAL DO SISTEMA PGO.
     
