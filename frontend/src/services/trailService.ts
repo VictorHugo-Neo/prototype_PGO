@@ -18,8 +18,8 @@ const MOCK_TASKS: Task[] = [
 ];
 
 export const getStudentTasks = async (studentId: number): Promise<Task[]> => {
-  // await api.get(...) 
-  await new Promise(resolve => setTimeout(resolve, 400)); // Delay artificial
+  
+  await new Promise(resolve => setTimeout(resolve, 400)); 
   return [...MOCK_TASKS];
 };
 

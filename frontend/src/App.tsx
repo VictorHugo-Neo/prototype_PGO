@@ -16,7 +16,6 @@ function App() {
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/Trail" element={<Trail />} />
           <Route path ="/Profile" element={<Profile />} />
-          {/* Esta rota está correta, ela passa o ID para o StudentDetails */}
           <Route path="/guidance/:id" element={<StudentDetails />} />
         </Routes>
         

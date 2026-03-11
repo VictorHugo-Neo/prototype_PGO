@@ -14,6 +14,5 @@ def test_login_flow():
     assert resp.status_code == 200
     assert "access_token" in resp.json()
 
-    # 3. Tentar logar (Erro)
     resp_err = client.post("/token", json={"email": email, "password": "errada"})
     assert resp_err.status_code == 401

@@ -22,26 +22,22 @@ export async function getCroppedImg(
 
   const rotRad = (rotation * Math.PI) / 180;
 
-  // Calcula caixa delimitadora para permitir rotação completa
   const { width: bBoxWidth, height: bBoxHeight } = rotateSize(
     image.width,
     image.height,
     rotation
   );
 
-  // Define tamanho do canvas
   canvas.width = bBoxWidth;
   canvas.height = bBoxHeight;
 
-  // Translata para o centro e rotaciona
   ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
   ctx.rotate(rotRad);
   ctx.translate(-image.width / 2, -image.height / 2);
 
-  // Desenha imagem
   ctx.drawImage(image, 0, 0);
 
-  // Pega os dados da área cortada
+ 
   const data = ctx.getImageData(
     pixelCrop.x,
     pixelCrop.y,
@@ -49,14 +45,12 @@ export async function getCroppedImg(
     pixelCrop.height
   );
 
-  // Redimensiona o canvas para o tamanho final do corte
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
 
-  // Cola os dados no novo canvas
   ctx.putImageData(data, 0, 0);
 
-  // Retorna como Blob (arquivo)
+
   return new Promise((resolve) => {
     canvas.toBlob((file) => {
       resolve(file);

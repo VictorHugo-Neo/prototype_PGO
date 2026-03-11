@@ -11,11 +11,11 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '', // Senha vazia = não alterar
+    password: '', 
     confirmPassword: ''
   });
 
-  // Carrega dados do usuário ao abrir a tela
+  
   useEffect(() => {
     loadProfile();
   }, []);
@@ -47,13 +47,13 @@ export default function Profile() {
     }
 
     try {
-      // Monta objeto apenas com campos preenchidos
+      
       const payload: any = { name: formData.name, email: formData.email };
       if (formData.password) payload.password = formData.password;
 
       await userService.updateMe(payload);
       alert("Dados atualizados com sucesso!");
-      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' })); // Limpa campos de senha
+      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' })); 
     } catch (error) {
       alert("Erro ao atualizar.");
     } finally {

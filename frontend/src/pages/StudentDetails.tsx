@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import Cropper from 'react-easy-crop';
-import { ChatWidget } from '../components/ChatWidget'; // <--- O NOVO COMPONENTE
+import { ChatWidget } from '../components/ChatWidget'; 
 import { getCroppedImg } from '../utils/cropImage';
 import { 
   guidanceService, 
@@ -31,10 +31,10 @@ export default function StudentDetails() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Usuário Logado
+  
   const [myUserId, setMyUserId] = useState<number>(0);
   
-  // Notificações & Reuniões
+  
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotif, setShowNotif] = useState(false);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -42,7 +42,7 @@ export default function StudentDetails() {
   const [newMeetingDate, setNewMeetingDate] = useState('');
   const [newMeetingTopic, setNewMeetingTopic] = useState('');
 
-  // Modais de Tarefa & Detalhes
+  
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
@@ -53,10 +53,10 @@ export default function StudentDetails() {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   
-  // IA - Gerar Tarefas (Botão do Header)
+  
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  // Crop (Avatar)
+  
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -99,7 +99,7 @@ export default function StudentDetails() {
     }
   };
 
-  // --- LÓGICA DE CROP ---
+  
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -124,7 +124,7 @@ export default function StudentDetails() {
     } catch (e) { alert("Erro ao cortar imagem."); }
   };
 
-  // --- OUTRAS FUNÇÕES ---
+  
   const handleGenerateAI = async () => {
     if (!window.confirm("A IA vai ler o tema e gerar sugestões de tarefas. Deseja continuar?")) return;
     setIsGeneratingAI(true);
@@ -161,7 +161,7 @@ export default function StudentDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col relative">
-      {/* --- HEADER --- */}
+      
       <div className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm z-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-4">
@@ -176,7 +176,7 @@ export default function StudentDetails() {
           </div>
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
-                {/* ÁREA DO AVATAR */}
+                
                 <div className="relative group">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 shadow-sm bg-gray-200 flex items-center justify-center relative">
                         {guidance?.student?.avatar_path && !imgError ? (
@@ -206,7 +206,7 @@ export default function StudentDetails() {
         </div>
       </div>
 
-      {/* --- KANBAN --- */}
+      
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex-1 overflow-x-auto p-6">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
@@ -217,12 +217,8 @@ export default function StudentDetails() {
         </div>
       </DragDropContext>
 
-      {/* --- CHAT WIDGET (SUBSTITUINDO O CÓDIGO ANTIGO) --- */}
       <ChatWidget guidanceId={Number(id)} />
-
-      {/* --- MODAIS COM ESTILO CLEAN (Sem bordas pretas) --- */}
       
-      {/* 1. Modal de Crop */}
       {isCropModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
@@ -239,7 +235,6 @@ export default function StudentDetails() {
         </div>
       )}
 
-      {/* 2. Modal de Reunião */}
       {isMeetingModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-2xl relative shadow-2xl">
@@ -258,7 +253,6 @@ export default function StudentDetails() {
         </div>
       )}
 
-      {/* 3. Modal Nova Tarefa */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
@@ -288,12 +282,11 @@ export default function StudentDetails() {
         </div>
       )}
 
-      {/* 4. Modal Detalhes da Tarefa */}
       {selectedTask && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl w-full max-w-4xl h-[80vh] flex relative shadow-2xl overflow-hidden">
             <button onClick={()=>setSelectedTask(null)} className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600"><X size={24}/></button>
-            {/* Lado Esquerdo: Info */}
+
             <div className="w-1/2 p-8 border-r border-gray-100 overflow-y-auto bg-gray-50">
               <span className={`text-xs font-bold px-2 py-1 rounded uppercase mb-4 inline-block ${selectedTask.status==='completed'?'bg-green-100 text-green-700':selectedTask.status==='in_progress'?'bg-blue-100 text-blue-700':'bg-gray-200 text-gray-700'}`}>{selectedTask.status === 'pending' ? 'A Fazer' : selectedTask.status === 'in_progress' ? 'Em Andamento' : 'Concluído'}</span>
               <h2 className="text-2xl font-bold mb-4 text-gray-800">{selectedTask.title}</h2>
@@ -303,7 +296,7 @@ export default function StudentDetails() {
                 <p className="whitespace-pre-wrap leading-relaxed">{selectedTask.description || "Sem descrição."}</p>
               </div>
             </div>
-            {/* Lado Direito: Chat e Arquivos */}
+            
             <div className="w-1/2 flex flex-col bg-white">
               <div className="p-4 border-b border-gray-100 bg-white">
                 <div className="flex justify-between items-center mb-3">
@@ -334,7 +327,7 @@ export default function StudentDetails() {
   );
 }
 
-// Kanban Component (Estilizado Clean)
+
 function KanbanColumn({ id, title, tasks, color, icon, onClickTask }: any) {
   return (
     <div className={`rounded-xl ${color} p-4 flex flex-col h-full min-h-[500px]`}>

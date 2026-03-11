@@ -12,15 +12,15 @@ export default function Trilha() {
   useEffect(() => {
     const fetchMyGuidance = async () => {
       try {
-        // Tenta buscar "Minha Orientação"
+        
         const guidance = await guidanceService.getStudentGuidance();
         
-        // Se achou, manda o aluno direto para o Kanban
+        
         if (guidance && guidance.id) {
           navigate(`/guidance/${guidance.id}`);
         }
       } catch (err: any) {
-        // Se deu erro 404, significa que ele não tem orientador ainda
+        
         if (err.response && err.response.status === 404) {
           setError("Você ainda não foi vinculado a nenhum orientador.");
         } else {
@@ -43,7 +43,7 @@ export default function Trilha() {
     return <div className="min-h-screen flex items-center justify-center">Carregando sua trilha...</div>;
   }
 
-  // Se chegou aqui, é porque não tem orientação vinculada ainda
+  
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-md text-center max-w-md">

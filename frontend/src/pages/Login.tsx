@@ -14,15 +14,14 @@ export default function Login() {
     setError('');
     
     try {
-      // 1. Faz o Login e salva o Token
+      
       await authService.login(email, password);
       
-      // 2. Busca os dados do usuário para saber se é Professor ou Aluno
       const user = await userService.getMe();
       
-      // 3. Redireciona para a tela correta
+      
       if (user.type === 'advisor') {
-        navigate('/dashboard'); // Professor vai para o Dashboard
+        navigate('/dashboard');
       } else {
         navigate('/trail'); 
       }

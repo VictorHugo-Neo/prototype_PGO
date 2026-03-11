@@ -28,10 +28,10 @@ export default function Register() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        type: role === 'student' ? 'student' : 'advisor' // traduz para o inglês - backend
+        type: role === 'student' ? 'student' : 'advisor' 
       })
       alert('Cadastro realizado com sucesso! Faça o seu Login.')
-      navigate('/') // tela de login
+      navigate('/') 
     }catch (error: any){
       console.error(error)
       const msg = error.response?.data?.detail || "Erro ao realizar cadastro"

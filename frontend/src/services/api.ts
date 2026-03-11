@@ -2,11 +2,11 @@ import axios from "axios";
 
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-console.log("🔍 URL Conectada:", API_BASE_URL);
+console.log("URL Conectada:", API_BASE_URL);
 
-// --- 1. Configuração da API e Interceptador ---
+
 export const api = axios.create({
-  baseURL: API_BASE_URL // Usa a constante
+  baseURL: API_BASE_URL 
 });
 
 api.interceptors.request.use((config) => {
@@ -18,8 +18,6 @@ api.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
-
-// --- 2. Interfaces (Tipos de Dados) ---
 
 export interface LoginResponse {
   access_token: string
@@ -33,13 +31,12 @@ export interface RegisterData {
   type: 'student' | 'advisor'
 }
 
-// Interface de Usuário (Atualizada com avatar)
 export interface User {
   id: number;
   name: string;
   email: string;
   type: 'student' | 'advisor';
-  avatar_path?: string; // <--- Campo Novo
+  avatar_path?: string;
 }
 
 export interface Task {
@@ -68,7 +65,7 @@ export interface StudentGuidance {
     id: number;
     name: string;
     email: string;
-    avatar_path?: string; // <--- Atualizado para refletir no dashboard também
+    avatar_path?: string;
   }
   advisor: {
     id: number;
@@ -119,12 +116,11 @@ export const authService = {
   },
 
   register: async (data: RegisterData) => {
-    // 🚨 CORREÇÃO: A rota correta no seu Swagger é /users/
+    
     const response = await api.post('/users/', {
       email: data.email,
       password: data.password,
       name: data.name
-      // Remova outros campos se o backend não aceitar, mas geralmente é isso
     }); 
     return response.data;
   },
@@ -145,7 +141,6 @@ export const userService = {
     return response.data
   },
 
-  // 👇 NOVO MÉTODO DE UPLOAD DE AVATAR
   uploadAvatar: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -259,15 +254,14 @@ export const meetingService = {
 };
 
 export const aiService = {
-  // Rota de gerar tarefas (Botão roxo do topo)
   generateTasks: async (guidanceId: number) => {
     const response = await api.post(`/ai/generate-tasks/${guidanceId}`);
     return response.data;
   },
 
-  // 👇 AQUI ESTAVA O PROBLEMA! TEM QUE SER /ai/consult/
+  
   askConsultant: async (guidanceId: number, question: string) => {
-    // Atenção: A rota correta é /ai/consult/ e não /chat/
+
     const response = await api.post(`/ai/consult/${guidanceId}`, { question });
     return response.data; 
   }
@@ -276,15 +270,14 @@ export const aiService = {
 export const reportService = {
   download: async (guidanceId: number) => {
     const response = await api.get(`/report/${guidanceId}`, {
-      responseType: 'blob', // Importante: Diz ao axios que é um arquivo
+      responseType: 'blob', 
     });
     
-    // Cria um link temporário para forçar o download no navegador
+    
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
     
-    // Tenta pegar o nome do arquivo do header ou define um padrão
     const contentDisposition = response.headers['content-disposition'];
     let fileName = 'relatorio.pdf';
     if (contentDisposition) {
