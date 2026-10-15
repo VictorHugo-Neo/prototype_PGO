@@ -4,11 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Plus, Clock, CheckCircle, PlayCircle, Calendar, 
   MessageSquare, Send, X, Paperclip, Download, Bell, 
-  Sparkles, FileText, Camera 
+  FileText, Camera 
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import Cropper from 'react-easy-crop';
-import { ChatWidget } from '../components/ChatWidget'; 
 import { getCroppedImg } from '../utils/cropImage';
 import { 
   guidanceService, 
@@ -18,7 +17,6 @@ import {
   attachmentService, 
   notificationService, 
   meetingService, 
-  aiService, 
   reportService   
 } from '../services/api';
 import type { Task, Comment, Attachment, Notification, Meeting } from '../services/api';
@@ -52,10 +50,6 @@ export default function StudentDetails() {
   const [newComment, setNewComment] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  
-  
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-
   
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -124,13 +118,6 @@ export default function StudentDetails() {
     } catch (e) { alert("Erro ao cortar imagem."); }
   };
 
-  
-  const handleGenerateAI = async () => {
-    if (!window.confirm("A IA vai ler o tema e gerar sugestões de tarefas. Deseja continuar?")) return;
-    setIsGeneratingAI(true);
-    try { await aiService.generateTasks(Number(id)); await loadData(); alert("Tarefas geradas com sucesso! 🤖✨"); } 
-    catch (e) { alert("Erro ao gerar tarefas."); } finally { setIsGeneratingAI(false); }
-  };
   const handleDownloadReport = async () => { try { await reportService.download(Number(id)); } catch (e) { alert("Erro ao baixar relatório."); } };
   const handleCreateMeeting = async (e: React.FormEvent) => {
     e.preventDefault(); if (!newMeetingDate || !newMeetingTopic) return;
@@ -198,7 +185,6 @@ export default function StudentDetails() {
                 </div>
             </div>
             <div className="flex gap-3 items-center">
-              <button onClick={handleGenerateAI} disabled={isGeneratingAI} className={`px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm text-white transition-all ${isGeneratingAI ? 'bg-purple-400 cursor-wait' : 'bg-purple-600 hover:bg-purple-700 hover:shadow-md'}`}><Sparkles size={20} className={isGeneratingAI ? "animate-spin" : ""} />{isGeneratingAI ? 'Criando...' : 'Gerar Tarefas'}</button>
               <button onClick={handleDownloadReport} className="flex items-center gap-2 text-gray-600 hover:text-red-600 text-sm font-medium bg-gray-50 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors border border-gray-200"><FileText size={18} />PDF</button>
               <button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm"><Plus size={20} /> Nova Tarefa</button>
             </div>
@@ -216,8 +202,6 @@ export default function StudentDetails() {
           </div>
         </div>
       </DragDropContext>
-
-      <ChatWidget guidanceId={Number(id)} />
       
       {isCropModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">

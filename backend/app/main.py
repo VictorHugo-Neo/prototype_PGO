@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import engine, Base
 
-from .routers import users, auth, guidance, chat, task, comment, attachment, notification, meeting, ai, report, stats
+from .routers import users, auth, guidance, task, comment, attachment, notification, meeting, report, stats
 
 Base.metadata.create_all(bind=engine)
 
@@ -24,18 +24,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluindo as rotas
 app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(guidance.router)
-app.include_router(chat.router)
 app.include_router(task.router) 
 app.include_router(comment.router)
 app.include_router(attachment.router)
-app.include_router(attachment.router)
 app.include_router(notification.router)
 app.include_router(meeting.router)
-app.include_router(ai.router)
 app.include_router(report.router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(stats.router)

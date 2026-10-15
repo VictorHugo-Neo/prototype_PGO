@@ -253,20 +253,6 @@ export const meetingService = {
   }
 };
 
-export const aiService = {
-  generateTasks: async (guidanceId: number) => {
-    const response = await api.post(`/ai/generate-tasks/${guidanceId}`);
-    return response.data;
-  },
-
-  
-  askConsultant: async (guidanceId: number, question: string) => {
-
-    const response = await api.post(`/ai/consult/${guidanceId}`, { question });
-    return response.data; 
-  }
-};
-
 export const reportService = {
   download: async (guidanceId: number) => {
     const response = await api.get(`/report/${guidanceId}`, {
