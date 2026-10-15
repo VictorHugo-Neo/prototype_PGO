@@ -9,9 +9,9 @@ def test_create_user():
     response = client.post("/users/", json={
         "name": "Api User",
         "email": email,
-        "type": "advisor"
+        "type": "advisor",
+        "password": "strongpassword123"
     })
     assert response.status_code == 200
     assert response.json()["email"] == email
     assert "id" in response.json()
-    

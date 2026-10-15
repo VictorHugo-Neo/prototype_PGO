@@ -1,19 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from .database import engine, Base
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from .database import engine, Base, get_db
 
 from .routers import users, auth, guidance, task, comment, attachment, notification, meeting, report, stats
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(title="PGO API", version="1.0.0")
 
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://prototype-pgo.vercel.app/",
-    "*"
+    "https://prototype-pgo.vercel.app",
 ]
 
 app.add_middleware(
@@ -39,3 +40,11 @@ app.include_router(stats.router)
 @app.get("/")
 def read_root():
     return {"message": "API do Projeto de Gestão de Orientação está rodando!"}
+
+@app.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception:
+        raise HTTPException(status_code=503, detail="Database unreachable")

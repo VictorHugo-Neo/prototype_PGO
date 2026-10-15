@@ -1,13 +1,7 @@
-from app.database import engine, Base
+from app.database import Base
 from app import models
-from sqlalchemy import inspect
 
 def test_models_tables_exist():
-    Base.metadata.drop_all(bind=engine) 
-    Base.metadata.create_all(bind=engine)
-    
-    inspector = inspect(engine)
-    tables = inspector.get_table_names()
-    
-    expected_tables = {'users', 'guidances', 'tasks'}
-    assert expected_tables.issubset(set(tables))
+    expected_tables = {'users', 'guidances', 'tasks', 'attachments', 'comments', 'notifications', 'meetings'}
+    registered_tables = set(Base.metadata.tables.keys())
+    assert expected_tables.issubset(registered_tables)

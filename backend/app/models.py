@@ -72,11 +72,9 @@ class Comment(Base):
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Chaves Estrangeiras
     task_id = Column(Integer, ForeignKey("tasks.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
 
-    # Relacionamentos
     task = relationship("Task", back_populates="comments")
     user = relationship("User") 
 
@@ -90,7 +88,6 @@ class Attachment(Base):
     
     task_id = Column(Integer, ForeignKey("tasks.id"))
     
-    # Relacionamento com Tarefa
     task = relationship("Task", back_populates="attachments")
 
 class Notification(Base):
@@ -98,13 +95,10 @@ class Notification(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     message = Column(String, nullable=False)
-    read = Column(Boolean, default=False) # Se já foi lida
+    read = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Quem vai receber a notificação
     user_id = Column(Integer, ForeignKey("users.id"))
-    
-    
     link = Column(String, nullable=True)
 
 class Meeting(Base):
@@ -113,7 +107,7 @@ class Meeting(Base):
     id = Column(Integer, primary_key=True, index=True)
     date = Column(DateTime, nullable=False)
     topic = Column(String, nullable=False)
-    status = Column(String, default="pending") # pending, confirmed, rejected
+    status = Column(String, default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     guidance_id = Column(Integer, ForeignKey("guidances.id"))

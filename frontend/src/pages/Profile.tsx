@@ -1,140 +1,178 @@
-import { useEffect, useState } from 'react';
-import { User, Mail, Lock, Save, ArrowLeft } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { User as UserIcon, Mail, Lock, ArrowLeft, Loader2, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userService } from '../services/api';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export default function Profile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '', 
-    confirmPassword: ''
+    password: '',
+    confirmPassword: '',
   });
 
-  
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       const user = await userService.getMe();
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         name: user.name,
-        email: user.email
+        email: user.email,
       }));
     } catch (error) {
-      alert("Erro ao carregar perfil. Faça login novamente.");
       navigate('/');
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
+    setStatusMessage(null);
 
     if (formData.password && formData.password !== formData.confirmPassword) {
-      alert("As senhas não coincidem!");
-      setSaving(false);
+      setStatusMessage({ type: 'error', text: 'As novas senhas não coincidem.' });
       return;
     }
 
+    if (formData.password && formData.password.length < 6) {
+      setStatusMessage({ type: 'error', text: 'A nova senha deve ter no mínimo 6 caracteres.' });
+      return;
+    }
+
+    setSaving(true);
     try {
-      
-      const payload: any = { name: formData.name, email: formData.email };
-      if (formData.password) payload.password = formData.password;
+      const payload: { name?: string; email?: string; password?: string } = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+      };
+      if (formData.password) {
+        payload.password = formData.password;
+      }
 
       await userService.updateMe(payload);
-      alert("Dados atualizados com sucesso!");
-      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' })); 
-    } catch (error) {
-      alert("Erro ao atualizar.");
+      setStatusMessage({ type: 'success', text: 'Dados cadastrais atualizados com sucesso!' });
+      setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
+    } catch (error: any) {
+      const msg = error.response?.data?.detail || 'Erro ao atualizar dados.';
+      setStatusMessage({ type: 'error', text: msg });
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Carregando...</div>;
+  if (loading) {
+    return <LoadingSpinner fullScreen message="Carregando perfil..." />;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 flex justify-center">
+    <div className="min-h-screen bg-gray-50 p-6 flex justify-center items-start">
       <div className="max-w-2xl w-full">
-        
-        {/* Header com Botão Voltar */}
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-200 rounded-full">
-            <ArrowLeft size={24} className="text-gray-600" />
+        <header className="flex items-center gap-4 mb-6">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-600"
+            aria-label="Voltar"
+          >
+            <ArrowLeft size={20} />
           </button>
           <h1 className="text-2xl font-bold text-gray-800">Meu Perfil</h1>
-        </div>
+        </header>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* Nome */}
+          {statusMessage && (
+            <div
+              role={statusMessage.type === 'error' ? 'alert' : 'status'}
+              className={`p-4 rounded-xl text-xs font-medium mb-6 flex items-center gap-2 ${
+                statusMessage.type === 'error'
+                  ? 'bg-red-50 text-red-600 border border-red-200'
+                  : 'bg-green-50 text-green-700 border border-green-200'
+              }`}
+            >
+              {statusMessage.type === 'success' && <Check size={16} />}
+              {statusMessage.text}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+              <label htmlFor="profile-name" className="block text-xs font-semibold text-gray-600 mb-1">
+                Nome Completo
+              </label>
               <div className="relative">
-                <User className="absolute left-3 top-3 text-gray-400" size={20} />
+                <UserIcon className="absolute left-3 top-3 text-gray-400" size={18} />
                 <input
+                  id="profile-name"
                   type="text"
+                  required
                   value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
             </div>
 
-            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+              <label htmlFor="profile-email" className="block text-xs font-semibold text-gray-600 mb-1">
+                E-mail Institucional
+              </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
+                <Mail className="absolute left-3 top-3 text-gray-400" size={18} />
                 <input
+                  id="profile-email"
                   type="email"
+                  required
                   value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>
             </div>
 
-            <hr className="border-gray-100 my-6" />
-            
-            <h3 className="text-lg font-semibold text-gray-800">Alterar Senha</h3>
-            <p className="text-sm text-gray-500 mb-4">Deixe em branco se não quiser alterar.</p>
+            <div className="pt-4 border-t border-gray-100 space-y-4">
+              <h2 className="text-sm font-bold text-gray-700">Alterar Senha (Opcional)</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
+                <label htmlFor="profile-pwd" className="block text-xs font-semibold text-gray-600 mb-1">
+                  Nova Senha
+                </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
+                  <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
                   <input
+                    id="profile-pwd"
                     type="password"
+                    placeholder="Deixe em branco para manter a atual"
                     value={formData.password}
-                    onChange={e => setFormData({...formData, password: e.target.value})}
-                    placeholder="******"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
+                <label htmlFor="profile-confirm-pwd" className="block text-xs font-semibold text-gray-600 mb-1">
+                  Confirmar Nova Senha
+                </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
+                  <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
                   <input
+                    id="profile-confirm-pwd"
                     type="password"
+                    placeholder="Repita a nova senha"
                     value={formData.confirmPassword}
-                    onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                    placeholder="******"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
                 </div>
               </div>
@@ -144,16 +182,12 @@ export default function Profile() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-all"
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-6 py-2 rounded-lg text-sm transition-all shadow-sm flex items-center gap-2"
               >
-                {saving ? 'Salvando...' : (
-                  <>
-                    <Save size={20} /> Salvar Alterações
-                  </>
-                )}
+                {saving && <Loader2 size={16} className="animate-spin" />}
+                {saving ? 'Salvando...' : 'Salvar Alterações'}
               </button>
             </div>
-
           </form>
         </div>
       </div>
