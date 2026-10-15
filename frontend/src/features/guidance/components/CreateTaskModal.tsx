@@ -1,21 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
+import type { TaskStatus } from '../../../types';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialStatus?: TaskStatus;
   onCreate: (taskData: {
     title: string;
     description: string;
     time_estimate?: string;
+    status?: TaskStatus;
   }) => Promise<void>;
 }
 
-export function CreateTaskModal({ isOpen, onClose, onCreate }: CreateTaskModalProps) {
+export function CreateTaskModal({ isOpen, onClose, initialStatus = 'pending', onCreate }: CreateTaskModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [timeEstimate, setTimeEstimate] = useState('');
+  const [status, setStatus] = useState<TaskStatus>(initialStatus);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setStatus(initialStatus);
+    }
+  }, [isOpen, initialStatus]);
 
   if (!isOpen) return null;
 
@@ -29,10 +39,12 @@ export function CreateTaskModal({ isOpen, onClose, onCreate }: CreateTaskModalPr
         title,
         description,
         time_estimate: timeEstimate || undefined,
+        status,
       });
       setTitle('');
       setDescription('');
       setTimeEstimate('');
+      setStatus('pending');
       onClose();
     } finally {
       setIsSubmitting(false);
@@ -91,17 +103,34 @@ export function CreateTaskModal({ isOpen, onClose, onCreate }: CreateTaskModalPr
             />
           </div>
 
-          <div>
-            <label htmlFor="task-date" className="block text-sm font-medium text-gray-700 mb-1">
-              Prazo Estimado
-            </label>
-            <input
-              id="task-date"
-              type="date"
-              value={timeEstimate}
-              onChange={(e) => setTimeEstimate(e.target.value)}
-              className="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="task-date" className="block text-sm font-medium text-gray-700 mb-1">
+                Prazo Estimado
+              </label>
+              <input
+                id="task-date"
+                type="date"
+                value={timeEstimate}
+                onChange={(e) => setTimeEstimate(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700"
+              />
+            </div>
+            <div>
+              <label htmlFor="task-status-create" className="block text-sm font-medium text-gray-700 mb-1">
+                Coluna / Etapa
+              </label>
+              <select
+                id="task-status-create"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                className="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 bg-white"
+              >
+                <option value="pending">A Fazer</option>
+                <option value="in_progress">Em Andamento</option>
+                <option value="completed">Concluído</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
-import type { Task, Comment, Attachment, Meeting, StudentGuidance, TaskStatus } from '../../../types';
+import type { Task, Comment, Attachment, Meeting, StudentGuidance, TaskStatus, TaskUpdatePayload } from '../../../types';
 import {
   guidanceService,
   taskService,
@@ -22,6 +22,7 @@ export function useStudentGuidance(id?: string) {
   const [taskComments, setTaskComments] = useState<Comment[]>([]);
   const [taskAttachments, setTaskAttachments] = useState<Attachment[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createTaskStatus, setCreateTaskStatus] = useState<TaskStatus>('pending');
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
 
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -117,20 +118,58 @@ export function useStudentGuidance(id?: string) {
     }
   };
 
+  const handleOpenCreateTask = (status: TaskStatus = 'pending') => {
+    setCreateTaskStatus(status);
+    setIsCreateModalOpen(true);
+  };
+
   const handleCreateTask = async (taskData: {
     title: string;
     description: string;
     time_estimate?: string;
+    status?: TaskStatus;
   }) => {
     if (!id) return;
     try {
-      await taskService.create({
+      const created = await taskService.create({
         ...taskData,
+        status: taskData.status || createTaskStatus,
         guidance_id: Number(id),
       });
-      await loadData();
+      setTasks((prev) => [...prev, created]);
     } catch (error) {
+      console.error('Erro ao criar tarefa:', error);
       alert('Erro ao criar tarefa.');
+      throw error;
+    }
+  };
+
+  const handleUpdateTask = async (taskId: number, taskData: TaskUpdatePayload) => {
+    try {
+      const updated = await taskService.update(taskId, taskData);
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
+      if (selectedTask && selectedTask.id === taskId) {
+        setSelectedTask(updated);
+      }
+      return updated;
+    } catch (error) {
+      console.error('Erro ao atualizar tarefa:', error);
+      alert('Erro ao atualizar tarefa.');
+      throw error;
+    }
+  };
+
+  const handleDeleteTask = async (taskId: number) => {
+    try {
+      await taskService.delete(taskId);
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      if (selectedTask && selectedTask.id === taskId) {
+        setSelectedTask(null);
+      }
+    } catch (error) {
+      console.error('Erro ao excluir tarefa:', error);
+      alert('Erro ao excluir tarefa.');
+      throw error;
     }
   };
 
@@ -226,12 +265,16 @@ export function useStudentGuidance(id?: string) {
     setIsCropModalOpen,
     setImageSrc,
     setImgError,
+    createTaskStatus,
+    handleOpenCreateTask,
     handleTaskClick,
     handleStatusChange,
     handleDragEnd,
     handleAddComment,
     handleUploadAttachment,
     handleCreateTask,
+    handleUpdateTask,
+    handleDeleteTask,
     handleRequestMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,

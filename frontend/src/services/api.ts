@@ -5,6 +5,8 @@ import type {
   User,
   Task,
   TaskStatus,
+  TaskCreatePayload,
+  TaskUpdatePayload,
   Comment,
   StudentGuidance,
   Attachment,
@@ -31,6 +33,23 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('pgo_token');
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname !== '/' &&
+        window.location.pathname !== '/register'
+      ) {
+        window.location.href = '/';
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 export const authService = {
@@ -124,19 +143,28 @@ export const taskService = {
     return response.data;
   },
 
-  create: async (data: {
-    title: string;
-    description?: string;
-    guidance_id: number;
-    time_estimate?: string;
-  }): Promise<Task> => {
+  getById: async (taskId: number): Promise<Task> => {
+    const response = await api.get<Task>(`/tasks/${taskId}`);
+    return response.data;
+  },
+
+  create: async (data: TaskCreatePayload): Promise<Task> => {
     const response = await api.post<Task>('/tasks/', data);
+    return response.data;
+  },
+
+  update: async (taskId: number, data: TaskUpdatePayload): Promise<Task> => {
+    const response = await api.put<Task>(`/tasks/${taskId}`, data);
     return response.data;
   },
 
   updateStatus: async (taskId: number, status: TaskStatus): Promise<Task> => {
     const response = await api.patch<Task>(`/tasks/${taskId}/status`, { status });
     return response.data;
+  },
+
+  delete: async (taskId: number): Promise<void> => {
+    await api.delete(`/tasks/${taskId}`);
   },
 };
 

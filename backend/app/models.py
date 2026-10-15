@@ -62,8 +62,8 @@ class Task(Base):
     guidance_id = Column(Integer, ForeignKey("guidances.id"))
     
     guidance = relationship("Guidance",back_populates="tasks")
-    comments = relationship("Comment", back_populates="task", order_by="Comment.created_at")
-    attachments = relationship("Attachment", back_populates="task")
+    comments = relationship("Comment", back_populates="task", order_by="Comment.created_at", cascade="all, delete-orphan")
+    attachments = relationship("Attachment", back_populates="task", cascade="all, delete-orphan")
     
 class Comment(Base): 
     __tablename__ = 'comments'

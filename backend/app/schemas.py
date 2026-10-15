@@ -71,16 +71,26 @@ class GuidanceList(BaseModel):
     defense_date: Optional[datetime] = None 
     created_at: datetime
     student: UserSimple  
+    advisor: Optional[UserSimple] = None
 
     model_config = ConfigDict(from_attributes=True)
 
 class TaskCreate(TaskBase):
     guidance_id: int
+    status: Optional[StatusTask] = StatusTask.PENDING
 
 class TaskResponse(TaskBase):
     id: int
+    guidance_id: int
     status: StatusTask
     model_config = ConfigDict(from_attributes=True)
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    time_estimate: Optional[datetime] = None
+    status: Optional[StatusTask] = None
+    order: Optional[int] = None
 
 class TaskUpdateStatus(BaseModel):
     status: StatusTask
