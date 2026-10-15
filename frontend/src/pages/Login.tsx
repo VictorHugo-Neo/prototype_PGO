@@ -1,89 +1,107 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { LogIn, Loader2 } from 'lucide-react';
 import { authService, userService } from '../services/api';
-import { LogIn } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setError('');
-    
+    setLoading(true);
+
     try {
-      
-      await authService.login(email, password);
-      
+      await authService.login(email.trim(), password);
       const user = await userService.getMe();
-      
-      
+
       if (user.type === 'advisor') {
         navigate('/dashboard');
       } else {
-        navigate('/trail'); 
+        navigate('/trail');
       }
-      
-    } catch (err) {
-      setError('Email ou senha incorretos');
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || 'E-mail ou senha incorretos.';
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Bem-vindo</h1>
-          <p className="text-gray-500">Faça login para acessar seus projetos</p>
-        </div>
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">PGO</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Plataforma de Gestão de Orientação de TCC
+          </p>
+        </header>
 
         {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm text-center">
+          <div
+            role="alert"
+            className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg mb-4 text-xs text-center font-medium"
+          >
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input 
-              type="email" 
+            <label htmlFor="login-email" className="block text-xs font-semibold text-gray-700 mb-1">
+              E-mail Institucional
+            </label>
+            <input
+              id="login-email"
+              type="email"
               required
-              className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              placeholder="seu@email.com"
+              autoComplete="email"
+              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              placeholder="seu.email@instituicao.edu.br"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-            <input 
-              type="password" 
+            <label htmlFor="login-password" className="block text-xs font-semibold text-gray-700 mb-1">
+              Senha
+            </label>
+            <input
+              id="login-password"
+              type="password"
               required
-              className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              autoComplete="current-password"
+              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-200"
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-100 text-sm"
           >
-            <LogIn size={20} /> Entrar
+            {loading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-gray-600 text-sm">
+        <footer className="text-center mt-6 text-gray-600 text-xs">
           Ainda não tem conta?{' '}
           <Link to="/register" className="text-blue-600 font-semibold hover:underline">
             Criar conta
           </Link>
-        </p>
+        </footer>
       </div>
     </div>
   );

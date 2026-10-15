@@ -3,7 +3,6 @@ from typing import Optional, List
 from datetime import datetime
 from .models import TypeUser, StatusTask
 
-# --- Base Schemas ---
 class UserBase(BaseModel):
     name: str
     email: EmailStr
@@ -15,7 +14,6 @@ class TaskBase(BaseModel):
     time_estimate: Optional[datetime] = None
     order: Optional[int] = 0
 
-# --- User Schemas ---
 class UserCreate(UserBase):
     password: str  
 
@@ -24,8 +22,8 @@ class UserResponse(UserBase):
     name: str
     email: str
     type: str
-    avatar_path: Optional[str] = None # <--- ADICIONE ESTA LINHA
-    
+    avatar_path: Optional[str] = None 
+
     model_config = ConfigDict(from_attributes=True)
 
 class UserUpdate(BaseModel):
@@ -49,13 +47,11 @@ class UserSimple(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-# --- Guidance Schemas ---
 class GuidanceCreate(BaseModel):
     theme: str 
     advisor_id: int
     student_id: int
 
-# Schema para Atualização (PATCH)
 class GuidanceUpdate(BaseModel):
     theme: Optional[str] = None
     defense_date: Optional[datetime] = None
@@ -78,7 +74,6 @@ class GuidanceList(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-# --- Task Schemas ---
 class TaskCreate(TaskBase):
     guidance_id: int
 
@@ -90,7 +85,6 @@ class TaskResponse(TaskBase):
 class TaskUpdateStatus(BaseModel):
     status: StatusTask
 
-# --- Comment Schemas ---
 class CommentCreate(BaseModel):
     content: str
     task_id: int
@@ -104,13 +98,6 @@ class CommentResponse(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
-# --- Chat Schemas ---
-class ChatRequest(BaseModel):
-    message: str
-    student_id: Optional[int] = None
-
-class ChatResponse(BaseModel):
-    response: str
 
 class AttachmentCreate(BaseModel):
     filename: str
@@ -139,7 +126,7 @@ class MeetingCreate(BaseModel):
     guidance_id: int
 
 class MeetingUpdateStatus(BaseModel):
-    status: str # confirmed, rejected
+    status: str 
 
 class MeetingResponse(BaseModel):
     id: int

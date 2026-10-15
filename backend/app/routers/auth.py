@@ -1,34 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm # <--- Importante!
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
-from pydantic import BaseModel
-from .. import database, schemas, models, utils, security, crud
+from .. import database, schemas, models, security, crud
 from ..database import get_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-class UserCreate(BaseModel):
-    email: str
-    password: str
-    name: str
-@router.post("/signup", status_code=status.HTTP_201_CREATED)
-def signup(user: UserCreate, db: Session = Depends(get_db)):
-    
-    user_exist = db.query(models.User).filter(models.User.email == user.email).first()
+@router.post("/signup", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
+def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    user_exist = crud.get_user_by_email(db, email=user.email)
     if user_exist:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
-
-
-    hashed_password = utils.hash(user.password) 
-
-
-    new_user = models.User(email=user.email, password=hashed_password, name=user.name)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return {"message": "Usuário criado com sucesso!"}
+    return crud.create_user(db=db, user=user)
 @router.post("/login", response_model=schemas.Token)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
