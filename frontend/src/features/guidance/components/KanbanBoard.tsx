@@ -1,15 +1,16 @@
 import { Clock, PlayCircle, CheckCircle } from 'lucide-react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
-import type { Task } from '../../../types';
+import type { Task, TaskStatus } from '../../../types';
 import { KanbanColumn } from './KanbanColumn';
 
 interface KanbanBoardProps {
   tasks: Task[];
   onDragEnd: (result: DropResult) => void;
   onTaskClick: (task: Task) => void;
+  onOpenCreateTask?: (status: TaskStatus) => void;
 }
 
-export function KanbanBoard({ tasks, onDragEnd, onTaskClick }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onDragEnd, onTaskClick, onOpenCreateTask }: KanbanBoardProps) {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex-1 overflow-x-auto p-6">
@@ -21,6 +22,7 @@ export function KanbanBoard({ tasks, onDragEnd, onTaskClick }: KanbanBoardProps)
             color="bg-gray-100"
             icon={<Clock size={18} className="text-gray-500" />}
             onClickTask={onTaskClick}
+            onOpenCreateTask={onOpenCreateTask}
           />
           <KanbanColumn
             id="in_progress"
@@ -29,6 +31,7 @@ export function KanbanBoard({ tasks, onDragEnd, onTaskClick }: KanbanBoardProps)
             color="bg-blue-50"
             icon={<PlayCircle size={18} className="text-blue-600" />}
             onClickTask={onTaskClick}
+            onOpenCreateTask={onOpenCreateTask}
           />
           <KanbanColumn
             id="completed"
@@ -37,6 +40,7 @@ export function KanbanBoard({ tasks, onDragEnd, onTaskClick }: KanbanBoardProps)
             color="bg-green-50"
             icon={<CheckCircle size={18} className="text-green-600" />}
             onClickTask={onTaskClick}
+            onOpenCreateTask={onOpenCreateTask}
           />
         </div>
       </div>

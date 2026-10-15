@@ -28,12 +28,16 @@ export default function Dashboard() {
       ]);
       setGuidances(gData);
       setStats(sData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar dados do dashboard:', error);
+      if (error?.response?.status === 401) {
+        authService.logout();
+        navigate('/', { replace: true });
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     loadDashboard();

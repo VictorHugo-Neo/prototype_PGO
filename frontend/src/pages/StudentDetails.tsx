@@ -18,6 +18,7 @@ export default function StudentDetails() {
     taskComments,
     taskAttachments,
     isCreateModalOpen,
+    createTaskStatus,
     isMeetingModalOpen,
     imageSrc,
     isCropModalOpen,
@@ -28,12 +29,15 @@ export default function StudentDetails() {
     setIsCropModalOpen,
     setImageSrc,
     setImgError,
+    handleOpenCreateTask,
     handleTaskClick,
     handleStatusChange,
     handleDragEnd,
     handleAddComment,
     handleUploadAttachment,
     handleCreateTask,
+    handleUpdateTask,
+    handleDeleteTask,
     handleRequestMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
@@ -54,7 +58,7 @@ export default function StudentDetails() {
     );
   }
 
-  const isAdvisor = myUserId === guidance.advisor.id;
+  const isAdvisor = Boolean(guidance.advisor && myUserId === guidance.advisor.id);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -68,13 +72,14 @@ export default function StudentDetails() {
         onUpdateDefenseDate={handleUpdateDefenseDate}
         onOpenMeetingsModal={() => setIsMeetingModalOpen(true)}
         onDownloadReport={handleDownloadReport}
-        onOpenCreateTaskModal={() => setIsCreateModalOpen(true)}
+        onOpenCreateTaskModal={() => handleOpenCreateTask('pending')}
       />
 
       <KanbanBoard
         tasks={tasks}
         onDragEnd={handleDragEnd}
         onTaskClick={handleTaskClick}
+        onOpenCreateTask={handleOpenCreateTask}
       />
 
       <GuidanceModals
@@ -82,6 +87,7 @@ export default function StudentDetails() {
         taskComments={taskComments}
         taskAttachments={taskAttachments}
         isCreateModalOpen={isCreateModalOpen}
+        createTaskStatus={createTaskStatus}
         isMeetingModalOpen={isMeetingModalOpen}
         meetings={meetings}
         isAdvisor={isAdvisor}
@@ -89,6 +95,8 @@ export default function StudentDetails() {
         isCropModalOpen={isCropModalOpen}
         onCloseTaskDetails={() => setSelectedTask(null)}
         onUpdateTaskStatus={handleStatusChange}
+        onUpdateTask={handleUpdateTask}
+        onDeleteTask={handleDeleteTask}
         onAddComment={handleAddComment}
         onUploadAttachment={handleUploadAttachment}
         onCloseCreateTask={() => setIsCreateModalOpen(false)}

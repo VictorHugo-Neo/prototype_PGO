@@ -1,4 +1,11 @@
-import type { Task, Comment, Attachment, Meeting, TaskStatus } from '../../../types';
+import type {
+  Task,
+  Comment,
+  Attachment,
+  Meeting,
+  TaskStatus,
+  TaskUpdatePayload,
+} from '../../../types';
 import { TaskDetailsModal } from './TaskDetailsModal';
 import { CreateTaskModal } from './CreateTaskModal';
 import { MeetingsModal } from './MeetingsModal';
@@ -9,6 +16,7 @@ interface GuidanceModalsProps {
   taskComments: Comment[];
   taskAttachments: Attachment[];
   isCreateModalOpen: boolean;
+  createTaskStatus?: TaskStatus;
   isMeetingModalOpen: boolean;
   meetings: Meeting[];
   isAdvisor: boolean;
@@ -16,10 +24,17 @@ interface GuidanceModalsProps {
   isCropModalOpen: boolean;
   onCloseTaskDetails: () => void;
   onUpdateTaskStatus: (taskId: number, status: TaskStatus) => Promise<void>;
+  onUpdateTask: (taskId: number, data: TaskUpdatePayload) => Promise<Task>;
+  onDeleteTask: (taskId: number) => Promise<void>;
   onAddComment: (taskId: number, content: string) => Promise<void>;
   onUploadAttachment: (taskId: number, file: File) => Promise<void>;
   onCloseCreateTask: () => void;
-  onCreateTask: (data: { title: string; description: string; time_estimate?: string }) => Promise<void>;
+  onCreateTask: (data: {
+    title: string;
+    description: string;
+    time_estimate?: string;
+    status?: TaskStatus;
+  }) => Promise<void>;
   onCloseMeetings: () => void;
   onRequestMeeting: (date: string, topic: string) => Promise<void>;
   onUpdateMeetingStatus: (meetingId: number, status: 'confirmed' | 'rejected') => Promise<void>;
@@ -32,6 +47,7 @@ export function GuidanceModals({
   taskComments,
   taskAttachments,
   isCreateModalOpen,
+  createTaskStatus,
   isMeetingModalOpen,
   meetings,
   isAdvisor,
@@ -39,6 +55,8 @@ export function GuidanceModals({
   isCropModalOpen,
   onCloseTaskDetails,
   onUpdateTaskStatus,
+  onUpdateTask,
+  onDeleteTask,
   onAddComment,
   onUploadAttachment,
   onCloseCreateTask,
@@ -58,6 +76,8 @@ export function GuidanceModals({
           attachments={taskAttachments}
           onClose={onCloseTaskDetails}
           onUpdateStatus={onUpdateTaskStatus}
+          onUpdateTask={onUpdateTask}
+          onDeleteTask={onDeleteTask}
           onAddComment={onAddComment}
           onUploadAttachment={onUploadAttachment}
         />
@@ -65,6 +85,7 @@ export function GuidanceModals({
 
       <CreateTaskModal
         isOpen={isCreateModalOpen}
+        initialStatus={createTaskStatus}
         onClose={onCloseCreateTask}
         onCreate={onCreateTask}
       />

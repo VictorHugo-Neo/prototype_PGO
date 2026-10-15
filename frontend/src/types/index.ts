@@ -23,6 +23,22 @@ export interface Task {
   time_estimate?: string;
 }
 
+export interface TaskCreatePayload {
+  title: string;
+  description?: string;
+  guidance_id: number;
+  time_estimate?: string;
+  status?: TaskStatus;
+}
+
+export interface TaskUpdatePayload {
+  title?: string;
+  description?: string;
+  time_estimate?: string | null;
+  status?: TaskStatus;
+  order?: number;
+}
+
 export interface Comment {
   id: number;
   content: string;
@@ -67,7 +83,7 @@ export interface StudentGuidance {
     email: string;
     avatar_path?: string;
   };
-  advisor: {
+  advisor?: {
     id: number;
     name: string;
     email?: string;

@@ -32,16 +32,37 @@ def create_task(db: Session, task: schemas.TaskCreate):
     db.refresh(db_task)
     return db_task
 
+def get_task_by_id(db: Session, task_id: int):
+    return db.query(models.Task).filter(models.Task.id == task_id).first()
+
 def get_task_by_guidance(db: Session, guidance_id: int):
-    return db.query(models.Task).filter(models.Task.guidance_id == guidance_id).all()
+    return db.query(models.Task).filter(models.Task.guidance_id == guidance_id).order_by(models.Task.order.asc(), models.Task.id.asc()).all()
+
+def update_task(db: Session, task_id: int, task_data: dict):
+    task = get_task_by_id(db, task_id)
+    if not task:
+        return None
+    for field, value in task_data.items():
+        setattr(task, field, value)
+    db.commit()
+    db.refresh(task)
+    return task
 
 def update_status_task(db: Session, task_id: int, new_status: models.StatusTask):
-    task = db.query(models.Task).filter(models.Task.id == task_id).first()
+    task = get_task_by_id(db, task_id)
     if task:
         task.status = new_status
         db.commit()
         db.refresh(task)
-    return task 
+    return task
+
+def delete_task(db: Session, task_id: int):
+    task = get_task_by_id(db, task_id)
+    if not task:
+        return False
+    db.delete(task)
+    db.commit()
+    return True 
 
 def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
