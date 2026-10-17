@@ -77,23 +77,49 @@ class GuidanceList(BaseModel):
 
 class TaskCreate(TaskBase):
     guidance_id: int
-    status: Optional[StatusTask] = StatusTask.PENDING
+    status: Optional[str] = "pending"
 
 class TaskResponse(TaskBase):
     id: int
     guidance_id: int
-    status: StatusTask
+    status: str
     model_config = ConfigDict(from_attributes=True)
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     time_estimate: Optional[datetime] = None
-    status: Optional[StatusTask] = None
+    status: Optional[str] = None
     order: Optional[int] = None
 
 class TaskUpdateStatus(BaseModel):
-    status: StatusTask
+    status: str
+
+class KanbanColumnBase(BaseModel):
+    title: str
+    color: Optional[str] = "bg-gray-100"
+    order: Optional[int] = 0
+
+class KanbanColumnCreate(BaseModel):
+    title: str
+    color: Optional[str] = "bg-gray-100"
+    order: Optional[int] = None
+
+class KanbanColumnUpdate(BaseModel):
+    title: Optional[str] = None
+    color: Optional[str] = None
+    order: Optional[int] = None
+
+class KanbanColumnResponse(BaseModel):
+    id: int
+    guidance_id: int
+    title: str
+    slug: str
+    color: str
+    order: int
+    created_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 class CommentCreate(BaseModel):
     content: str

@@ -25,7 +25,7 @@ export default function Profile() {
         name: user.name,
         email: user.email,
       }));
-    } catch (error) {
+    } catch {
       navigate('/');
     } finally {
       setLoading(false);
@@ -63,8 +63,9 @@ export default function Profile() {
       await userService.updateMe(payload);
       setStatusMessage({ type: 'success', text: 'Dados cadastrais atualizados com sucesso!' });
       setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
-    } catch (error: any) {
-      const msg = error.response?.data?.detail || 'Erro ao atualizar dados.';
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      const msg = axiosError.response?.data?.detail || 'Erro ao atualizar dados.';
       setStatusMessage({ type: 'error', text: msg });
     } finally {
       setSaving(false);

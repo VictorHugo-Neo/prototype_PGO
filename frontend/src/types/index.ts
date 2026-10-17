@@ -1,8 +1,30 @@
 export type UserType = 'student' | 'advisor';
 
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'late';
+export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'late' | (string & {});
 
 export type MeetingStatus = 'pending' | 'confirmed' | 'rejected';
+
+export interface KanbanColumn {
+  id: number;
+  guidance_id: number;
+  title: string;
+  slug: string;
+  color: string;
+  order: number;
+  created_at?: string;
+}
+
+export interface KanbanColumnCreatePayload {
+  title: string;
+  color?: string;
+  order?: number;
+}
+
+export interface KanbanColumnUpdatePayload {
+  title?: string;
+  color?: string;
+  order?: number;
+}
 
 export interface User {
   id: number;

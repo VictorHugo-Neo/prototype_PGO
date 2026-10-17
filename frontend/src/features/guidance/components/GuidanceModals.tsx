@@ -5,6 +5,7 @@ import type {
   Meeting,
   TaskStatus,
   TaskUpdatePayload,
+  KanbanColumn,
 } from '../../../types';
 import { TaskDetailsModal } from './TaskDetailsModal';
 import { CreateTaskModal } from './CreateTaskModal';
@@ -15,6 +16,7 @@ interface GuidanceModalsProps {
   selectedTask: Task | null;
   taskComments: Comment[];
   taskAttachments: Attachment[];
+  columns?: KanbanColumn[];
   isCreateModalOpen: boolean;
   createTaskStatus?: TaskStatus;
   isMeetingModalOpen: boolean;
@@ -46,6 +48,7 @@ export function GuidanceModals({
   selectedTask,
   taskComments,
   taskAttachments,
+  columns,
   isCreateModalOpen,
   createTaskStatus,
   isMeetingModalOpen,
@@ -74,6 +77,7 @@ export function GuidanceModals({
           task={selectedTask}
           comments={taskComments}
           attachments={taskAttachments}
+          columns={columns}
           onClose={onCloseTaskDetails}
           onUpdateStatus={onUpdateTaskStatus}
           onUpdateTask={onUpdateTask}
@@ -86,6 +90,7 @@ export function GuidanceModals({
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         initialStatus={createTaskStatus}
+        columns={columns}
         onClose={onCloseCreateTask}
         onCreate={onCreateTask}
       />

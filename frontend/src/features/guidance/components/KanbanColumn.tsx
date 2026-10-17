@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Droppable } from '@hello-pangea/dnd';
 import type { Task, TaskStatus } from '../../../types';
 import { KanbanCard } from './KanbanCard';
@@ -12,6 +12,10 @@ interface KanbanColumnProps {
   icon: React.ReactNode;
   onClickTask: (task: Task) => void;
   onOpenCreateTask?: (status: TaskStatus) => void;
+  columnId?: number;
+  isAdvisor?: boolean;
+  isCustom?: boolean;
+  onDeleteColumn?: (columnId: number) => void;
 }
 
 export function KanbanColumn({
@@ -22,15 +26,41 @@ export function KanbanColumn({
   icon,
   onClickTask,
   onOpenCreateTask,
+  columnId,
+  isAdvisor,
+  isCustom,
+  onDeleteColumn,
 }: KanbanColumnProps) {
+  const handleDelete = () => {
+    if (!columnId || !onDeleteColumn) return;
+    if (tasks.length > 0) {
+      alert('Mova ou exclua as tarefas desta etapa antes de remover a coluna.');
+      return;
+    }
+    if (window.confirm(`Deseja realmente remover a coluna "${title}"?`)) {
+      onDeleteColumn(columnId);
+    }
+  };
+
   return (
-    <div className={`flex flex-col rounded-xl p-4 min-h-[500px] ${color}`}>
+    <div className={`flex flex-col rounded-xl p-4 min-h-[500px] w-80 min-w-[20rem] flex-shrink-0 ${color}`}>
       <div className="flex items-center gap-2 mb-4 font-semibold text-gray-700">
         {icon}
-        <h3>{title}</h3>
+        <h3 className="truncate" title={title}>{title}</h3>
         <span className="ml-auto bg-white px-2 py-0.5 rounded-full text-xs shadow-sm text-gray-500 border border-gray-100">
           {tasks.length}
         </span>
+        {isAdvisor && isCustom && columnId && onDeleteColumn && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="p-1 hover:bg-white rounded-lg text-gray-400 hover:text-red-600 transition-colors shadow-none hover:shadow-sm"
+            title={`Excluir coluna "${title}"`}
+            aria-label={`Excluir coluna "${title}"`}
+          >
+            <Trash2 size={15} />
+          </button>
+        )}
         {onOpenCreateTask && (
           <button
             type="button"

@@ -12,13 +12,14 @@ import {
   AlertTriangle,
   Check,
 } from 'lucide-react';
-import type { Task, Comment, Attachment, TaskStatus, TaskUpdatePayload } from '../../../types';
+import type { Task, Comment, Attachment, TaskStatus, TaskUpdatePayload, KanbanColumn } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
 
 interface TaskDetailsModalProps {
   task: Task;
   comments: Comment[];
   attachments: Attachment[];
+  columns?: KanbanColumn[];
   onClose: () => void;
   onUpdateStatus: (taskId: number, newStatus: TaskStatus) => Promise<void>;
   onUpdateTask: (taskId: number, data: TaskUpdatePayload) => Promise<Task>;
@@ -31,6 +32,7 @@ export function TaskDetailsModal({
   task,
   comments,
   attachments,
+  columns,
   onClose,
   onUpdateStatus,
   onUpdateTask,
@@ -155,9 +157,19 @@ export function TaskDetailsModal({
                       onChange={(e) => onUpdateStatus(task.id, e.target.value as TaskStatus)}
                       className="text-xs bg-white border border-gray-200 rounded px-2 py-1 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="pending">A Fazer</option>
-                      <option value="in_progress">Em Andamento</option>
-                      <option value="completed">Concluído</option>
+                      {columns && columns.length > 0 ? (
+                        columns.map((c) => (
+                          <option key={c.id || c.slug} value={c.slug}>
+                            {c.title}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="pending">A Fazer</option>
+                          <option value="in_progress">Em Andamento</option>
+                          <option value="completed">Concluído</option>
+                        </>
+                      )}
                     </select>
                   </div>
 
@@ -297,9 +309,19 @@ export function TaskDetailsModal({
                     onChange={(e) => setEditStatus(e.target.value as TaskStatus)}
                     className="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 bg-white"
                   >
-                    <option value="pending">A Fazer</option>
-                    <option value="in_progress">Em Andamento</option>
-                    <option value="completed">Concluído</option>
+                    {columns && columns.length > 0 ? (
+                      columns.map((c) => (
+                        <option key={c.id || c.slug} value={c.slug}>
+                          {c.title}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="pending">A Fazer</option>
+                        <option value="in_progress">Em Andamento</option>
+                        <option value="completed">Concluído</option>
+                      </>
+                    )}
                   </select>
                 </div>
               </div>

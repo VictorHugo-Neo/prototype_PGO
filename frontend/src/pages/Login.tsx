@@ -26,8 +26,9 @@ export default function Login() {
       } else {
         navigate('/trail');
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || 'E-mail ou senha incorretos.';
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      const msg = axiosError.response?.data?.detail || 'E-mail ou senha incorretos.';
       setError(msg);
     } finally {
       setLoading(false);

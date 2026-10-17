@@ -28,9 +28,10 @@ export default function Dashboard() {
       ]);
       setGuidances(gData);
       setStats(sData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao carregar dados do dashboard:', error);
-      if (error?.response?.status === 401) {
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError?.response?.status === 401) {
         authService.logout();
         navigate('/', { replace: true });
       }
