@@ -49,6 +49,20 @@ class Guidance(Base):
                               back_populates="guidelines_student")
     tasks = relationship("Task",back_populates="guidance")
     meetings = relationship("Meeting", back_populates="guidance")
+    kanban_columns = relationship("KanbanColumn", back_populates="guidance", order_by="KanbanColumn.order.asc()", cascade="all, delete-orphan")
+
+class KanbanColumn(Base):
+    __tablename__ = 'kanban_columns'
+
+    id = Column(Integer, primary_key=True, index=True)
+    guidance_id = Column(Integer, ForeignKey("guidances.id"), nullable=False)
+    title = Column(String, nullable=False)
+    slug = Column(String, nullable=False)
+    order = Column(Integer, default=0)
+    color = Column(String, default="bg-gray-100")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    guidance = relationship("Guidance", back_populates="kanban_columns")
 
 class Task(Base):
     __tablename__ = 'tasks'
@@ -57,7 +71,7 @@ class Task(Base):
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     time_estimate = Column(DateTime,nullable=True)
-    status = Column(Enum(StatusTask),default=StatusTask.PENDING)
+    status = Column(String, default="pending")
     order = Column(Integer, default = 0)
     guidance_id = Column(Integer, ForeignKey("guidances.id"))
     

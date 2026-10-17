@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Cropper from 'react-easy-crop';
+import Cropper, { type Area } from 'react-easy-crop';
 import { X, Loader2 } from 'lucide-react';
 import { getCroppedImg } from '../../../utils/cropImage';
 
@@ -18,7 +18,7 @@ export function CropPhotoModal({
 }: CropPhotoModalProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   if (!isOpen || !imageSrc) return null;

@@ -16,8 +16,9 @@ export default function Trail() {
         if (guidance && guidance.id) {
           navigate(`/guidance/${guidance.id}`, { replace: true });
         }
-      } catch (err: any) {
-        if (err.response && err.response.status === 404) {
+      } catch (err: unknown) {
+        const axiosError = err as { response?: { status?: number } };
+        if (axiosError.response && axiosError.response.status === 404) {
           setError('Você ainda não foi vinculado a nenhum professor orientador.');
         } else {
           setError('Erro ao carregar seus dados acadêmicos. Tente novamente mais tarde.');

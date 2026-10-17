@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
-import type { Task, Comment, Attachment, Meeting, StudentGuidance, TaskStatus, TaskUpdatePayload } from '../../../types';
+import type { Task, Comment, Attachment, Meeting, StudentGuidance, TaskStatus, TaskUpdatePayload, KanbanColumn, KanbanColumnUpdatePayload } from '../../../types';
 import {
   guidanceService,
   taskService,
@@ -9,11 +9,13 @@ import {
   attachmentService,
   meetingService,
   reportService,
+  kanbanService,
 } from '../../../services/api';
 
 export function useStudentGuidance(id?: string) {
   const [guidance, setGuidance] = useState<StudentGuidance | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [columns, setColumns] = useState<KanbanColumn[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [myUserId, setMyUserId] = useState<number>(0);
@@ -32,14 +34,16 @@ export function useStudentGuidance(id?: string) {
   const loadData = useCallback(async () => {
     if (!id) return;
     try {
-      const [guidanceData, tasksData, meetingsData] = await Promise.all([
+      const [guidanceData, tasksData, meetingsData, columnsData] = await Promise.all([
         guidanceService.getById(id),
         taskService.getByGuidance(id),
         meetingService.getByGuidance(id),
+        kanbanService.getColumns(id),
       ]);
       setGuidance(guidanceData);
       setTasks(tasksData);
       setMeetings(meetingsData);
+      setColumns(columnsData);
     } catch (error) {
       console.error('Erro ao carregar dados do projeto:', error);
     } finally {
@@ -104,7 +108,7 @@ export function useStudentGuidance(id?: string) {
     try {
       const created = await commentService.create(taskId, content);
       setTaskComments((prev) => [...prev, created]);
-    } catch (error) {
+    } catch {
       alert('Erro ao enviar comentário.');
     }
   };
@@ -113,7 +117,7 @@ export function useStudentGuidance(id?: string) {
     try {
       const created = await attachmentService.upload(taskId, file);
       setTaskAttachments((prev) => [...prev, created]);
-    } catch (error) {
+    } catch {
       alert('Erro ao enviar anexo.');
     }
   };
@@ -173,6 +177,44 @@ export function useStudentGuidance(id?: string) {
     }
   };
 
+  const handleAddColumn = async (title: string, color?: string) => {
+    if (!id) return;
+    try {
+      const created = await kanbanService.createColumn(id, { title, color });
+      setColumns((prev) => [...prev, created]);
+      return created;
+    } catch (error) {
+      console.error('Erro ao criar coluna:', error);
+      alert('Erro ao adicionar coluna.');
+      throw error;
+    }
+  };
+
+  const handleUpdateColumn = async (columnId: number, data: KanbanColumnUpdatePayload) => {
+    try {
+      const updated = await kanbanService.updateColumn(columnId, data);
+      setColumns((prev) => prev.map((c) => (c.id === columnId ? updated : c)));
+      return updated;
+    } catch (error) {
+      console.error('Erro ao atualizar coluna:', error);
+      alert('Erro ao atualizar coluna.');
+      throw error;
+    }
+  };
+
+  const handleDeleteColumn = async (columnId: number) => {
+    try {
+      await kanbanService.deleteColumn(columnId);
+      setColumns((prev) => prev.filter((c) => c.id !== columnId));
+    } catch (error: unknown) {
+      console.error('Erro ao excluir coluna:', error);
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      const msg = axiosError?.response?.data?.detail || 'Erro ao excluir coluna.';
+      alert(msg);
+      throw error;
+    }
+  };
+
   const handleRequestMeeting = async (date: string, topic: string) => {
     if (!id) return;
     try {
@@ -184,7 +226,7 @@ export function useStudentGuidance(id?: string) {
       const updated = await meetingService.getByGuidance(id);
       setMeetings(updated);
       alert('Solicitação de reunião enviada!');
-    } catch (error) {
+    } catch {
       alert('Erro ao solicitar reunião.');
     }
   };
@@ -198,7 +240,7 @@ export function useStudentGuidance(id?: string) {
       setMeetings((prev) =>
         prev.map((m) => (m.id === meetingId ? { ...m, status } : m))
       );
-    } catch (error) {
+    } catch {
       alert('Erro ao atualizar status da reunião.');
     }
   };
@@ -217,7 +259,7 @@ export function useStudentGuidance(id?: string) {
     if (!id) return;
     try {
       await reportService.download(Number(id));
-    } catch (error) {
+    } catch {
       alert('Erro ao baixar relatório em PDF.');
     }
   };
@@ -240,7 +282,7 @@ export function useStudentGuidance(id?: string) {
       setImgError(false);
       await loadData();
       alert('Foto de perfil atualizada com sucesso!');
-    } catch (error) {
+    } catch {
       alert('Erro ao salvar avatar.');
     }
   };
@@ -248,6 +290,7 @@ export function useStudentGuidance(id?: string) {
   return {
     guidance,
     tasks,
+    columns,
     meetings,
     loading,
     myUserId,
@@ -275,6 +318,9 @@ export function useStudentGuidance(id?: string) {
     handleCreateTask,
     handleUpdateTask,
     handleDeleteTask,
+    handleAddColumn,
+    handleUpdateColumn,
+    handleDeleteColumn,
     handleRequestMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,

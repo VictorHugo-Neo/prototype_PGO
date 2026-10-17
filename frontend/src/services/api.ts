@@ -14,6 +14,9 @@ import type {
   Meeting,
   MeetingStatus,
   DashboardStats,
+  KanbanColumn,
+  KanbanColumnCreatePayload,
+  KanbanColumnUpdatePayload,
 } from '../types';
 
 export * from '../types';
@@ -253,5 +256,32 @@ export const statsService = {
   getDashboard: async (): Promise<DashboardStats> => {
     const response = await api.get<DashboardStats>('/stats/dashboard');
     return response.data;
+  },
+};
+
+export const kanbanService = {
+  getColumns: async (guidanceId: number | string): Promise<KanbanColumn[]> => {
+    const response = await api.get<KanbanColumn[]>(`/kanban/guidance/${guidanceId}/columns`);
+    return response.data;
+  },
+
+  createColumn: async (
+    guidanceId: number | string,
+    data: KanbanColumnCreatePayload
+  ): Promise<KanbanColumn> => {
+    const response = await api.post<KanbanColumn>(`/kanban/guidance/${guidanceId}/columns`, data);
+    return response.data;
+  },
+
+  updateColumn: async (
+    columnId: number,
+    data: KanbanColumnUpdatePayload
+  ): Promise<KanbanColumn> => {
+    const response = await api.put<KanbanColumn>(`/kanban/columns/${columnId}`, data);
+    return response.data;
+  },
+
+  deleteColumn: async (columnId: number): Promise<void> => {
+    await api.delete(`/kanban/columns/${columnId}`);
   },
 };

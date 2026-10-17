@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import type { TaskStatus } from '../../../types';
+import type { TaskStatus, KanbanColumn } from '../../../types';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialStatus?: TaskStatus;
+  columns?: KanbanColumn[];
   onCreate: (taskData: {
     title: string;
     description: string;
@@ -14,7 +15,13 @@ interface CreateTaskModalProps {
   }) => Promise<void>;
 }
 
-export function CreateTaskModal({ isOpen, onClose, initialStatus = 'pending', onCreate }: CreateTaskModalProps) {
+export function CreateTaskModal({
+  isOpen,
+  onClose,
+  initialStatus = 'pending',
+  columns,
+  onCreate,
+}: CreateTaskModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [timeEstimate, setTimeEstimate] = useState('');
@@ -126,9 +133,19 @@ export function CreateTaskModal({ isOpen, onClose, initialStatus = 'pending', on
                 onChange={(e) => setStatus(e.target.value as TaskStatus)}
                 className="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 bg-white"
               >
-                <option value="pending">A Fazer</option>
-                <option value="in_progress">Em Andamento</option>
-                <option value="completed">Concluído</option>
+                {columns && columns.length > 0 ? (
+                  columns.map((c) => (
+                    <option key={c.id || c.slug} value={c.slug}>
+                      {c.title}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="pending">A Fazer</option>
+                    <option value="in_progress">Em Andamento</option>
+                    <option value="completed">Concluído</option>
+                  </>
+                )}
               </select>
             </div>
           </div>

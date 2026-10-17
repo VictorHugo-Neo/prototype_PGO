@@ -1,3 +1,5 @@
+import re
+import unicodedata
 from sqlalchemy.orm import Session
 from . import models, schemas, security
 from .security import get_password_hash
@@ -48,13 +50,109 @@ def update_task(db: Session, task_id: int, task_data: dict):
     db.refresh(task)
     return task
 
-def update_status_task(db: Session, task_id: int, new_status: models.StatusTask):
+def update_status_task(db: Session, task_id: int, new_status: str):
     task = get_task_by_id(db, task_id)
     if task:
-        task.status = new_status
+        task.status = str(new_status)
         db.commit()
         db.refresh(task)
     return task
+
+def generate_column_slug(text: str) -> str:
+    normalized = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+    cleaned = re.sub(r'[^\w\s-]', '', normalized).strip().lower()
+    slug = re.sub(r'[-\s]+', '_', cleaned)
+    return slug or "coluna"
+
+def get_kanban_columns_by_guidance(db: Session, guidance_id: int):
+    columns = db.query(models.KanbanColumn).filter(
+        models.KanbanColumn.guidance_id == guidance_id
+    ).order_by(models.KanbanColumn.order.asc(), models.KanbanColumn.id.asc()).all()
+
+    if not columns:
+        default_columns = [
+            models.KanbanColumn(guidance_id=guidance_id, title="A Fazer", slug="pending", color="bg-gray-100", order=0),
+            models.KanbanColumn(guidance_id=guidance_id, title="Em Andamento", slug="in_progress", color="bg-blue-50", order=1),
+            models.KanbanColumn(guidance_id=guidance_id, title="Concluído", slug="completed", color="bg-green-50", order=2),
+        ]
+        db.add_all(default_columns)
+        db.commit()
+        for col in default_columns:
+            db.refresh(col)
+        return default_columns
+
+    return columns
+
+def create_kanban_column(db: Session, guidance_id: int, column_in: schemas.KanbanColumnCreate):
+    existing_columns = get_kanban_columns_by_guidance(db, guidance_id)
+    base_slug = generate_column_slug(column_in.title)
+    existing_slugs = {c.slug for c in existing_columns}
+    
+    slug = base_slug
+    counter = 2
+    while slug in existing_slugs:
+        slug = f"{base_slug}_{counter}"
+        counter += 1
+
+    if column_in.order is not None:
+        col_order = column_in.order
+    else:
+        col_order = max([c.order for c in existing_columns], default=-1) + 1
+
+    db_column = models.KanbanColumn(
+        guidance_id=guidance_id,
+        title=column_in.title.strip(),
+        slug=slug,
+        color=column_in.color or "bg-purple-50",
+        order=col_order,
+    )
+    db.add(db_column)
+    db.commit()
+    db.refresh(db_column)
+    return db_column
+
+def get_kanban_column_by_id(db: Session, column_id: int):
+    return db.query(models.KanbanColumn).filter(models.KanbanColumn.id == column_id).first()
+
+def update_kanban_column(db: Session, column_id: int, column_in: schemas.KanbanColumnUpdate):
+    column = get_kanban_column_by_id(db, column_id)
+    if not column:
+        return None
+    
+    update_data = column_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if value is not None:
+            if field == "title":
+                value = value.strip()
+            setattr(column, field, value)
+    
+    db.commit()
+    db.refresh(column)
+    return column
+
+def delete_kanban_column(db: Session, column_id: int):
+    column = get_kanban_column_by_id(db, column_id)
+    if not column:
+        return False, "Coluna não encontrada."
+    
+    tasks_count = db.query(models.Task).filter(
+        models.Task.guidance_id == column.guidance_id,
+        models.Task.status == column.slug
+    ).count()
+
+    if tasks_count > 0:
+        return False, "Mova as tarefas antes de excluí-la."
+    
+    total_columns = db.query(models.KanbanColumn).filter(
+        models.KanbanColumn.guidance_id == column.guidance_id
+    ).count()
+
+    if total_columns <= 1:
+        return False, "Não é possível excluir todas as colunas."
+
+    db.delete(column)
+    db.commit()
+    return True, None
 
 def delete_task(db: Session, task_id: int):
     task = get_task_by_id(db, task_id)

@@ -5,9 +5,42 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from .database import engine, Base, get_db
 
-from .routers import users, auth, guidance, task, comment, attachment, notification, meeting, report, stats
+from .routers import users, auth, guidance, task, comment, attachment, notification, meeting, report, stats, kanban
 
-Base.metadata.create_all(bind=engine)
+def init_db():
+    Base.metadata.create_all(bind=engine)
+    if engine.dialect.name == "postgresql":
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("""
+                    DO $$
+                    BEGIN
+                        IF EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'tasks'
+                              AND column_name = 'status'
+                              AND udt_name = 'statustask'
+                        ) THEN
+                            ALTER TABLE tasks ALTER COLUMN status DROP DEFAULT;
+                            ALTER TABLE tasks ALTER COLUMN status TYPE VARCHAR USING status::text;
+                            ALTER TABLE tasks ALTER COLUMN status SET DEFAULT 'pending';
+                        END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'kanban_columns'
+                              AND column_name = 'created_at'
+                        ) THEN
+                            ALTER TABLE kanban_columns ADD COLUMN created_at TIMESTAMP WITH TIME ZONE DEFAULT now();
+                        END IF;
+                    END $$;
+                """))
+        except Exception:
+            pass
+
+init_db()
 
 app = FastAPI(title="PGO API", version="1.0.0")
 
@@ -29,6 +62,7 @@ app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(guidance.router)
 app.include_router(task.router) 
+app.include_router(kanban.router) 
 app.include_router(comment.router)
 app.include_router(attachment.router)
 app.include_router(notification.router)

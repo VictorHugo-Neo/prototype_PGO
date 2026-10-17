@@ -47,8 +47,9 @@ export default function Register() {
 
       setSuccess('Cadastro realizado com sucesso! Redirecionando para login...');
       setTimeout(() => navigate('/'), 1200);
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || 'Erro ao realizar cadastro.';
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      const msg = axiosError.response?.data?.detail || 'Erro ao realizar cadastro.';
       setError(msg);
     } finally {
       setLoading(false);

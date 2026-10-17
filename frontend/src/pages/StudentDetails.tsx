@@ -11,6 +11,7 @@ export default function StudentDetails() {
   const {
     guidance,
     tasks,
+    columns,
     meetings,
     loading,
     myUserId,
@@ -38,6 +39,9 @@ export default function StudentDetails() {
     handleCreateTask,
     handleUpdateTask,
     handleDeleteTask,
+    handleAddColumn,
+    handleUpdateColumn,
+    handleDeleteColumn,
     handleRequestMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
@@ -77,15 +81,21 @@ export default function StudentDetails() {
 
       <KanbanBoard
         tasks={tasks}
+        columns={columns}
+        isAdvisor={isAdvisor}
         onDragEnd={handleDragEnd}
         onTaskClick={handleTaskClick}
         onOpenCreateTask={handleOpenCreateTask}
+        onAddColumn={handleAddColumn}
+        onDeleteColumn={handleDeleteColumn}
+        onUpdateColumn={handleUpdateColumn}
       />
 
       <GuidanceModals
         selectedTask={selectedTask}
         taskComments={taskComments}
         taskAttachments={taskAttachments}
+        columns={columns}
         isCreateModalOpen={isCreateModalOpen}
         createTaskStatus={createTaskStatus}
         isMeetingModalOpen={isMeetingModalOpen}

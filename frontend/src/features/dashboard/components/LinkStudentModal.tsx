@@ -26,8 +26,9 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
       setEmail('');
       setTheme('');
       onClose();
-    } catch (err: any) {
-      const msg = err.response?.data?.detail || 'Erro ao vincular aluno. Verifique se o e-mail está cadastrado como aluno.';
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      const msg = axiosError.response?.data?.detail || 'Erro ao vincular aluno. Verifique se o e-mail está cadastrado como aluno.';
       setError(msg);
     } finally {
       setIsSubmitting(false);

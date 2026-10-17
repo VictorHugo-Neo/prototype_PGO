@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, FileText, Plus, Camera, Users, Bell } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Plus, Camera, Users } from 'lucide-react';
 import type { StudentGuidance } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
 
