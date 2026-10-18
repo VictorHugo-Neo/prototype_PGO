@@ -70,13 +70,35 @@ def update_column(
     guidance = db.query(models.Guidance).filter(models.Guidance.id == column.guidance_id).first()
     verify_advisor_access(guidance, current_user.id)
 
+    if column_in.title is not None and not column_in.title.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="O título da coluna não pode ser vazio."
+        )
+
     updated = crud.update_kanban_column(db, column_id, column_in)
     return updated
+
+
+@router.put("/guidance/{guidance_id}/columns/reorder", response_model=List[schemas.KanbanColumnResponse])
+def reorder_columns(
+    guidance_id: int,
+    reorder_in: schemas.KanbanColumnReorder,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    guidance = db.query(models.Guidance).filter(models.Guidance.id == guidance_id).first()
+    if not guidance:
+        raise HTTPException(status_code=404, detail="Orientação não encontrada.")
+    verify_advisor_access(guidance, current_user.id)
+
+    return crud.reorder_kanban_columns(db, guidance_id, reorder_in.column_ids)
 
 
 @router.delete("/columns/{column_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_column(
     column_id: int,
+    target_column_id: int | None = None,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user),
 ):
@@ -86,7 +108,7 @@ def delete_column(
     guidance = db.query(models.Guidance).filter(models.Guidance.id == column.guidance_id).first()
     verify_advisor_access(guidance, current_user.id)
 
-    success, error_msg = crud.delete_kanban_column(db, column_id)
+    success, error_msg = crud.delete_kanban_column(db, column_id, target_column_id=target_column_id)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

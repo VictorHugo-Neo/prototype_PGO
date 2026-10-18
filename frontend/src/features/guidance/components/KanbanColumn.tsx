@@ -1,66 +1,113 @@
 import React from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Droppable } from '@hello-pangea/dnd';
+<<<<<<< HEAD
 import type { Task, TaskStatus, KanbanColumn as KanbanColumnType } from '../../../types';
+=======
+import type { Task, TaskStatus, KanbanColumn as KanbanColumnItem } from '../../../types';
+>>>>>>> 58a6130 (feat: implementa CRUD do completo no gerenciamento das colunas do kanban)
 import { KanbanCard } from './KanbanCard';
 
 interface KanbanColumnProps {
   id: TaskStatus;
-  title: string;
+  column: KanbanColumnItem;
   tasks: Task[];
   color: string;
   icon: React.ReactNode;
   onClickTask: (task: Task) => void;
   onOpenCreateTask?: (status: TaskStatus) => void;
-  columnId?: number;
   isAdvisor?: boolean;
-  isCustom?: boolean;
-  onDeleteColumn?: (columnId: number) => void;
+  canMoveLeft?: boolean;
+  canMoveRight?: boolean;
+  onEditColumn?: (col: KanbanColumnItem) => void;
+  onDeleteColumn?: (col: KanbanColumnItem) => void;
+  onMoveColumnLeft?: (col: KanbanColumnItem) => void;
+  onMoveColumnRight?: (col: KanbanColumnItem) => void;
 }
 
 export function KanbanColumn({
   id,
-  title,
+  column,
   tasks,
   color,
   icon,
   onClickTask,
   onOpenCreateTask,
-  columnId,
   isAdvisor,
-  isCustom,
+  canMoveLeft,
+  canMoveRight,
+  onEditColumn,
   onDeleteColumn,
+  onMoveColumnLeft,
+  onMoveColumnRight,
 }: KanbanColumnProps) {
-  const handleDelete = () => {
-    if (!columnId || !onDeleteColumn) return;
-    if (tasks.length > 0) {
-      alert('Mova ou exclua as tarefas desta etapa antes de remover a coluna.');
-      return;
-    }
-    if (window.confirm(`Deseja realmente remover a coluna "${title}"?`)) {
-      onDeleteColumn(columnId);
-    }
-  };
+  const { title } = column;
 
   return (
     <div className={`flex flex-col rounded-xl p-4 min-h-[500px] w-80 min-w-[20rem] flex-shrink-0 ${color}`}>
       <div className="flex items-center gap-2 mb-4 font-semibold text-gray-700">
-        {icon}
-        <h3 className="truncate" title={title}>{title}</h3>
-        <span className="ml-auto bg-white px-2 py-0.5 rounded-full text-xs shadow-sm text-gray-500 border border-gray-100">
+        <div className="shrink-0">{icon}</div>
+        <h3 className="truncate font-semibold text-sm text-gray-800" title={title}>
+          {title}
+        </h3>
+        <span className="bg-white px-2 py-0.5 rounded-full text-xs shadow-2xs text-gray-500 border border-gray-100 font-bold">
           {tasks.length}
         </span>
-        {isAdvisor && isCustom && columnId && onDeleteColumn && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="p-1 hover:bg-white rounded-lg text-gray-400 hover:text-red-600 transition-colors shadow-none hover:shadow-sm"
-            title={`Excluir coluna "${title}"`}
-            aria-label={`Excluir coluna "${title}"`}
-          >
-            <Trash2 size={15} />
-          </button>
+
+        {isAdvisor && (
+          <div className="ml-auto flex items-center gap-0.5 bg-white/70 backdrop-blur-xs p-0.5 rounded-lg border border-gray-200/60 shadow-2xs">
+            {onMoveColumnLeft && (
+              <button
+                type="button"
+                onClick={() => onMoveColumnLeft(column)}
+                disabled={!canMoveLeft}
+                className="p-1 rounded-md text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition-colors"
+                title={canMoveLeft ? 'Mover coluna para a esquerda' : 'Primeira coluna'}
+                aria-label={`Mover coluna ${title} para a esquerda`}
+              >
+                <ChevronLeft size={14} />
+              </button>
+            )}
+
+            {onMoveColumnRight && (
+              <button
+                type="button"
+                onClick={() => onMoveColumnRight(column)}
+                disabled={!canMoveRight}
+                className="p-1 rounded-md text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition-colors"
+                title={canMoveRight ? 'Mover coluna para a direita' : 'Última coluna'}
+                aria-label={`Mover coluna ${title} para a direita`}
+              >
+                <ChevronRight size={14} />
+              </button>
+            )}
+
+            {onEditColumn && (
+              <button
+                type="button"
+                onClick={() => onEditColumn(column)}
+                className="p-1 rounded-md text-gray-400 hover:text-blue-600 hover:bg-white transition-colors"
+                title={`Editar coluna "${title}"`}
+                aria-label={`Editar coluna "${title}"`}
+              >
+                <Pencil size={13} />
+              </button>
+            )}
+
+            {onDeleteColumn && (
+              <button
+                type="button"
+                onClick={() => onDeleteColumn(column)}
+                className="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-white transition-colors"
+                title={`Excluir coluna "${title}"`}
+                aria-label={`Excluir coluna "${title}"`}
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
+          </div>
         )}
+
         {onOpenCreateTask && (
           <button
             type="button"

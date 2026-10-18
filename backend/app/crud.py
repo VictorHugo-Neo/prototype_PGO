@@ -130,25 +130,51 @@ def update_kanban_column(db: Session, column_id: int, column_in: schemas.KanbanC
     db.refresh(column)
     return column
 
-def delete_kanban_column(db: Session, column_id: int):
+def reorder_kanban_columns(db: Session, guidance_id: int, column_ids: list[int]):
+    columns = db.query(models.KanbanColumn).filter(
+        models.KanbanColumn.guidance_id == guidance_id
+    ).all()
+    col_map = {col.id: col for col in columns}
+
+    for new_order, col_id in enumerate(column_ids):
+        if col_id in col_map:
+            col_map[col_id].order = new_order
+
+    db.commit()
+    return get_kanban_columns_by_guidance(db, guidance_id)
+
+def delete_kanban_column(db: Session, column_id: int, target_column_id: int | None = None):
     column = get_kanban_column_by_id(db, column_id)
     if not column:
         return False, "Coluna não encontrada."
-    
-    tasks_count = db.query(models.Task).filter(
-        models.Task.guidance_id == column.guidance_id,
-        models.Task.status == column.slug
-    ).count()
-
-    if tasks_count > 0:
-        return False, "Mova as tarefas antes de excluí-la."
     
     total_columns = db.query(models.KanbanColumn).filter(
         models.KanbanColumn.guidance_id == column.guidance_id
     ).count()
 
     if total_columns <= 1:
-        return False, "Não é possível excluir todas as colunas."
+        return False, "Não é possível excluir todas as colunas. O quadro deve possuir pelo menos uma coluna."
+
+    tasks_count = db.query(models.Task).filter(
+        models.Task.guidance_id == column.guidance_id,
+        models.Task.status == column.slug
+    ).count()
+
+    if tasks_count > 0:
+        if not target_column_id:
+            return False, "Mova as tarefas antes de excluí-la ou informe a etapa de destino."
+
+        if target_column_id == column_id:
+            return False, "A etapa de destino não pode ser a mesma coluna a ser excluída."
+
+        target_column = get_kanban_column_by_id(db, target_column_id)
+        if not target_column or target_column.guidance_id != column.guidance_id:
+            return False, "Etapa de destino inválida."
+
+        db.query(models.Task).filter(
+            models.Task.guidance_id == column.guidance_id,
+            models.Task.status == column.slug
+        ).update({models.Task.status: target_column.slug}, synchronize_session="fetch")
 
     db.delete(column)
     db.commit()

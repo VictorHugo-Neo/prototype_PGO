@@ -185,7 +185,6 @@ export function useStudentGuidance(id?: string) {
       return created;
     } catch (error) {
       console.error('Erro ao criar coluna:', error);
-      alert('Erro ao adicionar coluna.');
       throw error;
     }
   };
@@ -197,22 +196,72 @@ export function useStudentGuidance(id?: string) {
       return updated;
     } catch (error) {
       console.error('Erro ao atualizar coluna:', error);
-      alert('Erro ao atualizar coluna.');
       throw error;
     }
   };
 
-  const handleDeleteColumn = async (columnId: number) => {
+  const handleDeleteColumn = async (columnId: number, targetColumnId?: number) => {
     try {
-      await kanbanService.deleteColumn(columnId);
+      const columnToDelete = columns.find((c) => c.id === columnId);
+      const targetColumn = targetColumnId
+        ? columns.find((c) => c.id === targetColumnId)
+        : undefined;
+
+      await kanbanService.deleteColumn(columnId, targetColumnId);
+
       setColumns((prev) => prev.filter((c) => c.id !== columnId));
+
+      if (columnToDelete && targetColumn) {
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.status === columnToDelete.slug
+              ? { ...t, status: targetColumn.slug }
+              : t
+          )
+        );
+      }
     } catch (error: unknown) {
       console.error('Erro ao excluir coluna:', error);
-      const axiosError = error as { response?: { data?: { detail?: string } } };
-      const msg = axiosError?.response?.data?.detail || 'Erro ao excluir coluna.';
-      alert(msg);
       throw error;
     }
+  };
+
+  const handleReorderColumns = async (newColumnIds: number[]) => {
+    if (!id) return;
+    try {
+      const colMap = new Map(columns.map((c) => [c.id, c]));
+      const reordered: KanbanColumn[] = [];
+      newColumnIds.forEach((colId, index) => {
+        const col = colMap.get(colId);
+        if (col) {
+          reordered.push({ ...col, order: index });
+        }
+      });
+      setColumns(reordered);
+
+      const updated = await kanbanService.reorderColumns(id, newColumnIds);
+      setColumns(updated);
+      return updated;
+    } catch (error) {
+      console.error('Erro ao reordenar colunas:', error);
+      await loadData();
+      throw error;
+    }
+  };
+
+  const handleMoveColumn = async (columnId: number, direction: 'left' | 'right') => {
+    const currentIndex = columns.findIndex((c) => c.id === columnId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= columns.length) return;
+
+    const newColumns = [...columns];
+    const [moved] = newColumns.splice(currentIndex, 1);
+    newColumns.splice(targetIndex, 0, moved);
+
+    const newIds = newColumns.map((c) => c.id);
+    return handleReorderColumns(newIds);
   };
 
   const handleRequestMeeting = async (date: string, topic: string) => {
@@ -321,6 +370,8 @@ export function useStudentGuidance(id?: string) {
     handleAddColumn,
     handleUpdateColumn,
     handleDeleteColumn,
+    handleReorderColumns,
+    handleMoveColumn,
     handleRequestMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,

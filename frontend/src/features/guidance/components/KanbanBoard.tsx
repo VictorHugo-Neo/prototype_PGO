@@ -14,24 +14,15 @@ interface KanbanBoardProps {
   onTaskClick: (task: Task) => void;
   onOpenCreateTask?: (status: TaskStatus) => void;
   onAddColumn?: (title: string, color?: string) => Promise<unknown>;
-  onDeleteColumn?: (columnId: number) => Promise<unknown>;
+  onDeleteColumn?: (columnId: number, targetColumnId?: number) => Promise<unknown>;
   onUpdateColumn?: (columnId: number, data: KanbanColumnUpdatePayload) => Promise<unknown>;
+  onMoveColumn?: (columnId: number, direction: 'left' | 'right') => Promise<unknown>;
 }
 
 const DEFAULT_COLUMNS: KanbanColumnItem[] = [
   { id: 1, guidance_id: 0, title: 'A Fazer', slug: 'pending', color: 'bg-gray-100', order: 0 },
   { id: 2, guidance_id: 0, title: 'Em Andamento', slug: 'in_progress', color: 'bg-blue-50', order: 1 },
   { id: 3, guidance_id: 0, title: 'Concluído', slug: 'completed', color: 'bg-green-50', order: 2 },
-];
-
-const COLOR_OPTIONS = [
-  { label: 'Roxo', value: 'bg-purple-50', border: 'border-purple-300' },
-  { label: 'Azul', value: 'bg-blue-50', border: 'border-blue-300' },
-  { label: 'Âmbar', value: 'bg-amber-50', border: 'border-amber-300' },
-  { label: 'Verde', value: 'bg-emerald-50', border: 'border-emerald-300' },
-  { label: 'Rosa', value: 'bg-rose-50', border: 'border-rose-300' },
-  { label: 'Índigo', value: 'bg-indigo-50', border: 'border-indigo-300' },
-  { label: 'Cinza', value: 'bg-gray-100', border: 'border-gray-300' },
 ];
 
 function getColumnIcon(slug: string) {
@@ -56,11 +47,16 @@ export function KanbanBoard({
   onOpenCreateTask,
   onAddColumn,
   onDeleteColumn,
+  onUpdateColumn,
+  onMoveColumn,
 }: KanbanBoardProps) {
   const [isAddingColumn, setIsAddingColumn] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [selectedColor, setSelectedColor] = useState('bg-purple-50');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [editingColumn, setEditingColumn] = useState<KanbanColumnItem | null>(null);
+  const [deletingColumn, setDeletingColumn] = useState<KanbanColumnItem | null>(null);
 
   const displayColumns = columns && columns.length > 0 ? columns : DEFAULT_COLUMNS;
 
@@ -79,29 +75,45 @@ export function KanbanBoard({
     }
   };
 
+  const handleMoveLeft = (col: KanbanColumnItem) => {
+    if (onMoveColumn) {
+      onMoveColumn(col.id, 'left');
+    }
+  };
+
+  const handleMoveRight = (col: KanbanColumnItem) => {
+    if (onMoveColumn) {
+      onMoveColumn(col.id, 'right');
+    }
+  };
+
+  const deletingColumnTasksCount = deletingColumn
+    ? tasks.filter((t) => t.status === deletingColumn.slug).length
+    : 0;
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex-1 overflow-x-auto p-6">
         <div className="flex items-start gap-6 min-h-full pb-4">
-          {displayColumns.map((col) => {
-            const isStandard = ['pending', 'in_progress', 'completed'].includes(col.slug);
-            return (
-              <KanbanColumn
-                key={col.id || col.slug}
-                id={col.slug}
-                columnId={col.id}
-                title={col.title}
-                tasks={tasks.filter((t) => t.status === col.slug)}
-                color={col.color || 'bg-gray-100'}
-                icon={getColumnIcon(col.slug)}
-                onClickTask={onTaskClick}
-                onOpenCreateTask={onOpenCreateTask}
-                isAdvisor={isAdvisor}
-                isCustom={!isStandard}
-                onDeleteColumn={onDeleteColumn}
-              />
-            );
-          })}
+          {displayColumns.map((col, index) => (
+            <KanbanColumn
+              key={col.id || col.slug}
+              id={col.slug}
+              column={col}
+              tasks={tasks.filter((t) => t.status === col.slug)}
+              color={col.color || 'bg-gray-100'}
+              icon={getColumnIcon(col.slug)}
+              onClickTask={onTaskClick}
+              onOpenCreateTask={onOpenCreateTask}
+              isAdvisor={isAdvisor}
+              canMoveLeft={index > 0}
+              canMoveRight={index < displayColumns.length - 1}
+              onEditColumn={onUpdateColumn ? () => setEditingColumn(col) : undefined}
+              onDeleteColumn={onDeleteColumn ? () => setDeletingColumn(col) : undefined}
+              onMoveColumnLeft={onMoveColumn ? handleMoveLeft : undefined}
+              onMoveColumnRight={onMoveColumn ? handleMoveRight : undefined}
+            />
+          ))}
 
           {isAdvisor && onAddColumn && (
             <div className="w-80 min-w-[20rem] flex-shrink-0">
@@ -111,7 +123,7 @@ export function KanbanBoard({
                   onClick={() => setIsAddingColumn(true)}
                   className="w-full h-32 border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50/40 transition-all font-medium text-sm group cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-full bg-white border border-gray-200 group-hover:border-blue-300 flex items-center justify-center text-gray-500 group-hover:text-blue-600 transition-colors shadow-sm">
+                  <div className="w-9 h-9 rounded-full bg-white border border-gray-200 group-hover:border-blue-300 flex items-center justify-center text-gray-500 group-hover:text-blue-600 transition-colors shadow-xs">
                     <Plus size={18} />
                   </div>
                   <span>Adicionar Coluna</span>
@@ -145,6 +157,7 @@ export function KanbanBoard({
                       type="text"
                       required
                       autoFocus
+                      maxLength={60}
                       value={newColumnTitle}
                       onChange={(e) => setNewColumnTitle(e.target.value)}
                       placeholder="Ex: Revisão, Testes, Impedimentos..."
@@ -157,7 +170,7 @@ export function KanbanBoard({
                       Cor da Coluna
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {COLOR_OPTIONS.map((c) => (
+                      {KANBAN_COLOR_OPTIONS.map((c) => (
                         <button
                           key={c.value}
                           type="button"

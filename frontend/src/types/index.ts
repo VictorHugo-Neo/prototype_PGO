@@ -26,6 +26,10 @@ export interface KanbanColumnUpdatePayload {
   order?: number;
 }
 
+export interface KanbanColumnReorderPayload {
+  column_ids: number[];
+}
+
 export interface User {
   id: number;
   name: string;

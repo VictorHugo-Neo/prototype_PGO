@@ -281,7 +281,18 @@ export const kanbanService = {
     return response.data;
   },
 
-  deleteColumn: async (columnId: number): Promise<void> => {
-    await api.delete(`/kanban/columns/${columnId}`);
+  reorderColumns: async (
+    guidanceId: number | string,
+    columnIds: number[]
+  ): Promise<KanbanColumn[]> => {
+    const response = await api.put<KanbanColumn[]>(`/kanban/guidance/${guidanceId}/columns/reorder`, {
+      column_ids: columnIds,
+    });
+    return response.data;
+  },
+
+  deleteColumn: async (columnId: number, targetColumnId?: number): Promise<void> => {
+    const params = targetColumnId ? { target_column_id: targetColumnId } : undefined;
+    await api.delete(`/kanban/columns/${columnId}`, { params });
   },
 };

@@ -110,6 +110,9 @@ class KanbanColumnUpdate(BaseModel):
     color: Optional[str] = None
     order: Optional[int] = None
 
+class KanbanColumnReorder(BaseModel):
+    column_ids: List[int]
+
 class KanbanColumnResponse(BaseModel):
     id: int
     guidance_id: int
