@@ -42,6 +42,7 @@ export default function StudentDetails() {
     handleAddColumn,
     handleUpdateColumn,
     handleDeleteColumn,
+    handleMoveColumn,
     handleRequestMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
@@ -89,6 +90,7 @@ export default function StudentDetails() {
         onAddColumn={handleAddColumn}
         onDeleteColumn={handleDeleteColumn}
         onUpdateColumn={handleUpdateColumn}
+        onMoveColumn={handleMoveColumn}
       />
 
       <GuidanceModals

@@ -122,6 +122,33 @@ def test_kanban_columns_flow():
         assert res_after.status_code == 200
         remaining_slugs = [c["slug"] for c in res_after.json()]
         assert "revisao_final" not in remaining_slugs
+
+        cols_before = res_after.json()
+        col_ids_reversed = [c["id"] for c in reversed(cols_before)]
+        res_reorder = client.put(
+            f"/kanban/guidance/{guidance.id}/columns/reorder",
+            json={"column_ids": col_ids_reversed}
+        )
+        assert res_reorder.status_code == 200
+        assert [c["id"] for c in res_reorder.json()] == col_ids_reversed
+
+        col_to_delete = client.post(
+            f"/kanban/guidance/{guidance.id}/columns",
+            json={"title": "Coluna Temporária", "color": "bg-amber-50"}
+        ).json()
+        target_col = [c for c in res_reorder.json() if c["id"] != col_to_delete["id"]][0]
+
+        temp_task = client.post("/tasks/", json={
+            "title": "Tarefa em coluna temporária",
+            "guidance_id": guidance.id,
+            "status": col_to_delete["slug"]
+        }).json()
+
+        res_del_migrate = client.delete(f"/kanban/columns/{col_to_delete['id']}?target_column_id={target_col['id']}")
+        assert res_del_migrate.status_code == 204
+
+        migrated_task = client.get(f"/tasks/{temp_task['id']}").json()
+        assert migrated_task["status"] == target_col["slug"]
     finally:
         app.dependency_overrides.clear()
         db.close()

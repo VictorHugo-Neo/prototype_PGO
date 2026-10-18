@@ -121,6 +121,9 @@ class KanbanColumnResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class KanbanColumnReorder(BaseModel):
+    column_ids: List[int]
+
 class CommentCreate(BaseModel):
     content: str
     task_id: int

@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from typing import Optional, List
 from sqlalchemy.orm import Session
 from . import models, schemas, security
 from .security import get_password_hash
@@ -130,29 +131,55 @@ def update_kanban_column(db: Session, column_id: int, column_in: schemas.KanbanC
     db.refresh(column)
     return column
 
-def delete_kanban_column(db: Session, column_id: int):
+def delete_kanban_column(db: Session, column_id: int, target_column_id: Optional[int] = None):
     column = get_kanban_column_by_id(db, column_id)
     if not column:
         return False, "Coluna não encontrada."
-    
-    tasks_count = db.query(models.Task).filter(
-        models.Task.guidance_id == column.guidance_id,
-        models.Task.status == column.slug
-    ).count()
-
-    if tasks_count > 0:
-        return False, "Mova as tarefas antes de excluí-la."
     
     total_columns = db.query(models.KanbanColumn).filter(
         models.KanbanColumn.guidance_id == column.guidance_id
     ).count()
 
     if total_columns <= 1:
-        return False, "Não é possível excluir todas as colunas."
+        return False, "Não é possível excluir a única etapa restante do quadro."
+
+    tasks_count = db.query(models.Task).filter(
+        models.Task.guidance_id == column.guidance_id,
+        models.Task.status == column.slug
+    ).count()
+
+    if tasks_count > 0:
+        if not target_column_id:
+            return False, f"Mova as tarefas antes de excluí-la ou selecione outra etapa de destino ({tasks_count} tarefa(s) presente(s))."
+        
+        target_column = get_kanban_column_by_id(db, target_column_id)
+        if not target_column or target_column.guidance_id != column.guidance_id:
+            return False, "Etapa de destino inválida para transferência das tarefas."
+        
+        if target_column.id == column.id:
+            return False, "A etapa de destino não pode ser a mesma coluna a ser excluída."
+
+        db.query(models.Task).filter(
+            models.Task.guidance_id == column.guidance_id,
+            models.Task.status == column.slug
+        ).update({"status": target_column.slug}, synchronize_session=False)
 
     db.delete(column)
     db.commit()
     return True, None
+
+def reorder_kanban_columns(db: Session, guidance_id: int, column_ids: List[int]):
+    columns = db.query(models.KanbanColumn).filter(
+        models.KanbanColumn.guidance_id == guidance_id
+    ).all()
+    col_map = {c.id: c for c in columns}
+
+    for order_idx, col_id in enumerate(column_ids):
+        if col_id in col_map:
+            col_map[col_id].order = order_idx
+
+    db.commit()
+    return get_kanban_columns_by_guidance(db, guidance_id)
 
 def delete_task(db: Session, task_id: int):
     task = get_task_by_id(db, task_id)

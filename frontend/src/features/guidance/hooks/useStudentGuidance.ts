@@ -202,10 +202,10 @@ export function useStudentGuidance(id?: string) {
     }
   };
 
-  const handleDeleteColumn = async (columnId: number) => {
+  const handleDeleteColumn = async (columnId: number, targetColumnId?: number) => {
     try {
-      await kanbanService.deleteColumn(columnId);
-      setColumns((prev) => prev.filter((c) => c.id !== columnId));
+      await kanbanService.deleteColumn(columnId, targetColumnId);
+      await loadData();
     } catch (error: unknown) {
       console.error('Erro ao excluir coluna:', error);
       const axiosError = error as { response?: { data?: { detail?: string } } };
@@ -213,6 +213,45 @@ export function useStudentGuidance(id?: string) {
       alert(msg);
       throw error;
     }
+  };
+
+  const handleReorderColumns = async (newColumnIds: number[]) => {
+    if (!id) return;
+    try {
+      const columnMap = new Map(columns.map((c) => [c.id, c]));
+      const reordered = newColumnIds
+        .map((cid, idx) => {
+          const col = columnMap.get(cid);
+          return col ? { ...col, order: idx } : null;
+        })
+        .filter((c): c is KanbanColumn => c !== null);
+      if (reordered.length === columns.length) {
+        setColumns(reordered);
+      }
+
+      const updated = await kanbanService.reorderColumns(id, newColumnIds);
+      setColumns(updated);
+    } catch (error) {
+      console.error('Erro ao reordenar colunas:', error);
+      alert('Erro ao reordenar colunas.');
+      await loadData();
+      throw error;
+    }
+  };
+
+  const handleMoveColumn = async (columnId: number, direction: 'left' | 'right') => {
+    const currentIndex = columns.findIndex((c) => c.id === columnId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= columns.length) return;
+
+    const newColumns = [...columns];
+    const [moved] = newColumns.splice(currentIndex, 1);
+    newColumns.splice(targetIndex, 0, moved);
+
+    const orderedIds = newColumns.map((c) => c.id);
+    await handleReorderColumns(orderedIds);
   };
 
   const handleRequestMeeting = async (date: string, topic: string) => {
@@ -321,6 +360,8 @@ export function useStudentGuidance(id?: string) {
     handleAddColumn,
     handleUpdateColumn,
     handleDeleteColumn,
+    handleReorderColumns,
+    handleMoveColumn,
     handleRequestMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
