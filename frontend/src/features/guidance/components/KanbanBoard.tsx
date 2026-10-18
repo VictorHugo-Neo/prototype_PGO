@@ -3,8 +3,9 @@ import { Clock, PlayCircle, CheckCircle, Plus, KanbanSquare, Loader2, X } from '
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import type { Task, TaskStatus, KanbanColumn as KanbanColumnItem, KanbanColumnUpdatePayload } from '../../../types';
 import { KanbanColumn } from './KanbanColumn';
-import { ColumnModal } from './ColumnModal';
+import { EditColumnModal } from './EditColumnModal';
 import { DeleteColumnModal } from './DeleteColumnModal';
+import { KANBAN_COLOR_OPTIONS } from '../constants/kanbanColors';
 
 interface KanbanBoardProps {
   tasks: Task[];
@@ -212,32 +213,27 @@ export function KanbanBoard({
             </div>
           )}
         </div>
-      </DragDropContext>
+      </div>
 
-      {/* Column Create / Edit Modal */}
-      <ColumnModal
-        isOpen={isColumnModalOpen}
-        mode={columnModalMode}
-        column={selectedColumnForEdit}
-        onClose={() => {
-          setIsColumnModalOpen(false);
-          setSelectedColumnForEdit(null);
-        }}
-        onSave={handleSaveColumn}
-      />
+      {onUpdateColumn && (
+        <EditColumnModal
+          isOpen={Boolean(editingColumn)}
+          column={editingColumn}
+          onClose={() => setEditingColumn(null)}
+          onUpdate={onUpdateColumn}
+        />
+      )}
 
-      {/* Delete Column Smart Modal */}
-      <DeleteColumnModal
-        isOpen={isDeleteModalOpen}
-        column={selectedColumnForDelete}
-        columns={displayColumns}
-        taskCount={tasksInColumnToDelete}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setSelectedColumnForDelete(null);
-        }}
-        onConfirmDelete={handleConfirmDelete}
-      />
-    </>
+      {onDeleteColumn && (
+        <DeleteColumnModal
+          isOpen={Boolean(deletingColumn)}
+          column={deletingColumn}
+          tasksCount={deletingColumnTasksCount}
+          availableColumns={displayColumns}
+          onClose={() => setDeletingColumn(null)}
+          onDelete={onDeleteColumn}
+        />
+      )}
+    </DragDropContext>
   );
 }
