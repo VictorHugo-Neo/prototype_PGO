@@ -3,6 +3,8 @@ import { Clock, PlayCircle, CheckCircle, Plus, KanbanSquare, Loader2, X } from '
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import type { Task, TaskStatus, KanbanColumn as KanbanColumnItem, KanbanColumnUpdatePayload } from '../../../types';
 import { KanbanColumn } from './KanbanColumn';
+import { ColumnModal } from './ColumnModal';
+import { DeleteColumnModal } from './DeleteColumnModal';
 
 interface KanbanBoardProps {
   tasks: Task[];
@@ -197,7 +199,32 @@ export function KanbanBoard({
             </div>
           )}
         </div>
-      </div>
-    </DragDropContext>
+      </DragDropContext>
+
+      {/* Column Create / Edit Modal */}
+      <ColumnModal
+        isOpen={isColumnModalOpen}
+        mode={columnModalMode}
+        column={selectedColumnForEdit}
+        onClose={() => {
+          setIsColumnModalOpen(false);
+          setSelectedColumnForEdit(null);
+        }}
+        onSave={handleSaveColumn}
+      />
+
+      {/* Delete Column Smart Modal */}
+      <DeleteColumnModal
+        isOpen={isDeleteModalOpen}
+        column={selectedColumnForDelete}
+        columns={displayColumns}
+        taskCount={tasksInColumnToDelete}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedColumnForDelete(null);
+        }}
+        onConfirmDelete={handleConfirmDelete}
+      />
+    </>
   );
 }
