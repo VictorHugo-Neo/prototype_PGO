@@ -30,6 +30,7 @@ export function useStudentGuidance(id?: string) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!id) return;
@@ -305,11 +306,28 @@ export function useStudentGuidance(id?: string) {
   };
 
   const handleDownloadReport = async () => {
-    if (!id) return;
+    if (!id || isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
     try {
       await reportService.download(Number(id));
-    } catch {
-      alert('Erro ao baixar relatório em PDF.');
+    } catch (error) {
+      console.error('Erro ao baixar relatório:', error);
+      alert('Não foi possível gerar o relatório em PDF. Tente novamente.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handlePreviewReport = async () => {
+    if (!id || isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
+      await reportService.preview(Number(id));
+    } catch (error) {
+      console.error('Erro ao visualizar relatório:', error);
+      alert('Não foi possível carregar a pré-visualização do relatório.');
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -376,6 +394,8 @@ export function useStudentGuidance(id?: string) {
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
     handleDownloadReport,
+    handlePreviewReport,
+    isGeneratingPdf,
     handleFileChange,
     handleSaveCrop,
   };

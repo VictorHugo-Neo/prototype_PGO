@@ -233,15 +233,27 @@ export const reportService = {
       responseType: 'blob',
     });
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
 
     const contentDisposition = response.headers['content-disposition'];
     let fileName = `relatorio_orientacao_${guidanceId}.pdf`;
     if (contentDisposition) {
-      const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
-      if (fileNameMatch && fileNameMatch.length === 2) fileName = fileNameMatch[1];
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+      if (utf8Match && utf8Match[1]) {
+        try {
+          fileName = decodeURIComponent(utf8Match[1]);
+        } catch {
+          fileName = utf8Match[1];
+        }
+      } else {
+        const asciiMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+        if (asciiMatch && asciiMatch[1]) {
+          fileName = asciiMatch[1];
+        }
+      }
     }
 
     link.setAttribute('download', fileName);
@@ -249,6 +261,20 @@ export const reportService = {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
+  },
+
+  preview: async (guidanceId: number): Promise<void> => {
+    const response = await api.get(`/report/${guidanceId}?preview=true`, {
+      responseType: 'blob',
+    });
+
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    // Delay de 15s para garantir que o visualizador nativo do navegador carregue o blob antes do revoke
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 15000);
   },
 };
 

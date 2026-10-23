@@ -1,108 +1,71 @@
-from fastapi import APIRouter, Depends, HTTPException
+import re
+from urllib.parse import quote
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib import colors
-from io import BytesIO
-from datetime import datetime
-from .. import models, deps
+
+from .. import crud, deps, models
 from ..database import get_db
+from ..services.pdf import generate_guidance_report_pdf
 
 router = APIRouter(prefix="/report", tags=["report"])
+
+
+def _build_content_disposition(student_name: str, preview: bool) -> str:
+    clean_name = re.sub(r"[^\w\s-]", "", student_name).strip().replace(" ", "_")
+    raw_filename = f"Relatorio_Orientacao_{clean_name}.pdf"
+    # RFC 5987 / RFC 6266: suporte a cabeçalhos ASCII e UTF-8 codificados.
+    ascii_safe = raw_filename.encode("ascii", "ignore").decode("ascii") or "relatorio.pdf"
+    encoded_utf8 = quote(raw_filename)
+    disposition_type = "inline" if preview else "attachment"
+    return f"{disposition_type}; filename=\"{ascii_safe}\"; filename*=UTF-8''{encoded_utf8}"
+
 
 @router.get("/{guidance_id}")
 def generate_pdf_report(
     guidance_id: int,
+    preview: bool = Query(False, description="Se True, exibe o PDF inline; se False, força download."),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(deps.get_current_user)
+    current_user: models.User = Depends(deps.get_current_user),
 ):
-
     guidance = db.query(models.Guidance).filter(models.Guidance.id == guidance_id).first()
     if not guidance:
-        raise HTTPException(status_code=404, detail="Orientação não encontrada")
-        
-    tasks = db.query(models.Task).filter(models.Task.guidance_id == guidance_id).all()
-    meetings = db.query(models.Meeting).filter(models.Meeting.guidance_id == guidance_id).all()
+        raise HTTPException(status_code=404, detail="Orientação não encontrada.")
 
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    elements = []
-    styles = getSampleStyleSheet()
-    
+    is_advisor = guidance.advisor_id == current_user.id
+    is_student = guidance.student_id == current_user.id
+    if not is_advisor and not is_student:
+        raise HTTPException(
+            status_code=403,
+            detail="Você não tem permissão para acessar o relatório desta orientação.",
+        )
 
-    title_style = styles['Title']
-    elements.append(Paragraph(f"Relatório de Orientação - PGO", title_style))
-    elements.append(Spacer(1, 12))
-    
+    columns = crud.get_kanban_columns_by_guidance(db, guidance_id)
+    tasks = crud.get_task_by_guidance(db, guidance_id)
+    active_slugs = {col.slug for col in columns}
+    kanban_tasks = [t for t in tasks if t.status in active_slugs]
 
-    info_text = f"""
-    <b>Aluno:</b> {guidance.student.name}<br/>
-    <b>Orientador:</b> {guidance.advisor.name}<br/>
-    <b>Tema:</b> {guidance.theme}<br/>
-    <b>Data do Relatório:</b> {datetime.now().strftime('%d/%m/%Y')}
-    """
-    elements.append(Paragraph(info_text, styles['Normal']))
-    elements.append(Spacer(1, 24))
-    
+    meetings = (
+        db.query(models.Meeting)
+        .filter(models.Meeting.guidance_id == guidance_id)
+        .order_by(models.Meeting.date.desc())
+        .all()
+    )
 
-    elements.append(Paragraph("Histórico de Tarefas", styles['Heading2']))
-    
-    if not tasks:
-        elements.append(Paragraph("Nenhuma tarefa registrada.", styles['Normal']))
-    else:
+    pdf_buffer = generate_guidance_report_pdf(
+        guidance=guidance,
+        columns=columns,
+        tasks=kanban_tasks,
+        meetings=meetings,
+    )
 
-        data = [['Título', 'Status', 'Prazo']]
-        for t in tasks:
-            status_map = {'pending': 'Pendente', 'in_progress': 'Em Andamento', 'completed': 'Concluído'}
-            prazo = t.time_estimate.strftime('%d/%m/%Y') if t.time_estimate else '-'
-            data.append([t.title[:40], status_map.get(t.status, t.status), prazo])
-            
-        t = Table(data, colWidths=[300, 100, 100])
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-        elements.append(t)
-    
-    elements.append(Spacer(1, 24))
+    content_disposition = _build_content_disposition(guidance.student.name, preview)
 
-
-    elements.append(Paragraph("Registro de Reuniões", styles['Heading2']))
-    
-    if not meetings:
-        elements.append(Paragraph("Nenhuma reunião registrada.", styles['Normal']))
-    else:
-        data_meet = [['Data', 'Assunto', 'Status']]
-        for m in meetings:
-            status_meet = {'pending': 'Pendente', 'confirmed': 'Confirmada', 'rejected': 'Cancelada'}
-            data_meet.append([
-                m.date.strftime('%d/%m/%Y %H:%M'), 
-                m.topic, 
-                status_meet.get(m.status, m.status)
-            ])
-            
-        tm = Table(data_meet, colWidths=[120, 280, 100])
-        tm.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-        elements.append(tm)
-
-
-    doc.build(elements)
-    buffer.seek(0)
-    
-    filename = f"Relatorio_{guidance.student.name.replace(' ', '_')}.pdf"
-    
     return StreamingResponse(
-        buffer, 
-        media_type="application/pdf", 
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": content_disposition,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
     )

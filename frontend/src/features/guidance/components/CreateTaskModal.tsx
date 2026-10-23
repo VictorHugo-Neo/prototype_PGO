@@ -30,9 +30,16 @@ export function CreateTaskModal({
 
   useEffect(() => {
     if (isOpen) {
-      setStatus(initialStatus);
+      const isInitialValid = columns?.some((c) => c.slug === initialStatus);
+      if (isInitialValid) {
+        setStatus(initialStatus);
+      } else if (columns && columns.length > 0) {
+        setStatus(columns[0].slug as TaskStatus);
+      } else {
+        setStatus(initialStatus);
+      }
     }
-  }, [isOpen, initialStatus]);
+  }, [isOpen, initialStatus, columns]);
 
   if (!isOpen) return null;
 
@@ -40,18 +47,25 @@ export function CreateTaskModal({
     e.preventDefault();
     if (!title.trim() || isSubmitting) return;
 
+    const validStatus = columns?.some((c) => c.slug === status)
+      ? status
+      : columns && columns.length > 0
+      ? (columns[0].slug as TaskStatus)
+      : status;
+
     setIsSubmitting(true);
     try {
       await onCreate({
         title,
         description,
         time_estimate: timeEstimate || undefined,
-        status,
+        status: validStatus,
       });
       setTitle('');
       setDescription('');
       setTimeEstimate('');
-      setStatus('pending');
+      const defaultReset = columns && columns.length > 0 ? (columns[0].slug as TaskStatus) : 'pending';
+      setStatus(defaultReset);
       onClose();
     } finally {
       setIsSubmitting(false);

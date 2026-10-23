@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import type { TaskStatus } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { StudentHeader } from '../features/guidance/components/StudentHeader';
 import { KanbanBoard } from '../features/guidance/components/KanbanBoard';
@@ -47,6 +48,8 @@ export default function StudentDetails() {
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
     handleDownloadReport,
+    handlePreviewReport,
+    isGeneratingPdf,
     handleFileChange,
     handleSaveCrop,
   } = useStudentGuidance(id);
@@ -72,12 +75,16 @@ export default function StudentDetails() {
         myUserId={myUserId}
         meetingsCount={meetings.length}
         imgError={imgError}
+        isGeneratingPdf={isGeneratingPdf}
         onImgError={() => setImgError(true)}
         onFileChange={handleFileChange}
         onUpdateDefenseDate={handleUpdateDefenseDate}
         onOpenMeetingsModal={() => setIsMeetingModalOpen(true)}
         onDownloadReport={handleDownloadReport}
-        onOpenCreateTaskModal={() => handleOpenCreateTask('pending')}
+        onPreviewReport={handlePreviewReport}
+        onOpenCreateTaskModal={() =>
+          handleOpenCreateTask(columns && columns.length > 0 ? (columns[0].slug as TaskStatus) : 'pending')
+        }
       />
 
       <KanbanBoard

@@ -1,5 +1,17 @@
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, FileText, Plus, Camera, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  FileText,
+  Plus,
+  Camera,
+  Users,
+  Loader2,
+  ChevronDown,
+  Download,
+  ExternalLink,
+} from 'lucide-react';
 import type { StudentGuidance } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
 
@@ -8,11 +20,13 @@ interface StudentHeaderProps {
   myUserId: number;
   meetingsCount: number;
   imgError: boolean;
+  isGeneratingPdf?: boolean;
   onImgError: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onUpdateDefenseDate: (date: string) => Promise<void>;
   onOpenMeetingsModal: () => void;
   onDownloadReport: () => void;
+  onPreviewReport?: () => void;
   onOpenCreateTaskModal: () => void;
 }
 
@@ -21,15 +35,57 @@ export function StudentHeader({
   myUserId,
   meetingsCount,
   imgError,
+  isGeneratingPdf = false,
   onImgError,
   onFileChange,
   onUpdateDefenseDate,
   onOpenMeetingsModal,
   onDownloadReport,
+  onPreviewReport,
   onOpenCreateTaskModal,
 }: StudentHeaderProps) {
   const navigate = useNavigate();
   const isStudent = myUserId === guidance.student.id;
+  const [isReportMenuOpen, setIsReportMenuOpen] = useState(false);
+  const reportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (reportMenuRef.current && !reportMenuRef.current.contains(event.target as Node)) {
+        setIsReportMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsReportMenuOpen(false);
+      }
+    };
+
+    if (isReportMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isReportMenuOpen]);
+
+  const handlePreviewClick = () => {
+    setIsReportMenuOpen(false);
+    if (onPreviewReport) {
+      onPreviewReport();
+    } else {
+      onDownloadReport();
+    }
+  };
+
+  const handleDownloadClick = () => {
+    setIsReportMenuOpen(false);
+    onDownloadReport();
+  };
 
   return (
     <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
@@ -109,14 +165,80 @@ export function StudentHeader({
               Reuniões ({meetingsCount})
             </button>
 
-            <button
-              type="button"
-              onClick={onDownloadReport}
-              className="flex items-center gap-2 text-gray-700 hover:text-red-600 text-xs font-medium bg-gray-50 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors border border-gray-200"
-            >
-              <FileText size={16} aria-hidden="true" />
-              PDF Relatório
-            </button>
+            <div className="relative" ref={reportMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsReportMenuOpen((prev) => !prev)}
+                disabled={isGeneratingPdf}
+                aria-expanded={isReportMenuOpen}
+                aria-haspopup="menu"
+                aria-label="Ações de Relatório em PDF"
+                className={`flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg transition-all border ${
+                  isGeneratingPdf
+                    ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                    : 'bg-gray-50 text-gray-700 hover:text-blue-700 hover:bg-blue-50 hover:border-blue-200 border-gray-200 shadow-sm'
+                }`}
+              >
+                {isGeneratingPdf ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin text-blue-600" aria-hidden="true" />
+                    <span>Gerando PDF...</span>
+                  </>
+                ) : (
+                  <>
+                    <FileText size={16} className="text-blue-600" aria-hidden="true" />
+                    <span>PDF Relatório</span>
+                    <ChevronDown
+                      size={14}
+                      className={`text-gray-400 transition-transform ${
+                        isReportMenuOpen ? 'rotate-180' : ''
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </>
+                )}
+              </button>
+
+              {isReportMenuOpen && !isGeneratingPdf && (
+                <div
+                  role="menu"
+                  aria-orientation="vertical"
+                  className="absolute right-0 mt-1.5 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1.5 animate-in fade-in slide-in-from-top-1"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handlePreviewClick}
+                    className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 text-gray-700 hover:text-blue-700 flex items-start gap-2.5 transition-colors group"
+                  >
+                    <ExternalLink size={16} className="mt-0.5 text-blue-500 group-hover:text-blue-600 shrink-0" aria-hidden="true" />
+                    <div>
+                      <div className="text-xs font-semibold">Visualizar Relatório</div>
+                      <div className="text-[11px] text-gray-500 group-hover:text-blue-600">
+                        Abrir em nova aba do navegador
+                      </div>
+                    </div>
+                  </button>
+
+                  <div className="h-px bg-gray-100 my-1" />
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleDownloadClick}
+                    className="w-full text-left px-3.5 py-2.5 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 flex items-start gap-2.5 transition-colors group"
+                  >
+                    <Download size={16} className="mt-0.5 text-emerald-500 group-hover:text-emerald-600 shrink-0" aria-hidden="true" />
+                    <div>
+                      <div className="text-xs font-semibold">Baixar Arquivo PDF</div>
+                      <div className="text-[11px] text-gray-500 group-hover:text-emerald-600">
+                        Download com formatação oficial
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
 
             <button
               type="button"

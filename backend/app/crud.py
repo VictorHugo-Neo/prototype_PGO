@@ -28,7 +28,12 @@ def create_guidance(db: Session, guidance_date: dict):
     return db_guidance
 
 def create_task(db: Session, task: schemas.TaskCreate):
-    db_task = models.Task(**task.model_dump())
+    columns = get_kanban_columns_by_guidance(db, task.guidance_id)
+    valid_slugs = {c.slug for c in columns}
+    task_dict = task.model_dump()
+    if task_dict.get("status") not in valid_slugs and columns:
+        task_dict["status"] = columns[0].slug
+    db_task = models.Task(**task_dict)
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
@@ -38,7 +43,28 @@ def get_task_by_id(db: Session, task_id: int):
     return db.query(models.Task).filter(models.Task.id == task_id).first()
 
 def get_task_by_guidance(db: Session, guidance_id: int):
-    return db.query(models.Task).filter(models.Task.guidance_id == guidance_id).order_by(models.Task.order.asc(), models.Task.id.asc()).all()
+    columns = get_kanban_columns_by_guidance(db, guidance_id)
+    valid_slugs = {c.slug for c in columns}
+    tasks = (
+        db.query(models.Task)
+        .filter(models.Task.guidance_id == guidance_id)
+        .order_by(models.Task.order.asc(), models.Task.id.asc())
+        .all()
+    )
+
+    needs_commit = False
+    if columns:
+        first_slug = columns[0].slug
+        for t in tasks:
+            if t.status not in valid_slugs:
+                t.status = first_slug
+                needs_commit = True
+    if needs_commit:
+        db.commit()
+        for t in tasks:
+            db.refresh(t)
+
+    return tasks
 
 def update_task(db: Session, task_id: int, task_data: dict):
     task = get_task_by_id(db, task_id)
