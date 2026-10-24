@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Plus, User, LogOut } from 'lucide-react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Plus, User, LogOut, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import type { StudentGuidance, DashboardStats } from '../types';
@@ -19,6 +19,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'in_progress' | 'completed' | 'pending_meetings'>('all');
 
   const loadDashboard = useCallback(async () => {
     try {
@@ -54,6 +56,30 @@ export default function Dashboard() {
     navigate('/');
   };
 
+  const filteredGuidances = useMemo(() => {
+    return guidances.filter((g) => {
+      const summary = stats?.guidances_summary?.[String(g.id)];
+      const matchesSearch =
+        searchQuery.trim() === '' ||
+        g.student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        g.theme.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (!matchesSearch) return false;
+
+      if (activeFilter === 'completed') {
+        return (summary?.progress ?? 0) === 100;
+      }
+      if (activeFilter === 'in_progress') {
+        return (summary?.progress ?? 0) < 100;
+      }
+      if (activeFilter === 'pending_meetings') {
+        return (summary?.pending_meetings ?? 0) > 0;
+      }
+
+      return true;
+    });
+  }, [guidances, stats, searchQuery, activeFilter]);
+
   if (loading) {
     return <LoadingSpinner fullScreen message="Carregando painel de orientações..." />;
   }
@@ -67,7 +93,7 @@ export default function Dashboard() {
               Dashboard de Orientação
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Visão geral do progresso acadêmico dos seus orientandos
+              Visão geral integrada com os fluxos e quadros Kanban dos seus orientandos
             </p>
           </div>
 
@@ -110,8 +136,75 @@ export default function Dashboard() {
         </section>
 
         <section aria-label="Orientações ativas" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-800">Suas Orientações ({guidances.length})</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">Suas Orientações ({guidances.length})</h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Acompanhe o progresso do Kanban e as reuniões de cada estudante
+              </p>
+            </div>
+
+            {guidances.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="relative">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar aluno ou tema..."
+                    className="pl-9 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 w-full sm:w-56 shadow-sm"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-gray-200 shadow-sm text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter('all')}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                      activeFilter === 'all'
+                        ? 'bg-blue-50 text-blue-700 font-semibold'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter('in_progress')}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                      activeFilter === 'in_progress'
+                        ? 'bg-blue-50 text-blue-700 font-semibold'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Em Andamento
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter('completed')}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                      activeFilter === 'completed'
+                        ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Concluídos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter('pending_meetings')}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                      activeFilter === 'pending_meetings'
+                        ? 'bg-amber-50 text-amber-700 font-semibold'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Reuniões
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {guidances.length === 0 ? (
@@ -123,10 +216,28 @@ export default function Dashboard() {
                 onClick: () => setIsLinkModalOpen(true),
               }}
             />
+          ) : filteredGuidances.length === 0 ? (
+            <div className="p-8 bg-white rounded-2xl border border-gray-100 text-center space-y-2">
+              <p className="text-sm font-medium text-gray-700">Nenhuma orientação encontrada com os filtros atuais.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setActiveFilter('all');
+                }}
+                className="text-xs text-blue-600 hover:underline font-semibold"
+              >
+                Limpar filtros de busca
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {guidances.map((guidance) => (
-                <GuidanceCard key={guidance.id} guidance={guidance} />
+              {filteredGuidances.map((guidance) => (
+                <GuidanceCard
+                  key={guidance.id}
+                  guidance={guidance}
+                  summary={stats?.guidances_summary?.[String(guidance.id)]}
+                />
               ))}
             </div>
           )}

@@ -127,18 +127,50 @@ export interface DashboardTaskStat {
   name: string;
   value: number;
   color: string;
+  slug?: string;
 }
 
 export interface StudentRanking {
   name: string;
   progress: number;
+  id?: number;
+  guidance_id?: number;
+  full_name?: string;
+  theme?: string;
+  total_tasks?: number;
+  completed_tasks?: number;
+}
+
+export interface GuidanceColumnSummary {
+  title: string;
+  slug: string;
+  color: string;
+  task_count: number;
+}
+
+export interface GuidanceKanbanSummary {
+  guidance_id: number;
+  total_tasks: number;
+  completed_tasks: number;
+  in_progress_tasks: number;
+  pending_tasks: number;
+  progress: number;
+  pending_meetings: number;
+  confirmed_meetings: number;
+  columns?: GuidanceColumnSummary[];
 }
 
 export interface DashboardStats {
   total_students: number;
   pending_meetings: number;
+  confirmed_meetings?: number;
+  total_tasks?: number;
+  completed_tasks?: number;
+  in_progress_tasks?: number;
+  overall_progress?: number;
   task_stats: DashboardTaskStat[];
   student_ranking: StudentRanking[];
+  guidances_summary?: Record<string, GuidanceKanbanSummary>;
 }
 
 export interface LoginResponse {
