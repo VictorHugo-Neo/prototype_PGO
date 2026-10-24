@@ -45,6 +45,8 @@ export default function StudentDetails() {
     handleDeleteColumn,
     handleMoveColumn,
     handleRequestMeeting,
+    handleUpdateMeeting,
+    handleDeleteMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
     handleDownloadReport,
@@ -123,6 +125,8 @@ export default function StudentDetails() {
         onCloseMeetings={() => setIsMeetingModalOpen(false)}
         onRequestMeeting={handleRequestMeeting}
         onUpdateMeetingStatus={handleUpdateMeetingStatus}
+        onUpdateMeeting={handleUpdateMeeting}
+        onDeleteMeeting={handleDeleteMeeting}
         onCloseCrop={() => {
           setIsCropModalOpen(false);
           setImageSrc(null);

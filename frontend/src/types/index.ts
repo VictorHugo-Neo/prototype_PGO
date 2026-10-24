@@ -90,6 +90,12 @@ export interface Meeting {
   created_at?: string;
 }
 
+export interface MeetingUpdatePayload {
+  date?: string;
+  topic?: string;
+  status?: MeetingStatus;
+}
+
 export interface Notification {
   id: number;
   message: string;

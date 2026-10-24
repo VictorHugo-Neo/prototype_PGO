@@ -13,6 +13,7 @@ import type {
   Notification,
   Meeting,
   MeetingStatus,
+  MeetingUpdatePayload,
   DashboardStats,
   KanbanColumn,
   KanbanColumnCreatePayload,
@@ -221,9 +222,23 @@ export const meetingService = {
     return response.data;
   },
 
+  getById: async (meetingId: number): Promise<Meeting> => {
+    const response = await api.get<Meeting>(`/meetings/${meetingId}`);
+    return response.data;
+  },
+
+  update: async (meetingId: number, data: MeetingUpdatePayload): Promise<Meeting> => {
+    const response = await api.put<Meeting>(`/meetings/${meetingId}`, data);
+    return response.data;
+  },
+
   updateStatus: async (id: number, status: MeetingStatus): Promise<Meeting> => {
     const response = await api.patch<Meeting>(`/meetings/${id}/status`, { status });
     return response.data;
+  },
+
+  delete: async (meetingId: number): Promise<void> => {
+    await api.delete(`/meetings/${meetingId}`);
   },
 };
 

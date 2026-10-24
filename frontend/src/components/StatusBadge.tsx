@@ -5,9 +5,10 @@ type AnyStatus = TaskStatus | MeetingStatus | 'ativo' | 'atrasado' | 'concluido'
 
 interface StatusBadgeProps {
   status: AnyStatus;
+  label?: string;
 }
 
-export function StatusBadge({ status }: StatusBadgeProps) {
+export function StatusBadge({ status, label: customLabel }: StatusBadgeProps) {
   const configs: Record<
     string,
     { label: string; className: string; icon: React.ReactNode }
@@ -70,7 +71,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}
     >
       {config.icon}
-      {config.label}
+      {customLabel || config.label}
     </span>
   );
 }

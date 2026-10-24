@@ -239,3 +239,60 @@ def authenticate_user(db: Session, email: str, password: str):
         return False
     
     return user
+
+
+def create_meeting(db: Session, meeting: schemas.MeetingCreate):
+    db_meeting = models.Meeting(
+        date=meeting.date,
+        topic=meeting.topic,
+        guidance_id=meeting.guidance_id,
+        status="pending"
+    )
+    db.add(db_meeting)
+    db.commit()
+    db.refresh(db_meeting)
+    return db_meeting
+
+
+def get_meeting_by_id(db: Session, meeting_id: int):
+    return db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+
+
+def get_meetings_by_guidance(db: Session, guidance_id: int):
+    return (
+        db.query(models.Meeting)
+        .filter(models.Meeting.guidance_id == guidance_id)
+        .order_by(models.Meeting.date.asc())
+        .all()
+    )
+
+
+def update_meeting(db: Session, meeting_id: int, meeting_data: dict):
+    meeting = get_meeting_by_id(db, meeting_id)
+    if not meeting:
+        return None
+    for field, value in meeting_data.items():
+        if value is not None:
+            setattr(meeting, field, value)
+    db.commit()
+    db.refresh(meeting)
+    return meeting
+
+
+def update_meeting_status(db: Session, meeting_id: int, status: str):
+    meeting = get_meeting_by_id(db, meeting_id)
+    if not meeting:
+        return None
+    meeting.status = status
+    db.commit()
+    db.refresh(meeting)
+    return meeting
+
+
+def delete_meeting(db: Session, meeting_id: int):
+    meeting = get_meeting_by_id(db, meeting_id)
+    if not meeting:
+        return False
+    db.delete(meeting)
+    db.commit()
+    return True

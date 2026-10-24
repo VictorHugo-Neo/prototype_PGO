@@ -3,6 +3,7 @@ import type {
   Comment,
   Attachment,
   Meeting,
+  MeetingUpdatePayload,
   TaskStatus,
   TaskUpdatePayload,
   KanbanColumn,
@@ -40,6 +41,8 @@ interface GuidanceModalsProps {
   onCloseMeetings: () => void;
   onRequestMeeting: (date: string, topic: string) => Promise<void>;
   onUpdateMeetingStatus: (meetingId: number, status: 'confirmed' | 'rejected') => Promise<void>;
+  onUpdateMeeting: (meetingId: number, data: MeetingUpdatePayload) => Promise<Meeting | void>;
+  onDeleteMeeting: (meetingId: number) => Promise<void>;
   onCloseCrop: () => void;
   onSaveCrop: (croppedBlob: Blob) => Promise<void>;
 }
@@ -67,6 +70,8 @@ export function GuidanceModals({
   onCloseMeetings,
   onRequestMeeting,
   onUpdateMeetingStatus,
+  onUpdateMeeting,
+  onDeleteMeeting,
   onCloseCrop,
   onSaveCrop,
 }: GuidanceModalsProps) {
@@ -102,6 +107,8 @@ export function GuidanceModals({
         isAdvisor={isAdvisor}
         onRequestMeeting={onRequestMeeting}
         onUpdateStatus={onUpdateMeetingStatus}
+        onUpdateMeeting={onUpdateMeeting}
+        onDeleteMeeting={onDeleteMeeting}
       />
 
       <CropPhotoModal

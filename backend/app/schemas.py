@@ -167,12 +167,18 @@ class MeetingCreate(BaseModel):
 class MeetingUpdateStatus(BaseModel):
     status: str 
 
+class MeetingUpdate(BaseModel):
+    date: Optional[datetime] = None
+    topic: Optional[str] = None
+    status: Optional[str] = None
+
 class MeetingResponse(BaseModel):
     id: int
     date: datetime
     topic: str
     status: str
     created_at: datetime
+    guidance_id: Optional[int] = None
     
     model_config = ConfigDict(from_attributes=True)
 

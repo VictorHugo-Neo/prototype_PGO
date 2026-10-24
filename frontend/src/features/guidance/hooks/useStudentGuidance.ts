@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
-import type { Task, Comment, Attachment, Meeting, StudentGuidance, TaskStatus, TaskUpdatePayload, KanbanColumn, KanbanColumnUpdatePayload } from '../../../types';
+import type { Task, Comment, Attachment, Meeting, MeetingUpdatePayload, StudentGuidance, TaskStatus, TaskUpdatePayload, KanbanColumn, KanbanColumnUpdatePayload } from '../../../types';
 import {
   guidanceService,
   taskService,
@@ -268,16 +268,47 @@ export function useStudentGuidance(id?: string) {
   const handleRequestMeeting = async (date: string, topic: string) => {
     if (!id) return;
     try {
-      await meetingService.create({
+      const created = await meetingService.create({
         date,
         topic,
         guidance_id: Number(id),
       });
-      const updated = await meetingService.getByGuidance(id);
-      setMeetings(updated);
+      setMeetings((prev) =>
+        [...prev, created].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      );
       alert('Solicitação de reunião enviada!');
     } catch {
       alert('Erro ao solicitar reunião.');
+    }
+  };
+
+  const handleUpdateMeeting = async (
+    meetingId: number,
+    data: MeetingUpdatePayload
+  ) => {
+    try {
+      const updated = await meetingService.update(meetingId, data);
+      setMeetings((prev) =>
+        prev
+          .map((m) => (m.id === meetingId ? updated : m))
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      );
+      return updated;
+    } catch (error) {
+      console.error('Erro ao atualizar reunião:', error);
+      alert('Erro ao atualizar reunião.');
+      throw error;
+    }
+  };
+
+  const handleDeleteMeeting = async (meetingId: number) => {
+    try {
+      await meetingService.delete(meetingId);
+      setMeetings((prev) => prev.filter((m) => m.id !== meetingId));
+    } catch (error) {
+      console.error('Erro ao excluir reunião:', error);
+      alert('Erro ao excluir reunião.');
+      throw error;
     }
   };
 
@@ -391,6 +422,8 @@ export function useStudentGuidance(id?: string) {
     handleReorderColumns,
     handleMoveColumn,
     handleRequestMeeting,
+    handleUpdateMeeting,
+    handleDeleteMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
     handleDownloadReport,
