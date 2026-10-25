@@ -1,6 +1,6 @@
 import re
 import unicodedata
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from . import models, schemas, security
 from .security import get_password_hash
 
@@ -27,10 +27,14 @@ def create_guidance(db: Session, guidance_date: dict):
     db.refresh(db_guidance)
     return db_guidance
 
-def create_task(db: Session, task: schemas.TaskCreate):
+def create_task(db: Session, task: schemas.TaskCreate, creator_id: int | None = None):
     columns = get_kanban_columns_by_guidance(db, task.guidance_id)
     valid_slugs = {c.slug for c in columns}
     task_dict = task.model_dump()
+    if creator_id is not None:
+        task_dict["creator_id"] = creator_id
+    elif task_dict.get("creator_id") is None and getattr(task, "creator_id", None) is not None:
+        task_dict["creator_id"] = task.creator_id
     if task_dict.get("status") not in valid_slugs and columns:
         task_dict["status"] = columns[0].slug
     db_task = models.Task(**task_dict)
@@ -40,13 +44,19 @@ def create_task(db: Session, task: schemas.TaskCreate):
     return db_task
 
 def get_task_by_id(db: Session, task_id: int):
-    return db.query(models.Task).filter(models.Task.id == task_id).first()
+    return (
+        db.query(models.Task)
+        .options(joinedload(models.Task.creator))
+        .filter(models.Task.id == task_id)
+        .first()
+    )
 
 def get_task_by_guidance(db: Session, guidance_id: int):
     columns = get_kanban_columns_by_guidance(db, guidance_id)
     valid_slugs = {c.slug for c in columns}
     tasks = (
         db.query(models.Task)
+        .options(joinedload(models.Task.creator))
         .filter(models.Task.guidance_id == guidance_id)
         .order_by(models.Task.order.asc(), models.Task.id.asc())
         .all()

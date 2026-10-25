@@ -43,6 +43,7 @@ class UserSimple(BaseModel):
     id: int
     name: str
     email: str
+    type: Optional[str] = None
     avatar_path: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -78,11 +79,14 @@ class GuidanceList(BaseModel):
 class TaskCreate(TaskBase):
     guidance_id: int
     status: Optional[str] = "pending"
+    creator_id: Optional[int] = None
 
 class TaskResponse(TaskBase):
     id: int
     guidance_id: int
     status: str
+    creator_id: Optional[int] = None
+    creator: Optional[UserSimple] = None
     model_config = ConfigDict(from_attributes=True)
 
 class TaskUpdate(BaseModel):

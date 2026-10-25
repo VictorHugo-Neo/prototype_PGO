@@ -65,7 +65,15 @@ def _build_column_tasks_table(
                 clean_desc = clean_desc[:97] + "..."
             desc_snippet = f"<br/><font size='7' color='#64748B'>{clean_desc}</font>"
 
-        title_html = f"<b>{t.title}</b>{desc_snippet}"
+        creator_tag = ""
+        if getattr(t, "creator", None):
+            c_type = getattr(t.creator, "type", None)
+            if c_type in (models.TypeUser.ADVISOR, "advisor"):
+                creator_tag = " <font size='7' color='#7C3AED'><b>[Orientador]</b></font>"
+            elif c_type in (models.TypeUser.STUDENT, "student"):
+                creator_tag = " <font size='7' color='#059669'><b>[Aluno]</b></font>"
+
+        title_html = f"<b>{t.title}</b>{creator_tag}{desc_snippet}"
         deadline_html = format_date(t.time_estimate, include_time=False)
         if t.time_estimate and t.time_estimate < now and col.slug != completed_slug:
             deadline_html += " <font color='#B91C1C'><b>(Atrasada)</b></font>"

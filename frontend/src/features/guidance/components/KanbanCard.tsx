@@ -1,4 +1,4 @@
-import { Calendar } from 'lucide-react';
+import { Calendar, GraduationCap, User } from 'lucide-react';
 import { Draggable } from '@hello-pangea/dnd';
 import type { Task } from '../../../types';
 
@@ -9,6 +9,9 @@ interface KanbanCardProps {
 }
 
 export function KanbanCard({ task, index, onClick }: KanbanCardProps) {
+  const isAdvisor = task.creator?.type === 'advisor';
+  const isStudent = task.creator?.type === 'student';
+
   return (
     <Draggable draggableId={String(task.id)} index={index}>
       {(provided, snapshot) => (
@@ -29,6 +32,31 @@ export function KanbanCard({ task, index, onClick }: KanbanCardProps) {
             }
           }}
         >
+          {task.creator && (
+            <div className="mb-2">
+              {isAdvisor && (
+                <span
+                  data-testid="badge-advisor"
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200/80"
+                  title={`Criada pelo orientador: ${task.creator.name}`}
+                >
+                  <GraduationCap size={11} aria-hidden="true" />
+                  Orientador
+                </span>
+              )}
+              {isStudent && (
+                <span
+                  data-testid="badge-student"
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                  title={`Criada pelo aluno: ${task.creator.name}`}
+                >
+                  <User size={11} aria-hidden="true" />
+                  Aluno
+                </span>
+              )}
+            </div>
+          )}
+
           <h4 className="font-medium text-gray-800 break-words line-clamp-2">{task.title}</h4>
           {task.description && (
             <p className="text-xs text-gray-500 mt-2 line-clamp-2">{task.description}</p>

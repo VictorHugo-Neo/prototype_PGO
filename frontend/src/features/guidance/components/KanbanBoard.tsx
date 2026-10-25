@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Clock, PlayCircle, CheckCircle, Plus, KanbanSquare, Loader2, X } from 'lucide-react';
+import {
+  Clock,
+  PlayCircle,
+  CheckCircle,
+  Plus,
+  KanbanSquare,
+  Loader2,
+  X,
+  Filter,
+  GraduationCap,
+  User,
+} from 'lucide-react';
 import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import type { Task, TaskStatus, KanbanColumn as KanbanColumnItem, KanbanColumnUpdatePayload } from '../../../types';
 import { KanbanColumn } from './KanbanColumn';
@@ -58,6 +69,16 @@ export function KanbanBoard({
 
   const [editingColumn, setEditingColumn] = useState<KanbanColumnItem | null>(null);
   const [deletingColumn, setDeletingColumn] = useState<KanbanColumnItem | null>(null);
+  const [creatorFilter, setCreatorFilter] = useState<'all' | 'advisor' | 'student'>('all');
+
+  const countAdvisor = tasks.filter((t) => t.creator?.type === 'advisor').length;
+  const countStudent = tasks.filter((t) => t.creator?.type === 'student').length;
+
+  const filteredTasks = tasks.filter((t) => {
+    if (creatorFilter === 'advisor') return t.creator?.type === 'advisor';
+    if (creatorFilter === 'student') return t.creator?.type === 'student';
+    return true;
+  });
 
   const displayColumns = columns && columns.length > 0 ? columns : DEFAULT_COLUMNS;
 
@@ -94,27 +115,75 @@ export function KanbanBoard({
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex-1 overflow-x-auto p-6">
-        <div className="flex items-start gap-6 min-h-full pb-4">
-          {displayColumns.map((col, index) => (
-            <KanbanColumn
-              key={col.id || col.slug}
-              id={col.slug}
-              column={col}
-              tasks={tasks.filter((t) => t.status === col.slug)}
-              color={col.color || 'bg-gray-100'}
-              icon={getColumnIcon(col.slug)}
-              onClickTask={onTaskClick}
-              onOpenCreateTask={onOpenCreateTask}
-              isAdvisor={isAdvisor}
-              canMoveLeft={index > 0}
-              canMoveRight={index < displayColumns.length - 1}
-              onEditColumn={onUpdateColumn ? () => setEditingColumn(col) : undefined}
-              onDeleteColumn={onDeleteColumn ? () => setDeletingColumn(col) : undefined}
-              onMoveColumnLeft={onMoveColumn ? handleMoveLeft : undefined}
-              onMoveColumnRight={onMoveColumn ? handleMoveRight : undefined}
-            />
-          ))}
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="px-6 pt-4 pb-1 flex flex-wrap items-center justify-between gap-3">
+          <div
+            role="toolbar"
+            aria-label="Filtrar tarefas por autor"
+            className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-xl text-xs font-medium text-gray-600"
+          >
+            <span className="text-gray-400 px-2 flex items-center gap-1 font-medium">
+              <Filter size={13} aria-hidden="true" /> Origem:
+            </span>
+            <button
+              type="button"
+              onClick={() => setCreatorFilter('all')}
+              className={`px-3 py-1 rounded-lg transition-all ${
+                creatorFilter === 'all'
+                  ? 'bg-white text-gray-800 font-semibold shadow-xs'
+                  : 'hover:text-gray-900 text-gray-600'
+              }`}
+            >
+              Todas ({tasks.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setCreatorFilter('advisor')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all ${
+                creatorFilter === 'advisor'
+                  ? 'bg-white text-purple-700 font-semibold shadow-xs ring-1 ring-purple-200'
+                  : 'hover:text-purple-700 text-gray-600'
+              }`}
+            >
+              <GraduationCap size={13} className="text-purple-600" aria-hidden="true" />
+              Orientador ({countAdvisor})
+            </button>
+            <button
+              type="button"
+              onClick={() => setCreatorFilter('student')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all ${
+                creatorFilter === 'student'
+                  ? 'bg-white text-emerald-700 font-semibold shadow-xs ring-1 ring-emerald-200'
+                  : 'hover:text-emerald-700 text-gray-600'
+              }`}
+            >
+              <User size={13} className="text-emerald-600" aria-hidden="true" />
+              Aluno ({countStudent})
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-x-auto p-6 pt-3">
+          <div className="flex items-start gap-6 min-h-full pb-4">
+            {displayColumns.map((col, index) => (
+              <KanbanColumn
+                key={col.id || col.slug}
+                id={col.slug}
+                column={col}
+                tasks={filteredTasks.filter((t) => t.status === col.slug)}
+                color={col.color || 'bg-gray-100'}
+                icon={getColumnIcon(col.slug)}
+                onClickTask={onTaskClick}
+                onOpenCreateTask={onOpenCreateTask}
+                isAdvisor={isAdvisor}
+                canMoveLeft={index > 0}
+                canMoveRight={index < displayColumns.length - 1}
+                onEditColumn={onUpdateColumn ? () => setEditingColumn(col) : undefined}
+                onDeleteColumn={onDeleteColumn ? () => setDeletingColumn(col) : undefined}
+                onMoveColumnLeft={onMoveColumn ? handleMoveLeft : undefined}
+                onMoveColumnRight={onMoveColumn ? handleMoveRight : undefined}
+              />
+            ))}
 
           {isAdvisor && onAddColumn && (
             <div className="w-80 min-w-[20rem] flex-shrink-0">
@@ -213,6 +282,7 @@ export function KanbanBoard({
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {onUpdateColumn && (

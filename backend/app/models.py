@@ -74,8 +74,10 @@ class Task(Base):
     status = Column(String, default="pending")
     order = Column(Integer, default = 0)
     guidance_id = Column(Integer, ForeignKey("guidances.id"))
+    creator_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     guidance = relationship("Guidance",back_populates="tasks")
+    creator = relationship("User", foreign_keys=[creator_id])
     comments = relationship("Comment", back_populates="task", order_by="Comment.created_at", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="task", cascade="all, delete-orphan")
     

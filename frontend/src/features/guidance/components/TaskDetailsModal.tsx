@@ -11,6 +11,8 @@ import {
   Calendar,
   AlertTriangle,
   Check,
+  GraduationCap,
+  User,
 } from 'lucide-react';
 import type { Task, Comment, Attachment, TaskStatus, TaskUpdatePayload, KanbanColumn } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
@@ -177,6 +179,28 @@ export function TaskDetailsModal({
                     <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-white border border-gray-200 px-2 py-1 rounded">
                       <Calendar size={13} className="text-blue-600" aria-hidden="true" />
                       <span>{new Date(task.time_estimate).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                  )}
+
+                  {task.creator && (
+                    <div
+                      data-testid="task-creator-info"
+                      className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded font-medium border ${
+                        task.creator.type === 'advisor'
+                          ? 'bg-purple-50 text-purple-700 border-purple-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}
+                      title={task.creator.email ? `E-mail: ${task.creator.email}` : undefined}
+                    >
+                      {task.creator.type === 'advisor' ? (
+                        <GraduationCap size={13} className="text-purple-600" aria-hidden="true" />
+                      ) : (
+                        <User size={13} className="text-emerald-600" aria-hidden="true" />
+                      )}
+                      <span>
+                        Criada por:{' '}
+                        <strong className="text-gray-800">{task.creator.name}</strong> ({task.creator.type === 'advisor' ? 'Orientador' : 'Aluno'})
+                      </span>
                     </div>
                   )}
                 </div>

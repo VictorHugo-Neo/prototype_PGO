@@ -39,6 +39,14 @@ export interface User {
   created_at?: string;
 }
 
+export interface TaskCreator {
+  id: number;
+  name: string;
+  email: string;
+  type?: UserType;
+  avatar_path?: string;
+}
+
 export interface Task {
   id: number;
   title: string;
@@ -47,6 +55,8 @@ export interface Task {
   order?: number;
   guidance_id: number;
   time_estimate?: string;
+  creator_id?: number | null;
+  creator?: TaskCreator | null;
 }
 
 export interface TaskCreatePayload {
@@ -55,6 +65,7 @@ export interface TaskCreatePayload {
   guidance_id: number;
   time_estimate?: string;
   status?: TaskStatus;
+  creator_id?: number;
 }
 
 export interface TaskUpdatePayload {

@@ -53,7 +53,7 @@ def create_task(
     if not guidance:
         raise HTTPException(status_code=404, detail="Orientação não encontrada")
     verify_guidance_access(guidance, current_user.id)
-    return crud.create_task(db, task)
+    return crud.create_task(db, task, creator_id=current_user.id)
 
 
 @router.put("/{task_id}", response_model=schemas.TaskResponse)
