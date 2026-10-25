@@ -22,12 +22,14 @@ export default function StudentDetails() {
     isCreateModalOpen,
     createTaskStatus,
     isMeetingModalOpen,
+    isDefenseModalOpen,
     imageSrc,
     isCropModalOpen,
     imgError,
     setSelectedTask,
     setIsCreateModalOpen,
     setIsMeetingModalOpen,
+    setIsDefenseModalOpen,
     setIsCropModalOpen,
     setImageSrc,
     setImgError,
@@ -49,6 +51,8 @@ export default function StudentDetails() {
     handleDeleteMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
+    handleSaveDefenseDate,
+    handleDeleteDefenseDate,
     handleDownloadReport,
     handlePreviewReport,
     isGeneratingPdf,
@@ -81,6 +85,8 @@ export default function StudentDetails() {
         onImgError={() => setImgError(true)}
         onFileChange={handleFileChange}
         onUpdateDefenseDate={handleUpdateDefenseDate}
+        onOpenDefenseModal={() => setIsDefenseModalOpen(true)}
+        onDeleteDefenseDate={handleDeleteDefenseDate}
         onOpenMeetingsModal={() => setIsMeetingModalOpen(true)}
         onDownloadReport={handleDownloadReport}
         onPreviewReport={handlePreviewReport}
@@ -114,6 +120,10 @@ export default function StudentDetails() {
         isAdvisor={isAdvisor}
         imageSrc={imageSrc}
         isCropModalOpen={isCropModalOpen}
+        isDefenseModalOpen={isDefenseModalOpen}
+        guidanceDefenseDate={guidance.defense_date}
+        studentName={guidance.student.name}
+        guidanceTheme={guidance.theme}
         onCloseTaskDetails={() => setSelectedTask(null)}
         onUpdateTaskStatus={handleStatusChange}
         onUpdateTask={handleUpdateTask}
@@ -132,6 +142,9 @@ export default function StudentDetails() {
           setImageSrc(null);
         }}
         onSaveCrop={handleSaveCrop}
+        onCloseDefenseModal={() => setIsDefenseModalOpen(false)}
+        onSaveDefenseDate={handleSaveDefenseDate}
+        onDeleteDefenseDate={handleDeleteDefenseDate}
       />
     </div>
   );

@@ -134,9 +134,21 @@ export const guidanceService = {
 
   update: async (
     id: number,
-    data: { defense_date?: string; theme?: string }
+    data: { defense_date?: string | null; theme?: string }
   ): Promise<StudentGuidance> => {
     const response = await api.patch<StudentGuidance>(`/guidances/${id}`, data);
+    return response.data;
+  },
+
+  setDefenseDate: async (id: number, defenseDate: string): Promise<StudentGuidance> => {
+    const response = await api.put<StudentGuidance>(`/guidances/${id}/defense-date`, {
+      defense_date: defenseDate,
+    });
+    return response.data;
+  },
+
+  removeDefenseDate: async (id: number): Promise<StudentGuidance> => {
+    const response = await api.delete<StudentGuidance>(`/guidances/${id}/defense-date`);
     return response.data;
   },
 };
@@ -286,7 +298,6 @@ export const reportService = {
     const blob = new Blob([response.data], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     window.open(url, '_blank');
-    // Delay de 15s para garantir que o visualizador nativo do navegador carregue o blob antes do revoke
     setTimeout(() => {
       window.URL.revokeObjectURL(url);
     }, 15000);

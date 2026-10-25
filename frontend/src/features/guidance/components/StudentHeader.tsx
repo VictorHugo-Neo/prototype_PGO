@@ -11,6 +11,10 @@ import {
   ChevronDown,
   Download,
   ExternalLink,
+  GraduationCap,
+  Clock,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import type { StudentGuidance } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
@@ -23,11 +27,59 @@ interface StudentHeaderProps {
   isGeneratingPdf?: boolean;
   onImgError: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onUpdateDefenseDate: (date: string) => Promise<void>;
+  onUpdateDefenseDate?: (date: string) => Promise<void>;
+  onOpenDefenseModal?: () => void;
+  onDeleteDefenseDate?: () => Promise<void>;
   onOpenMeetingsModal: () => void;
   onDownloadReport: () => void;
   onPreviewReport?: () => void;
   onOpenCreateTaskModal: () => void;
+}
+
+function getDefenseDateMeta(defenseDate?: string | null) {
+  if (!defenseDate) return null;
+  const d = new Date(defenseDate);
+  if (isNaN(d.getTime())) return null;
+
+  const dateFormatted = d.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  const timeFormatted = d.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const target = new Date(d);
+  target.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  let badgeText = '';
+  let badgeClass = '';
+
+  if (diffDays < 0) {
+    badgeText = 'Realizada';
+    badgeClass = 'bg-gray-100 text-gray-600 border border-gray-200';
+  } else if (diffDays === 0) {
+    badgeText = 'Hoje!';
+    badgeClass = 'bg-purple-100 text-purple-700 border border-purple-200 font-bold';
+  } else if (diffDays <= 7) {
+    badgeText = `Faltam ${diffDays}d`;
+    badgeClass = 'bg-amber-100 text-amber-800 border border-amber-200 font-bold';
+  } else {
+    badgeText = `Em ${diffDays}d`;
+    badgeClass = 'bg-blue-100 text-blue-700 border border-blue-200';
+  }
+
+  return {
+    dateFormatted,
+    timeFormatted,
+    badgeText,
+    badgeClass,
+  };
 }
 
 export function StudentHeader({
@@ -38,7 +90,8 @@ export function StudentHeader({
   isGeneratingPdf = false,
   onImgError,
   onFileChange,
-  onUpdateDefenseDate,
+  onOpenDefenseModal,
+  onDeleteDefenseDate,
   onOpenMeetingsModal,
   onDownloadReport,
   onPreviewReport,
@@ -46,6 +99,8 @@ export function StudentHeader({
 }: StudentHeaderProps) {
   const navigate = useNavigate();
   const isStudent = myUserId === guidance.student.id;
+  const isAdvisor = !isStudent || Boolean(guidance.advisor && myUserId === guidance.advisor.id);
+  const defenseMeta = getDefenseDateMeta(guidance.defense_date);
   const [isReportMenuOpen, setIsReportMenuOpen] = useState(false);
   const reportMenuRef = useRef<HTMLDivElement>(null);
 
@@ -133,25 +188,76 @@ export function StudentHeader({
               <p className="text-gray-500 text-xs mt-0.5 mb-1.5">
                 Tema: <span className="font-medium text-blue-600">{guidance.theme}</span>
               </p>
-              <div className="flex items-center gap-2 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100 w-fit">
-                <label
-                  htmlFor="defense-date-input"
-                  className="text-[11px] font-bold text-gray-500 uppercase flex items-center gap-1"
+              {defenseMeta ? (
+                <div
+                  data-testid="defense-date-badge"
+                  className="flex items-center gap-2.5 bg-white border border-gray-200 px-3 py-1.5 rounded-xl shadow-2xs w-fit"
                 >
-                  <Calendar size={12} aria-hidden="true" /> Banca:
-                </label>
-                <input
-                  id="defense-date-input"
-                  type="datetime-local"
-                  className="text-xs bg-transparent text-gray-700 focus:outline-none font-medium"
-                  value={
-                    guidance.defense_date
-                      ? new Date(guidance.defense_date).toISOString().slice(0, 16)
-                      : ''
-                  }
-                  onChange={(e) => onUpdateDefenseDate(e.target.value)}
-                />
-              </div>
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                    <GraduationCap size={15} aria-hidden="true" />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 leading-none">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        Banca:
+                      </span>
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${defenseMeta.badgeClass}`}>
+                        {defenseMeta.badgeText}
+                      </span>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-800 mt-1">
+                      {defenseMeta.dateFormatted} às {defenseMeta.timeFormatted}
+                    </span>
+                  </div>
+
+                  {isAdvisor && onOpenDefenseModal && (
+                    <div className="flex items-center gap-0.5 ml-2 pl-2 border-l border-gray-100">
+                      <button
+                        type="button"
+                        onClick={onOpenDefenseModal}
+                        data-testid="edit-defense-date-btn"
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        title="Reagendar data da banca"
+                        aria-label="Reagendar data da banca"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                      {onDeleteDefenseDate && (
+                        <button
+                          type="button"
+                          onClick={onDeleteDefenseDate}
+                          data-testid="delete-defense-date-btn"
+                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                          title="Desmarcar data da banca"
+                          aria-label="Desmarcar data da banca"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : isAdvisor && onOpenDefenseModal ? (
+                <button
+                  type="button"
+                  onClick={onOpenDefenseModal}
+                  data-testid="schedule-defense-btn"
+                  className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100/90 text-blue-700 hover:text-blue-800 border border-blue-200/80 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs group"
+                  title="Agendar data da apresentação da banca examinadora"
+                >
+                  <Calendar size={13} className="text-blue-600 group-hover:scale-110 transition-transform" aria-hidden="true" />
+                  <span>+ Agendar Data da Banca</span>
+                </button>
+              ) : (
+                <div
+                  data-testid="defense-date-pending"
+                  className="flex items-center gap-1.5 bg-gray-50 border border-gray-200/80 text-gray-500 px-3 py-1.5 rounded-xl text-xs font-medium w-fit"
+                  title="A data da banca examinadora ainda não foi definida pelo orientador"
+                >
+                  <Clock size={13} className="text-gray-400" aria-hidden="true" />
+                  <span>Banca: <strong className="font-semibold text-gray-600">A definir</strong></span>
+                </div>
+              )}
             </div>
           </div>
 

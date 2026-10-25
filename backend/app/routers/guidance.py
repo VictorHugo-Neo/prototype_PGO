@@ -120,11 +120,59 @@ def update_guidance(
         raise HTTPException(status_code=404, detail="Orientação não encontrada.")
 
     
-    if guidance_update.theme:
-        db_guidance.theme = guidance_update.theme
-    if guidance_update.defense_date:
-        db_guidance.defense_date = guidance_update.defense_date
+    update_data = guidance_update.model_dump(exclude_unset=True)
+    if "theme" in update_data and update_data["theme"] is not None:
+        db_guidance.theme = update_data["theme"]
+    if "defense_date" in update_data:
+        db_guidance.defense_date = update_data["defense_date"]
 
+    db.commit()
+    db.refresh(db_guidance)
+    return db_guidance
+
+
+@router.put("/{guidance_id}/defense-date", response_model=schemas.GuidanceList)
+def set_defense_date(
+    guidance_id: int,
+    payload: schemas.DefenseDateUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    if current_user.type != models.TypeUser.ADVISOR:
+        raise HTTPException(status_code=403, detail="Apenas orientadores podem alterar a data da banca.")
+
+    db_guidance = db.query(models.Guidance).filter(
+        models.Guidance.id == guidance_id,
+        models.Guidance.advisor_id == current_user.id
+    ).first()
+
+    if not db_guidance:
+        raise HTTPException(status_code=404, detail="Orientação não encontrada.")
+
+    db_guidance.defense_date = payload.defense_date
+    db.commit()
+    db.refresh(db_guidance)
+    return db_guidance
+
+
+@router.delete("/{guidance_id}/defense-date", response_model=schemas.GuidanceList)
+def remove_defense_date(
+    guidance_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    if current_user.type != models.TypeUser.ADVISOR:
+        raise HTTPException(status_code=403, detail="Apenas orientadores podem remover a data da banca.")
+
+    db_guidance = db.query(models.Guidance).filter(
+        models.Guidance.id == guidance_id,
+        models.Guidance.advisor_id == current_user.id
+    ).first()
+
+    if not db_guidance:
+        raise HTTPException(status_code=404, detail="Orientação não encontrada.")
+
+    db_guidance.defense_date = None
     db.commit()
     db.refresh(db_guidance)
     return db_guidance

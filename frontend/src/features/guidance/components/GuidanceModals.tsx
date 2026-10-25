@@ -12,6 +12,7 @@ import { TaskDetailsModal } from './TaskDetailsModal';
 import { CreateTaskModal } from './CreateTaskModal';
 import { MeetingsModal } from './MeetingsModal';
 import { CropPhotoModal } from './CropPhotoModal';
+import { DefenseDateModal } from './DefenseDateModal';
 
 interface GuidanceModalsProps {
   selectedTask: Task | null;
@@ -25,6 +26,10 @@ interface GuidanceModalsProps {
   isAdvisor: boolean;
   imageSrc: string | null;
   isCropModalOpen: boolean;
+  isDefenseModalOpen?: boolean;
+  guidanceDefenseDate?: string | null;
+  studentName?: string;
+  guidanceTheme?: string;
   onCloseTaskDetails: () => void;
   onUpdateTaskStatus: (taskId: number, status: TaskStatus) => Promise<void>;
   onUpdateTask: (taskId: number, data: TaskUpdatePayload) => Promise<Task>;
@@ -45,6 +50,9 @@ interface GuidanceModalsProps {
   onDeleteMeeting: (meetingId: number) => Promise<void>;
   onCloseCrop: () => void;
   onSaveCrop: (croppedBlob: Blob) => Promise<void>;
+  onCloseDefenseModal?: () => void;
+  onSaveDefenseDate?: (dateIso: string) => Promise<void>;
+  onDeleteDefenseDate?: () => Promise<void>;
 }
 
 export function GuidanceModals({
@@ -74,6 +82,13 @@ export function GuidanceModals({
   onDeleteMeeting,
   onCloseCrop,
   onSaveCrop,
+  isDefenseModalOpen,
+  guidanceDefenseDate,
+  studentName,
+  guidanceTheme,
+  onCloseDefenseModal,
+  onSaveDefenseDate,
+  onDeleteDefenseDate,
 }: GuidanceModalsProps) {
   return (
     <>
@@ -117,6 +132,18 @@ export function GuidanceModals({
         onClose={onCloseCrop}
         onSaveCrop={onSaveCrop}
       />
+
+      {isDefenseModalOpen && onCloseDefenseModal && onSaveDefenseDate && onDeleteDefenseDate && (
+        <DefenseDateModal
+          isOpen={isDefenseModalOpen}
+          onClose={onCloseDefenseModal}
+          currentDate={guidanceDefenseDate}
+          studentName={studentName || ''}
+          theme={guidanceTheme || ''}
+          onSave={onSaveDefenseDate}
+          onDelete={onDeleteDefenseDate}
+        />
+      )}
     </>
   );
 }

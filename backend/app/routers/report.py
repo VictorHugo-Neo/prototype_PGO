@@ -14,7 +14,6 @@ router = APIRouter(prefix="/report", tags=["report"])
 def _build_content_disposition(student_name: str, preview: bool) -> str:
     clean_name = re.sub(r"[^\w\s-]", "", student_name).strip().replace(" ", "_")
     raw_filename = f"Relatorio_Orientacao_{clean_name}.pdf"
-    # RFC 5987 / RFC 6266: suporte a cabeçalhos ASCII e UTF-8 codificados.
     ascii_safe = raw_filename.encode("ascii", "ignore").decode("ascii") or "relatorio.pdf"
     encoded_utf8 = quote(raw_filename)
     disposition_type = "inline" if preview else "attachment"

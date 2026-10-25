@@ -47,14 +47,12 @@ def setup_guidance_data():
     db.commit()
     db.refresh(guidance)
 
-    # Seed kanban columns
     col_pending = models.KanbanColumn(guidance_id=guidance.id, title="A Fazer", slug="pending", order=0)
     col_progress = models.KanbanColumn(guidance_id=guidance.id, title="Em Andamento", slug="in_progress", order=1)
     col_done = models.KanbanColumn(guidance_id=guidance.id, title="Concluído", slug="completed", order=2)
     db.add_all([col_pending, col_progress, col_done])
     db.commit()
 
-    # Seed tasks
     task1 = models.Task(
         title="Elaboração do Cronograma e Referencial Teórico",
         description="Pesquisa e levantamento bibliográfico das principais referências.",
@@ -74,7 +72,6 @@ def setup_guidance_data():
     db.add_all([task1, task2])
     db.commit()
 
-    # Seed meeting
     meeting = models.Meeting(
         date=datetime(2026, 4, 10, 10, 0),
         topic="Alinhamento sobre metodologia e cronograma de entregas.",

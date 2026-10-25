@@ -132,13 +132,11 @@ def test_kanban_columns_reorder_and_migration():
 
     try:
         app.dependency_overrides[deps.get_current_user] = lambda: advisor
-        # 1. Get initial columns
         res_cols = client.get(f"/kanban/guidance/{guidance.id}/columns")
         cols = res_cols.json()
         assert len(cols) == 3
         col_ids = [c["id"] for c in cols]
 
-        # 2. Reorder columns: reverse order
         reversed_ids = list(reversed(col_ids))
         res_reorder = client.put(
             f"/kanban/guidance/{guidance.id}/columns/reorder",
@@ -148,7 +146,6 @@ def test_kanban_columns_reorder_and_migration():
         reordered = res_reorder.json()
         assert [c["id"] for c in reordered] == reversed_ids
 
-        # 3. Student cannot reorder columns
         app.dependency_overrides[deps.get_current_user] = lambda: student
         res_student_reorder = client.put(
             f"/kanban/guidance/{guidance.id}/columns/reorder",
@@ -156,7 +153,6 @@ def test_kanban_columns_reorder_and_migration():
         )
         assert res_student_reorder.status_code == 403
 
-        # 4. Student cannot update or delete column
         res_student_update = client.put(
             f"/kanban/columns/{col_ids[0]}",
             json={"title": "Hacked Title"}
@@ -166,7 +162,6 @@ def test_kanban_columns_reorder_and_migration():
         res_student_delete = client.delete(f"/kanban/columns/{col_ids[0]}")
         assert res_student_delete.status_code == 403
 
-        # 5. Advisor updates column with blank title -> 400
         app.dependency_overrides[deps.get_current_user] = lambda: advisor
         res_blank_title = client.put(
             f"/kanban/columns/{col_ids[0]}",
@@ -174,7 +169,6 @@ def test_kanban_columns_reorder_and_migration():
         )
         assert res_blank_title.status_code == 400
 
-        # 6. Create custom column with a task and test migration on delete
         res_custom = client.post(
             f"/kanban/guidance/{guidance.id}/columns",
             json={"title": "Testes de Integracao", "color": "bg-amber-50"}
@@ -184,7 +178,6 @@ def test_kanban_columns_reorder_and_migration():
         custom_col_id = custom_col["id"]
         custom_slug = custom_col["slug"]
 
-        # Create task in custom column
         res_task = client.post("/tasks/", json={
             "title": "Executar testes",
             "guidance_id": guidance.id,
@@ -193,23 +186,19 @@ def test_kanban_columns_reorder_and_migration():
         assert res_task.status_code == 200
         task_id = res_task.json()["id"]
 
-        # Target column is the first default column
         target_col_id = cols[0]["id"]
         target_slug = cols[0]["slug"]
 
-        # Delete with same column as target -> 400
         res_same_target = client.delete(
             f"/kanban/columns/{custom_col_id}?target_column_id={custom_col_id}"
         )
         assert res_same_target.status_code == 400
 
-        # Delete with target_column_id migrates tasks
         res_del_migrated = client.delete(
             f"/kanban/columns/{custom_col_id}?target_column_id={target_col_id}"
         )
         assert res_del_migrated.status_code == 204
 
-        # Verify task was migrated to target_slug
         res_task_check = client.get(f"/tasks/{task_id}")
         assert res_task_check.status_code == 200
         assert res_task_check.json()["status"] == target_slug

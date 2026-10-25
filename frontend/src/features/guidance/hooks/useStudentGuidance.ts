@@ -26,6 +26,7 @@ export function useStudentGuidance(id?: string) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createTaskStatus, setCreateTaskStatus] = useState<TaskStatus>('pending');
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
+  const [isDefenseModalOpen, setIsDefenseModalOpen] = useState(false);
 
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
@@ -326,13 +327,33 @@ export function useStudentGuidance(id?: string) {
     }
   };
 
-  const handleUpdateDefenseDate = async (defenseDate: string) => {
+  const handleSaveDefenseDate = async (defenseDate: string) => {
     if (!id || !guidance) return;
     try {
-      await guidanceService.update(Number(id), { defense_date: defenseDate });
-      setGuidance({ ...guidance, defense_date: defenseDate });
+      const updated = await guidanceService.setDefenseDate(Number(id), defenseDate);
+      setGuidance({ ...guidance, defense_date: updated.defense_date || defenseDate });
     } catch (error) {
-      console.error('Erro ao atualizar data da banca:', error);
+      console.error('Erro ao salvar data da banca:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteDefenseDate = async () => {
+    if (!id || !guidance) return;
+    try {
+      await guidanceService.removeDefenseDate(Number(id));
+      setGuidance({ ...guidance, defense_date: undefined });
+    } catch (error) {
+      console.error('Erro ao remover data da banca:', error);
+      throw error;
+    }
+  };
+
+  const handleUpdateDefenseDate = async (defenseDate: string) => {
+    if (!defenseDate) {
+      await handleDeleteDefenseDate();
+    } else {
+      await handleSaveDefenseDate(defenseDate);
     }
   };
 
@@ -397,12 +418,14 @@ export function useStudentGuidance(id?: string) {
     taskAttachments,
     isCreateModalOpen,
     isMeetingModalOpen,
+    isDefenseModalOpen,
     imageSrc,
     isCropModalOpen,
     imgError,
     setSelectedTask,
     setIsCreateModalOpen,
     setIsMeetingModalOpen,
+    setIsDefenseModalOpen,
     setIsCropModalOpen,
     setImageSrc,
     setImgError,
@@ -426,6 +449,8 @@ export function useStudentGuidance(id?: string) {
     handleDeleteMeeting,
     handleUpdateMeetingStatus,
     handleUpdateDefenseDate,
+    handleSaveDefenseDate,
+    handleDeleteDefenseDate,
     handleDownloadReport,
     handlePreviewReport,
     isGeneratingPdf,

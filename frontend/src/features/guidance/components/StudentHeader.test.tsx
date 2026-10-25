@@ -48,7 +48,6 @@ describe('StudentHeader - PDF Report Usability', () => {
     expect(reportBtn).toBeInTheDocument();
     expect(reportBtn).toHaveAttribute('aria-expanded', 'false');
 
-    // Abre o menu
     fireEvent.click(reportBtn);
     expect(reportBtn).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByRole('menuitem', { name: /visualizar relatório/i })).toBeInTheDocument();

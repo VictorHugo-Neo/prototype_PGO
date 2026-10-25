@@ -57,6 +57,9 @@ class GuidanceUpdate(BaseModel):
     theme: Optional[str] = None
     defense_date: Optional[datetime] = None
 
+class DefenseDateUpdate(BaseModel):
+    defense_date: datetime
+
 class GuidanceLink(BaseModel):
     student_email: EmailStr
     theme: str
