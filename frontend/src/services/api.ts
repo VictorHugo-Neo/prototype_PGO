@@ -9,6 +9,7 @@ import type {
   TaskUpdatePayload,
   Comment,
   StudentGuidance,
+  AvailableStudent,
   Attachment,
   Notification,
   Meeting,
@@ -124,11 +125,22 @@ export const guidanceService = {
     return response.data;
   },
 
-  linkStudent: async (email: string, theme: string): Promise<StudentGuidance> => {
-    const response = await api.post<StudentGuidance>('/guidances/link', {
+  getAvailableStudents: async (query?: string): Promise<AvailableStudent[]> => {
+    const response = await api.get<AvailableStudent[]>('/guidances/available-students', {
+      params: query ? { q: query } : undefined,
+    });
+    return response.data;
+  },
+
+  linkStudent: async (email: string, theme: string, defenseDate?: string): Promise<StudentGuidance> => {
+    const payload: { student_email: string; theme: string; defense_date?: string } = {
       student_email: email,
       theme,
-    });
+    };
+    if (defenseDate) {
+      payload.defense_date = defenseDate;
+    }
+    const response = await api.post<StudentGuidance>('/guidances/link', payload);
     return response.data;
   },
 

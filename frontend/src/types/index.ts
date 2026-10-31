@@ -115,6 +115,15 @@ export interface Notification {
   link?: string;
 }
 
+export interface AvailableStudent {
+  id: number;
+  name: string;
+  email: string;
+  avatar_path?: string;
+  is_already_linked: boolean;
+  active_theme?: string;
+}
+
 export interface StudentGuidance {
   id: number;
   theme: string;

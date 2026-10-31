@@ -63,10 +63,25 @@ class DefenseDateUpdate(BaseModel):
 class GuidanceLink(BaseModel):
     student_email: EmailStr
     theme: str
+    defense_date: Optional[datetime] = None
+
+class AvailableStudent(BaseModel):
+    id: int
+    name: str
+    email: str
+    avatar_path: Optional[str] = None
+    is_already_linked: bool = False
+    active_theme: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 class GuidanceResponse(BaseModel):
     id: int
     theme: str
+    defense_date: Optional[datetime] = None
+    advisor_id: Optional[int] = None
+    student_id: Optional[int] = None
+    student: Optional[UserSimple] = None
     model_config = ConfigDict(from_attributes=True)
 
 class GuidanceList(BaseModel):

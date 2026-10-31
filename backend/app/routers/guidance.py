@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from .. import crud, models, schemas, deps
 from ..database import get_db
 
@@ -40,6 +40,43 @@ def get_my_students(
     return guidances
 
 
+@router.get("/available-students", response_model=List[schemas.AvailableStudent])
+def get_available_students(
+    q: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    if current_user.type != models.TypeUser.ADVISOR:
+        raise HTTPException(status_code=403, detail="Apenas orientadores podem ver a lista de alunos disponíveis.")
+
+    my_guidances = db.query(models.Guidance).filter(
+        models.Guidance.advisor_id == current_user.id
+    ).all()
+    linked_map = {g.student_id: g.theme for g in my_guidances}
+
+    query = db.query(models.User).filter(models.User.type == models.TypeUser.STUDENT)
+    if q and q.strip():
+        term = f"%{q.strip()}%"
+        query = query.filter(
+            (models.User.name.ilike(term)) | (models.User.email.ilike(term))
+        )
+
+    students = query.order_by(models.User.name.asc()).all()
+
+    result = [
+        schemas.AvailableStudent(
+            id=s.id,
+            name=s.name,
+            email=s.email,
+            avatar_path=s.avatar_path,
+            is_already_linked=(s.id in linked_map),
+            active_theme=linked_map.get(s.id),
+        )
+        for s in students
+    ]
+    return result
+
+
 @router.post("/link", response_model=schemas.GuidanceResponse)
 def link_student_by_email(
     link_data: schemas.GuidanceLink,
@@ -66,13 +103,16 @@ def link_student_by_email(
 
     new_guidance = models.Guidance(
         theme=link_data.theme,
+        defense_date=link_data.defense_date,
         advisor_id=current_user.id,
         student_id=student.id
     )
     db.add(new_guidance)
     db.commit()
     db.refresh(new_guidance)
-    
+
+    crud.get_kanban_columns_by_guidance(db, new_guidance.id)
+
     return new_guidance
 
 
