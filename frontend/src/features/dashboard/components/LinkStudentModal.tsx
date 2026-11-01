@@ -206,7 +206,7 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
               <button
                 type="button"
                 onClick={handleClose}
-                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 aria-label="Fechar"
               >
                 <X size={20} />
@@ -284,7 +284,7 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
                       key={preset}
                       type="button"
                       onClick={() => handleApplyThemePreset(preset)}
-                      className="px-2 py-0.5 bg-gray-100 hover:bg-blue-50 hover:text-blue-700 text-gray-600 rounded-md text-[11px] font-medium transition-colors"
+                      className="px-2 py-0.5 bg-gray-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-transparent rounded-md text-[11px] font-medium transition-all cursor-pointer hover:scale-105 active:scale-95"
                     >
                       {preset}
                     </button>
@@ -306,7 +306,7 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 active:scale-95 transition-all cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -318,7 +318,7 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
                     !theme.trim() ||
                     isSubmitting
                   }
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                   {isSubmitting ? 'Criando orientação...' : 'Criar Orientação'}

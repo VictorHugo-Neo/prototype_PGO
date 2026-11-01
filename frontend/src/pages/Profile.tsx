@@ -83,7 +83,7 @@ export default function Profile() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-600"
+            className="p-2 hover:bg-gray-200 hover:text-gray-900 rounded-full transition-all text-gray-600 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Voltar"
           >
             <ArrowLeft size={20} />
@@ -183,7 +183,7 @@ export default function Profile() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-6 py-2 rounded-lg text-sm transition-all shadow-sm flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-6 py-2 rounded-lg text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 {saving ? 'Salvando...' : 'Salvar Alterações'}

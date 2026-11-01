@@ -90,7 +90,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-100 text-sm"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md shadow-blue-100 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
             {loading ? 'Entrando...' : 'Entrar'}
@@ -99,7 +99,7 @@ export default function Login() {
 
         <footer className="text-center mt-6 text-gray-600 text-xs">
           Ainda não tem conta?{' '}
-          <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+          <Link to="/register" className="text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors">
             Criar conta
           </Link>
         </footer>

@@ -112,12 +112,12 @@ export function StudentSearchCombobox({
                 aria-selected={highlightedIndex === idx}
                 disabled={candidate.is_already_linked}
                 onClick={() => onSelectStudent(candidate)}
-                className={`w-full text-left p-2.5 flex items-center justify-between transition-colors ${
+                className={`w-full text-left p-2.5 flex items-center justify-between transition-all cursor-pointer ${
                   candidate.is_already_linked
                     ? 'opacity-60 bg-gray-50 cursor-not-allowed'
                     : highlightedIndex === idx
                     ? 'bg-blue-50 text-blue-900'
-                    : 'hover:bg-gray-50'
+                    : 'hover:bg-blue-50/70 hover:translate-x-0.5'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -146,7 +146,7 @@ export function StudentSearchCombobox({
             <button
               type="button"
               onClick={onSelectCustomEmail}
-              className="w-full text-left p-2.5 hover:bg-blue-50 flex items-center justify-between text-xs text-blue-700 font-medium transition-colors"
+              className="w-full text-left p-2.5 hover:bg-blue-50 active:bg-blue-100 flex items-center justify-between text-xs text-blue-700 font-medium transition-all cursor-pointer"
             >
               <span>
                 Usar e-mail informado: <strong>{searchQuery.trim()}</strong>

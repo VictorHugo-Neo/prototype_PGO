@@ -150,7 +150,7 @@ export function StudentHeader({
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-700"
+              className="p-2 hover:bg-gray-100 rounded-full transition-all text-gray-500 hover:text-gray-900 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Voltar"
             >
               <ArrowLeft size={20} />
@@ -170,7 +170,7 @@ export function StudentHeader({
                 )}
               </div>
               {isStudent && (
-                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-1 rounded-full cursor-pointer hover:bg-blue-700 shadow-md flex items-center justify-center">
+                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-1 rounded-full cursor-pointer hover:bg-blue-700 hover:scale-110 active:scale-95 shadow-md flex items-center justify-center transition-all focus-within:ring-2 focus-within:ring-blue-500">
                   <Camera size={12} aria-hidden="true" />
                   <input
                     type="file"
@@ -216,7 +216,7 @@ export function StudentHeader({
                         type="button"
                         onClick={onOpenDefenseModal}
                         data-testid="edit-defense-date-btn"
-                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
                         title="Reagendar data da banca"
                         aria-label="Reagendar data da banca"
                       >
@@ -227,7 +227,7 @@ export function StudentHeader({
                           type="button"
                           onClick={onDeleteDefenseDate}
                           data-testid="delete-defense-date-btn"
-                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500"
                           title="Desmarcar data da banca"
                           aria-label="Desmarcar data da banca"
                         >
@@ -242,7 +242,7 @@ export function StudentHeader({
                   type="button"
                   onClick={onOpenDefenseModal}
                   data-testid="schedule-defense-btn"
-                  className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100/90 text-blue-700 hover:text-blue-800 border border-blue-200/80 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs group"
+                  className="flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 hover:border-blue-300 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   title="Agendar data da apresentação da banca examinadora"
                 >
                   <Calendar size={13} className="text-blue-600 group-hover:scale-110 transition-transform" aria-hidden="true" />
@@ -265,7 +265,7 @@ export function StudentHeader({
             <button
               type="button"
               onClick={onOpenMeetingsModal}
-              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 text-xs font-medium bg-gray-50 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors border border-gray-200"
+              className="flex items-center gap-2 text-gray-700 hover:text-blue-600 text-xs font-medium bg-gray-50 hover:bg-blue-50/80 px-3 py-2 rounded-lg transition-all border border-gray-200 hover:border-blue-200 hover:shadow-2xs active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               <Users size={16} aria-hidden="true" />
               Reuniões ({meetingsCount})
@@ -279,10 +279,10 @@ export function StudentHeader({
                 aria-expanded={isReportMenuOpen}
                 aria-haspopup="menu"
                 aria-label="Ações de Relatório em PDF"
-                className={`flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg transition-all border ${
+                className={`flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg transition-all border cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                   isGeneratingPdf
                     ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                    : 'bg-gray-50 text-gray-700 hover:text-blue-700 hover:bg-blue-50 hover:border-blue-200 border-gray-200 shadow-sm'
+                    : 'bg-gray-50 text-gray-700 hover:text-blue-700 hover:bg-blue-50/80 hover:border-blue-200 border-gray-200 shadow-2xs hover:shadow-xs'
                 }`}
               >
                 {isGeneratingPdf ? (
@@ -315,7 +315,7 @@ export function StudentHeader({
                     type="button"
                     role="menuitem"
                     onClick={handlePreviewClick}
-                    className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 text-gray-700 hover:text-blue-700 flex items-start gap-2.5 transition-colors group"
+                    className="w-full text-left px-3.5 py-2.5 hover:bg-blue-50 text-gray-700 hover:text-blue-700 flex items-start gap-2.5 transition-colors group cursor-pointer active:bg-blue-100"
                   >
                     <ExternalLink size={16} className="mt-0.5 text-blue-500 group-hover:text-blue-600 shrink-0" aria-hidden="true" />
                     <div>
@@ -332,7 +332,7 @@ export function StudentHeader({
                     type="button"
                     role="menuitem"
                     onClick={handleDownloadClick}
-                    className="w-full text-left px-3.5 py-2.5 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 flex items-start gap-2.5 transition-colors group"
+                    className="w-full text-left px-3.5 py-2.5 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 flex items-start gap-2.5 transition-colors group cursor-pointer active:bg-emerald-100"
                   >
                     <Download size={16} className="mt-0.5 text-emerald-500 group-hover:text-emerald-600 shrink-0" aria-hidden="true" />
                     <div>
@@ -349,7 +349,7 @@ export function StudentHeader({
             <button
               type="button"
               onClick={onOpenCreateTaskModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-1.5 text-xs font-semibold shadow-sm transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 text-white px-4 py-2 rounded-lg flex items-center gap-1.5 text-xs font-semibold shadow-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             >
               <Plus size={16} aria-hidden="true" /> Nova Tarefa
             </button>

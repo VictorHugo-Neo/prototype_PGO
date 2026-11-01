@@ -80,7 +80,7 @@ export function DeleteColumnModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Fechar modal"
           >
             <X size={18} />
@@ -143,7 +143,7 @@ export function DeleteColumnModal({
                 type="button"
                 onClick={onClose}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-lg transition-all active:scale-95 cursor-pointer"
               >
                 Cancelar
               </button>
@@ -151,7 +151,7 @@ export function DeleteColumnModal({
                 type="button"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting || !targetColumnId}
-                className="px-4 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed"
               >
                 {isDeleting ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -174,7 +174,7 @@ export function DeleteColumnModal({
                 type="button"
                 onClick={onClose}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-lg transition-all active:scale-95 cursor-pointer"
               >
                 Cancelar
               </button>
@@ -182,7 +182,7 @@ export function DeleteColumnModal({
                 type="button"
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2 text-xs font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed"
               >
                 {isDeleting ? (
                   <Loader2 size={14} className="animate-spin" />

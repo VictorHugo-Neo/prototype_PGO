@@ -70,7 +70,7 @@ export function EditColumnModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Fechar modal"
           >
             <X size={20} />
@@ -116,7 +116,7 @@ export function EditColumnModal({
                     key={c.value}
                     type="button"
                     onClick={() => setSelectedColor(c.value)}
-                    className={`flex items-center gap-2 p-2 rounded-lg border text-xs font-medium transition-all ${c.value} ${
+                    className={`flex items-center gap-2 p-2 rounded-lg border text-xs font-medium transition-all cursor-pointer hover:scale-105 active:scale-95 ${c.value} ${
                       isSelected
                         ? 'ring-2 ring-blue-500 border-blue-500 font-bold shadow-xs'
                         : `${c.border} text-gray-700 hover:border-gray-400`
@@ -149,14 +149,14 @@ export function EditColumnModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-lg transition-all active:scale-95 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 text-xs font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
+              className="px-5 py-2 text-xs font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <Loader2 size={14} className="animate-spin" />

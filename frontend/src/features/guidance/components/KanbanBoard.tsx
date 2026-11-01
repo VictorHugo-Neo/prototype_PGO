@@ -128,10 +128,10 @@ export function KanbanBoard({
             <button
               type="button"
               onClick={() => setCreatorFilter('all')}
-              className={`px-3 py-1 rounded-lg transition-all ${
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 active:scale-95 ${
                 creatorFilter === 'all'
                   ? 'bg-white text-gray-800 font-semibold shadow-xs'
-                  : 'hover:text-gray-900 text-gray-600'
+                  : 'hover:text-gray-900 hover:bg-white/70 text-gray-600'
               }`}
             >
               Todas ({tasks.length})
@@ -139,10 +139,10 @@ export function KanbanBoard({
             <button
               type="button"
               onClick={() => setCreatorFilter('advisor')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 active:scale-95 ${
                 creatorFilter === 'advisor'
                   ? 'bg-white text-purple-700 font-semibold shadow-xs ring-1 ring-purple-200'
-                  : 'hover:text-purple-700 text-gray-600'
+                  : 'hover:text-purple-700 hover:bg-purple-50/70 text-gray-600'
               }`}
             >
               <GraduationCap size={13} className="text-purple-600" aria-hidden="true" />
@@ -151,10 +151,10 @@ export function KanbanBoard({
             <button
               type="button"
               onClick={() => setCreatorFilter('student')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 active:scale-95 ${
                 creatorFilter === 'student'
                   ? 'bg-white text-emerald-700 font-semibold shadow-xs ring-1 ring-emerald-200'
-                  : 'hover:text-emerald-700 text-gray-600'
+                  : 'hover:text-emerald-700 hover:bg-emerald-50/70 text-gray-600'
               }`}
             >
               <User size={13} className="text-emerald-600" aria-hidden="true" />
@@ -191,9 +191,9 @@ export function KanbanBoard({
                 <button
                   type="button"
                   onClick={() => setIsAddingColumn(true)}
-                  className="w-full h-32 border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50/40 transition-all font-medium text-sm group cursor-pointer"
+                  className="w-full h-32 border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-xl flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50/50 hover:shadow-xs active:scale-[0.99] transition-all font-medium text-sm group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
-                  <div className="w-9 h-9 rounded-full bg-white border border-gray-200 group-hover:border-blue-300 flex items-center justify-center text-gray-500 group-hover:text-blue-600 transition-colors shadow-xs">
+                  <div className="w-9 h-9 rounded-full bg-white border border-gray-200 group-hover:border-blue-300 group-hover:scale-105 flex items-center justify-center text-gray-500 group-hover:text-blue-600 transition-all shadow-xs">
                     <Plus size={18} />
                   </div>
                   <span>Adicionar Coluna</span>
@@ -211,7 +211,7 @@ export function KanbanBoard({
                         setIsAddingColumn(false);
                         setNewColumnTitle('');
                       }}
-                      className="p-1 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+                      className="p-1 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-100 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
                       aria-label="Cancelar adição de coluna"
                     >
                       <X size={16} />
@@ -231,7 +231,7 @@ export function KanbanBoard({
                       value={newColumnTitle}
                       onChange={(e) => setNewColumnTitle(e.target.value)}
                       placeholder="Ex: Revisão, Testes, Impedimentos..."
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 hover:border-gray-300 transition-colors"
                     />
                   </div>
 
@@ -247,10 +247,10 @@ export function KanbanBoard({
                           onClick={() => setSelectedColor(c.value)}
                           title={c.label}
                           aria-label={`Cor ${c.label}`}
-                          className={`w-6 h-6 rounded-full ${c.value} border-2 ${
+                          className={`w-6 h-6 rounded-full ${c.value} border-2 cursor-pointer hover:scale-110 active:scale-95 ${
                             selectedColor === c.value
                               ? 'ring-2 ring-blue-500 ring-offset-1 border-blue-500 scale-110'
-                              : c.border
+                              : `${c.border} hover:border-gray-400`
                           } transition-all`}
                         />
                       ))}
@@ -264,14 +264,14 @@ export function KanbanBoard({
                         setIsAddingColumn(false);
                         setNewColumnTitle('');
                       }}
-                      className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-lg transition-all cursor-pointer active:scale-95"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={!newColumnTitle.trim() || isSubmitting}
-                      className="px-4 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
+                      className="px-4 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                     >
                       {isSubmitting && <Loader2 size={13} className="animate-spin" />}
                       {isSubmitting ? 'Salvando...' : 'Adicionar'}

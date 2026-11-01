@@ -28,8 +28,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:border-gray-200 transition-colors">
-        <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+      <div className="bg-white p-5 rounded-2xl shadow-xs border border-gray-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 hover:border-blue-100 transition-all duration-200 group">
+        <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
           <Users size={22} aria-hidden="true" />
         </div>
         <div>
@@ -39,9 +39,9 @@ export function KpiCards({ stats }: KpiCardsProps) {
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:border-gray-200 transition-colors">
+      <div className="bg-white p-5 rounded-2xl shadow-xs border border-gray-100 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 hover:border-emerald-100 transition-all duration-200 group">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
             <CheckSquare size={22} aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
@@ -67,8 +67,8 @@ export function KpiCards({ stats }: KpiCardsProps) {
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:border-gray-200 transition-colors">
-        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+      <div className="bg-white p-5 rounded-2xl shadow-xs border border-gray-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 hover:border-indigo-100 transition-all duration-200 group">
+        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform duration-200">
           <PlayCircle size={22} aria-hidden="true" />
         </div>
         <div>
@@ -78,9 +78,9 @@ export function KpiCards({ stats }: KpiCardsProps) {
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:border-gray-200 transition-colors">
+      <div className="bg-white p-5 rounded-2xl shadow-xs border border-gray-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-0.5 hover:border-amber-100 transition-all duration-200 group">
         <div
-          className={`p-3 rounded-xl ${
+          className={`p-3 rounded-xl group-hover:scale-105 transition-transform duration-200 ${
             pendingMeetings > 0 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
           }`}
         >

@@ -68,7 +68,7 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
             {data.map((entry) => {
               const pct = totalTasks > 0 ? Math.round((entry.value / totalTasks) * 100) : 0;
               return (
-                <div key={entry.name} className="flex items-center gap-1.5 text-xs text-gray-600">
+                <div key={entry.name} className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 transition-colors cursor-default">
                   <span
                     className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: entry.color }}

@@ -89,10 +89,10 @@ export default function Register() {
             type="button"
             onClick={() => setRole('student')}
             aria-pressed={role === 'student'}
-            className={`border-2 rounded-xl p-4 flex flex-col items-center gap-2 transition-all relative ${
+            className={`border-2 rounded-xl p-4 flex flex-col items-center gap-2 transition-all cursor-pointer relative hover:scale-[1.02] active:scale-[0.99] ${
               role === 'student'
-                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-blue-200 text-gray-600'
+                ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
+                : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 text-gray-600'
             }`}
           >
             <GraduationCap size={24} />
@@ -106,10 +106,10 @@ export default function Register() {
             type="button"
             onClick={() => setRole('advisor')}
             aria-pressed={role === 'advisor'}
-            className={`border-2 rounded-xl p-4 flex flex-col items-center gap-2 transition-all relative ${
+            className={`border-2 rounded-xl p-4 flex flex-col items-center gap-2 transition-all cursor-pointer relative hover:scale-[1.02] active:scale-[0.99] ${
               role === 'advisor'
-                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-blue-200 text-gray-600'
+                ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
+                : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 text-gray-600'
             }`}
           >
             <School size={24} />
@@ -194,7 +194,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md text-sm mt-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed text-sm mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             {loading && <Loader2 size={16} className="animate-spin" />}
             {loading ? 'Cadastrando...' : 'Criar Conta'}
@@ -203,7 +203,7 @@ export default function Register() {
 
         <footer className="text-center pb-6 text-gray-500 text-xs">
           Já tem uma conta?{' '}
-          <Link to="/" className="text-blue-600 font-semibold hover:underline">
+          <Link to="/" className="text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors">
             Fazer login
           </Link>
         </footer>

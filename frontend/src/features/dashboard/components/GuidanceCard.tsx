@@ -45,7 +45,7 @@ export function GuidanceCard({ guidance, summary }: GuidanceCardProps) {
       }}
       role="button"
       tabIndex={0}
-      className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-100 transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 flex flex-col justify-between"
+      className="bg-white rounded-2xl p-5 shadow-xs border border-gray-100 hover:shadow-lg hover:-translate-y-1 hover:border-blue-200 transition-all duration-200 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-[0.99] flex flex-col justify-between"
     >
       <div>
         <div className="flex items-center gap-3.5 mb-4">
@@ -112,7 +112,7 @@ export function GuidanceCard({ guidance, summary }: GuidanceCardProps) {
             {summary.columns.map((col) => (
               <span
                 key={col.slug}
-                className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${col.color} text-gray-700 border border-gray-200/60`}
+                className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${col.color} text-gray-700 border border-gray-200/60 hover:border-gray-300 transition-colors`}
                 title={`${col.title}: ${col.task_count} tarefas`}
               >
                 {col.title}: <strong>{col.task_count}</strong>
@@ -145,9 +145,9 @@ export function GuidanceCard({ guidance, summary }: GuidanceCardProps) {
             )}
           </div>
 
-          <span className="text-xs font-semibold text-blue-600 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span className="text-xs font-semibold text-blue-600 group-hover:text-blue-700 flex items-center gap-1 group-hover:translate-x-1 transition-all">
             Ver Kanban
-            <ArrowRight size={14} aria-hidden="true" />
+            <ArrowRight size={14} aria-hidden="true" className="group-hover:translate-x-0.5 transition-transform" />
           </span>
         </div>
       </div>

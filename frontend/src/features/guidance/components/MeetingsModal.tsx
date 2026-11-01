@@ -146,7 +146,7 @@ export function MeetingsModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100"
+            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Fechar"
           >
             <X size={20} />
@@ -247,7 +247,7 @@ export function MeetingsModal({
                             type="button"
                             onClick={cancelEditing}
                             disabled={isSavingEdit}
-                            className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 rounded-lg transition-all active:scale-95 cursor-pointer"
                           >
                             Cancelar
                           </button>
@@ -255,7 +255,7 @@ export function MeetingsModal({
                             type="button"
                             onClick={() => handleSaveEdit(meeting.id)}
                             disabled={!editTopic.trim() || !editDate || isSavingEdit}
-                            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
+                            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                           >
                             {isSavingEdit && <Loader2 size={13} className="animate-spin" />}
                             {isSavingEdit ? 'Salvando...' : 'Salvar Alterações'}
@@ -285,7 +285,7 @@ export function MeetingsModal({
                             type="button"
                             onClick={cancelDeleting}
                             disabled={isDeleting}
-                            className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200/60 rounded-lg transition-colors"
+                            className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200/80 rounded-lg transition-all active:scale-95 cursor-pointer"
                           >
                             Cancelar
                           </button>
@@ -293,7 +293,7 @@ export function MeetingsModal({
                             type="button"
                             onClick={() => handleConfirmDelete(meeting.id)}
                             disabled={isDeleting}
-                            className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg flex items-center gap-1 transition-colors shadow-sm"
+                            className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg flex items-center gap-1 transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                           >
                             {isDeleting && <Loader2 size={12} className="animate-spin" />}
                             {isDeleting ? 'Excluindo...' : 'Confirmar Exclusão'}
@@ -306,7 +306,7 @@ export function MeetingsModal({
                   return (
                     <div
                       key={meeting.id}
-                      className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-gray-200 transition-colors"
+                      className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-gray-200 hover:shadow-2xs transition-all"
                       data-testid={`meeting-item-${meeting.id}`}
                     >
                       <div className="space-y-1">
@@ -331,7 +331,7 @@ export function MeetingsModal({
                               type="button"
                               onClick={() => handleStatusChange(meeting.id, 'confirmed')}
                               disabled={updatingId === meeting.id}
-                              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg flex items-center gap-1 transition-colors shadow-sm"
+                              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg flex items-center gap-1 transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer"
                               title="Aceitar reunião"
                             >
                               {updatingId === meeting.id ? (
@@ -345,7 +345,7 @@ export function MeetingsModal({
                               type="button"
                               onClick={() => handleStatusChange(meeting.id, 'rejected')}
                               disabled={updatingId === meeting.id}
-                              className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium rounded-lg transition-colors"
+                              className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-medium rounded-lg transition-all active:scale-95 cursor-pointer"
                               title="Recusar reunião"
                             >
                               Recusar
@@ -356,7 +356,7 @@ export function MeetingsModal({
                         <button
                           type="button"
                           onClick={() => startEditing(meeting)}
-                          className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer hover:scale-110 active:scale-95"
                           title="Editar reunião"
                           aria-label={`Editar reunião ${meeting.topic}`}
                         >
@@ -366,7 +366,7 @@ export function MeetingsModal({
                         <button
                           type="button"
                           onClick={() => startDeleting(meeting.id)}
-                          className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer hover:scale-110 active:scale-95"
                           title="Excluir reunião"
                           aria-label={`Excluir reunião ${meeting.topic}`}
                         >
@@ -424,7 +424,7 @@ export function MeetingsModal({
                 <button
                   type="submit"
                   disabled={!newDate || !newTopic.trim() || isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                   {isSubmitting

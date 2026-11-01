@@ -37,7 +37,7 @@ export function DefenseDatePicker({ defenseDate, onChangeDate }: DefenseDatePick
           <button
             type="button"
             onClick={() => onChangeDate('')}
-            className="text-[11px] text-gray-400 hover:text-red-500 transition-colors"
+            className="text-[11px] text-gray-400 hover:text-red-600 hover:underline transition-colors cursor-pointer"
           >
             Limpar data
           </button>
@@ -50,28 +50,28 @@ export function DefenseDatePicker({ defenseDate, onChangeDate }: DefenseDatePick
         min={new Date().toISOString().split('T')[0]}
         value={defenseDate}
         onChange={(e) => onChangeDate(e.target.value)}
-        className="w-full border border-gray-200 rounded-lg p-2 text-xs bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700"
+        className="w-full border border-gray-200 hover:border-gray-300 rounded-lg p-2 text-xs bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 transition-colors"
       />
 
       <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
         <button
           type="button"
           onClick={() => handleSetPresetDate(90)}
-          className="px-2 py-0.5 bg-white border border-gray-200 hover:border-blue-300 text-gray-600 hover:text-blue-600 rounded text-[11px] transition-colors"
+          className="px-2 py-0.5 bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 text-gray-600 hover:text-blue-700 rounded text-[11px] transition-all cursor-pointer hover:scale-105 active:scale-95"
         >
           +3 meses
         </button>
         <button
           type="button"
           onClick={() => handleSetPresetDate(180)}
-          className="px-2 py-0.5 bg-white border border-gray-200 hover:border-blue-300 text-gray-600 hover:text-blue-600 rounded text-[11px] transition-colors"
+          className="px-2 py-0.5 bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 text-gray-600 hover:text-blue-700 rounded text-[11px] transition-all cursor-pointer hover:scale-105 active:scale-95"
         >
           +6 meses
         </button>
         <button
           type="button"
           onClick={handleSetEndOfSemester}
-          className="px-2 py-0.5 bg-white border border-gray-200 hover:border-blue-300 text-gray-600 hover:text-blue-600 rounded text-[11px] transition-colors"
+          className="px-2 py-0.5 bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 text-gray-600 hover:text-blue-700 rounded text-[11px] transition-all cursor-pointer hover:scale-105 active:scale-95"
         >
           Fim do Semestre
         </button>

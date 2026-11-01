@@ -87,7 +87,7 @@ export function CreateTaskModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Fechar modal"
           >
             <X size={20} />
@@ -168,14 +168,14 @@ export function CreateTaskModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 active:scale-95 transition-all cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={!title.trim() || isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {isSubmitting ? 'Salvando...' : 'Criar Tarefa'}

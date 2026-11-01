@@ -53,7 +53,7 @@ export function CropPhotoModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-200 transition-colors"
+            className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-gray-200 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Fechar"
           >
             <X size={20} />
@@ -82,14 +82,14 @@ export function CropPhotoModal({
               max={3}
               step={0.1}
               onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-full accent-blue-600 mt-1"
+              className="w-full accent-blue-600 mt-1 cursor-pointer"
             />
           </label>
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all active:scale-95 cursor-pointer"
             >
               Cancelar
             </button>
@@ -97,7 +97,7 @@ export function CropPhotoModal({
               type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSaving && <Loader2 size={16} className="animate-spin" />}
               {isSaving ? 'Salvando...' : 'Salvar Foto'}

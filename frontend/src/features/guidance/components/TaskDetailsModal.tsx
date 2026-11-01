@@ -221,7 +221,7 @@ export function TaskDetailsModal({
                     setIsEditing(true);
                     setIsConfirmingDelete(false);
                   }}
-                  className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
                   title="Editar dados da tarefa"
                   aria-label="Editar dados da tarefa"
                 >
@@ -230,7 +230,7 @@ export function TaskDetailsModal({
                 <button
                   type="button"
                   onClick={() => setIsConfirmingDelete(true)}
-                  className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-500"
                   title="Excluir tarefa"
                   aria-label="Excluir tarefa"
                 >
@@ -241,7 +241,7 @@ export function TaskDetailsModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+              className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Fechar modal"
             >
               <X size={20} />
@@ -262,7 +262,7 @@ export function TaskDetailsModal({
                 type="button"
                 onClick={() => setIsConfirmingDelete(false)}
                 disabled={isDeleting}
-                className="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-100 active:scale-95 transition-all cursor-pointer"
               >
                 Cancelar
               </button>
@@ -270,7 +270,7 @@ export function TaskDetailsModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-3 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-1.5 shadow-sm"
+                className="px-3 py-1.5 text-xs font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm hover:shadow cursor-pointer disabled:cursor-not-allowed"
               >
                 {isDeleting && <Loader2 size={12} className="animate-spin" />}
                 {isDeleting ? 'Excluindo...' : 'Sim, Excluir'}
@@ -355,14 +355,14 @@ export function TaskDetailsModal({
                   type="button"
                   onClick={handleCancelEdit}
                   disabled={isSaving}
-                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 active:scale-95 transition-all cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={!editTitle.trim() || isSaving}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
                   {isSaving ? 'Salvando...' : 'Salvar Alterações'}
@@ -429,7 +429,7 @@ export function TaskDetailsModal({
                           target="_blank"
                           rel="noopener noreferrer"
                           download
-                          className="text-gray-500 hover:text-blue-600 p-1"
+                          className="text-gray-500 hover:text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg transition-all cursor-pointer hover:scale-110 active:scale-95"
                           aria-label={`Baixar arquivo ${file.filename}`}
                         >
                           <Download size={16} />
@@ -467,12 +467,12 @@ export function TaskDetailsModal({
                     placeholder="Escreva uma mensagem ou tire uma dúvida..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 hover:border-gray-300 transition-colors"
                   />
                   <button
                     type="submit"
                     disabled={!newComment.trim() || isSubmittingComment}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 shadow-sm"
+                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1 shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {isSubmittingComment ? (
                       <Loader2 size={16} className="animate-spin" />

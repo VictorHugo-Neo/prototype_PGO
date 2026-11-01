@@ -102,7 +102,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => navigate('/profile')}
-              className="p-2.5 text-gray-600 bg-white hover:bg-gray-100 rounded-lg border border-gray-200 shadow-sm transition-colors"
+              className="p-2.5 text-gray-600 bg-white hover:bg-gray-100 hover:text-gray-900 rounded-lg border border-gray-200 hover:border-gray-300 shadow-2xs hover:shadow-xs active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               title="Meu Perfil"
               aria-label="Meu Perfil"
             >
@@ -111,7 +111,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={handleLogout}
-              className="p-2.5 text-red-600 bg-white hover:bg-red-50 rounded-lg border border-gray-200 shadow-sm transition-colors"
+              className="p-2.5 text-red-600 bg-white hover:bg-red-50 hover:text-red-700 rounded-lg border border-gray-200 hover:border-red-200 shadow-2xs hover:shadow-xs active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               title="Sair"
               aria-label="Sair"
             >
@@ -120,7 +120,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setIsLinkModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-sm transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             >
               <Plus size={18} /> Nova Orientação
             </button>
@@ -154,18 +154,18 @@ export default function Dashboard() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Buscar aluno ou tema..."
-                    className="pl-9 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 w-full sm:w-56 shadow-sm"
+                    className="pl-9 pr-3 py-1.5 bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 w-full sm:w-56 shadow-2xs transition-colors"
                   />
                 </div>
 
-                <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-gray-200 shadow-sm text-xs">
+                <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-gray-200 shadow-2xs text-xs">
                   <button
                     type="button"
                     onClick={() => setActiveFilter('all')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
                       activeFilter === 'all'
-                        ? 'bg-blue-50 text-blue-700 font-semibold'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs'
+                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
                     }`}
                   >
                     Todos
@@ -173,10 +173,10 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setActiveFilter('in_progress')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
                       activeFilter === 'in_progress'
-                        ? 'bg-blue-50 text-blue-700 font-semibold'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs'
+                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
                     }`}
                   >
                     Em Andamento
@@ -184,10 +184,10 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setActiveFilter('completed')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
                       activeFilter === 'completed'
-                        ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-2xs'
+                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
                     }`}
                   >
                     Concluídos
@@ -195,10 +195,10 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setActiveFilter('pending_meetings')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
                       activeFilter === 'pending_meetings'
-                        ? 'bg-amber-50 text-amber-700 font-semibold'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-amber-50 text-amber-700 font-semibold shadow-2xs'
+                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
                     }`}
                   >
                     Reuniões
@@ -226,7 +226,7 @@ export default function Dashboard() {
                   setSearchQuery('');
                   setActiveFilter('all');
                 }}
-                className="text-xs text-blue-600 hover:underline font-semibold"
+                className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer transition-colors"
               >
                 Limpar filtros de busca
               </button>

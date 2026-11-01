@@ -42,7 +42,7 @@ export function SelectedStudentCard({
       <button
         type="button"
         onClick={onChangeStudent}
-        className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100/50 px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1"
+        className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100/70 px-2.5 py-1 rounded-lg font-medium transition-all active:scale-95 cursor-pointer flex items-center gap-1"
       >
         <RefreshCw size={12} /> Trocar
       </button>

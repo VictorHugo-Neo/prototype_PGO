@@ -37,6 +37,7 @@ function getInitialDateParts(currentDate?: string | null) {
         };
       }
     } catch {
+      // Ignore invalid date string and fallback to default 30-day projection
     }
   }
 
@@ -184,7 +185,7 @@ function DefenseDateForm({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 transition-all cursor-pointer active:scale-95 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Fechar modal"
           >
             <X size={18} />
@@ -216,7 +217,7 @@ function DefenseDateForm({
                     type="button"
                     onClick={handleDelete}
                     disabled={isSubmitting}
-                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition-all shadow-sm hover:shadow active:scale-95 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     {isSubmitting && <Loader2 size={13} className="animate-spin" />}
                     Confirmar Desmarcação
@@ -225,7 +226,7 @@ function DefenseDateForm({
                     type="button"
                     onClick={() => setIsConfirmingDelete(false)}
                     disabled={isSubmitting}
-                    className="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                    className="bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95 cursor-pointer"
                   >
                     Voltar
                   </button>
@@ -254,7 +255,7 @@ function DefenseDateForm({
                   key={preset.days}
                   type="button"
                   onClick={() => handleApplyPreset(preset.days)}
-                  className="py-1.5 px-2 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-300 rounded-lg text-xs font-medium transition-all text-center"
+                  className="py-1.5 px-2 bg-gray-50 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 border border-gray-200 rounded-lg text-xs font-medium transition-all text-center cursor-pointer hover:scale-105 active:scale-95"
                 >
                   {preset.label}
                 </button>
@@ -333,7 +334,7 @@ function DefenseDateForm({
                 type="button"
                 onClick={() => setIsConfirmingDelete(true)}
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1.5 text-xs text-red-600 hover:text-red-700 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 text-xs text-red-600 hover:text-red-700 font-medium px-3 py-2 rounded-lg hover:bg-red-50 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <Trash2 size={14} aria-hidden="true" /> Desmarcar Banca
               </button>
@@ -346,14 +347,14 @@ function DefenseDateForm({
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-4 py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="px-4 py-2 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={!datePart || isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-colors shadow-sm flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-xs font-semibold transition-all shadow-sm hover:shadow active:scale-95 cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isSubmitting && <Loader2 size={14} className="animate-spin" />}
                 {isSubmitting ? 'Salvando...' : isRescheduling ? 'Salvar Reagendamento' : 'Confirmar Agendamento'}

@@ -60,21 +60,21 @@ export function LinkStudentSuccessView({
         <button
           type="button"
           onClick={onOpenKanban}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-xl font-semibold text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] text-white py-2.5 px-4 rounded-xl font-semibold text-sm transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
         >
           Ir para o Quadro Kanban <ArrowRight size={16} />
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 py-2.5 px-4 rounded-xl font-semibold text-sm transition-colors"
+          className="w-full bg-white hover:bg-gray-100 hover:text-gray-900 text-gray-700 border border-gray-200 py-2.5 px-4 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] cursor-pointer"
         >
           Voltar ao Dashboard
         </button>
         <button
           type="button"
           onClick={onReset}
-          className="text-xs text-blue-600 hover:underline font-medium block mx-auto pt-1"
+          className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium block mx-auto pt-1 cursor-pointer transition-colors"
         >
           + Vincular outro estudante
         </button>
