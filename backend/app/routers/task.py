@@ -146,3 +146,30 @@ def delete_task(
                 
     crud.delete_task(db, task_id)
     return None
+
+
+@router.post("/notify-upcoming-deadlines")
+def notify_upcoming_deadlines(
+    guidance_id: int | None = None,
+    hours_ahead: int = 48,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    if guidance_id:
+        guidance = db.query(models.Guidance).filter(models.Guidance.id == guidance_id).first()
+        if guidance:
+            verify_guidance_access(guidance, current_user.id)
+    from ..services.whatsapp_client import check_and_notify_upcoming_deadlines
+    return check_and_notify_upcoming_deadlines(db, hours_ahead=hours_ahead, guidance_id=guidance_id)
+
+
+@router.get("/whatsapp-status")
+def get_whatsapp_service_status(
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    from ..services.whatsapp_client import is_whatsapp_service_online
+    from ..config import settings
+    return {
+        "whatsapp_service_online": is_whatsapp_service_online(),
+        "service_url": settings.WHATSAPP_SERVICE_URL,
+    }

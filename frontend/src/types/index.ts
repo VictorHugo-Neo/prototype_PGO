@@ -34,6 +34,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  phone?: string;
   type: UserType;
   avatar_path?: string;
   created_at?: string;
@@ -43,6 +44,7 @@ export interface TaskCreator {
   id: number;
   name: string;
   email: string;
+  phone?: string;
   type?: UserType;
   avatar_path?: string;
 }

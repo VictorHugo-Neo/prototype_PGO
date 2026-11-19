@@ -7,6 +7,7 @@ class UserBase(BaseModel):
     name: str
     email: EmailStr
     type: TypeUser
+    phone: Optional[str] = None
 
 class TaskBase(BaseModel):
     title: str
@@ -22,6 +23,7 @@ class UserResponse(UserBase):
     name: str
     email: str
     type: str
+    phone: Optional[str] = None
     avatar_path: Optional[str] = None 
 
     model_config = ConfigDict(from_attributes=True)
@@ -29,6 +31,7 @@ class UserResponse(UserBase):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
+    phone: Optional[str] = None
     password: Optional[str] = None
 
 class LoginData(BaseModel):
@@ -43,6 +46,7 @@ class UserSimple(BaseModel):
     id: int
     name: str
     email: str
+    phone: Optional[str] = None
     type: Optional[str] = None
     avatar_path: Optional[str] = None
 
@@ -75,6 +79,7 @@ class AvailableStudent(BaseModel):
     id: int
     name: str
     email: str
+    phone: Optional[str] = None
     avatar_path: Optional[str] = None
     is_already_linked: bool = False
     active_theme: Optional[str] = None

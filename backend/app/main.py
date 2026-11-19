@@ -62,6 +62,15 @@ def init_db():
                         ) THEN
                             ALTER TABLE meetings ADD COLUMN creator_id INTEGER REFERENCES users(id);
                         END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'users'
+                              AND column_name = 'phone'
+                        ) THEN
+                            ALTER TABLE users ADD COLUMN phone VARCHAR;
+                        END IF;
                     END $$;
                 """))
         except Exception:
@@ -80,6 +89,10 @@ def init_db():
                 meeting_cols = [c[1] for c in conn.execute(text("PRAGMA table_info(meetings)")).fetchall()]
                 if meeting_cols and "creator_id" not in meeting_cols:
                     conn.execute(text("ALTER TABLE meetings ADD COLUMN creator_id INTEGER REFERENCES users(id)"))
+
+                user_cols = [c[1] for c in conn.execute(text("PRAGMA table_info(users)")).fetchall()]
+                if user_cols and "phone" not in user_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR"))
         except Exception:
             pass
 
