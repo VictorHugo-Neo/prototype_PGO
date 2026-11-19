@@ -13,6 +13,7 @@ import { CreateTaskModal } from './CreateTaskModal';
 import { MeetingsModal } from './MeetingsModal';
 import { CropPhotoModal } from './CropPhotoModal';
 import { DefenseDateModal } from './DefenseDateModal';
+import { CoadvisorModal } from './CoadvisorModal';
 
 interface GuidanceModalsProps {
   selectedTask: Task | null;
@@ -30,6 +31,8 @@ interface GuidanceModalsProps {
   guidanceDefenseDate?: string | null;
   studentName?: string;
   guidanceTheme?: string;
+  isCoadvisorModalOpen?: boolean;
+  guidanceCoadvisor?: { id: number; name: string; email?: string } | null;
   onCloseTaskDetails: () => void;
   onUpdateTaskStatus: (taskId: number, status: TaskStatus) => Promise<void>;
   onUpdateTask: (taskId: number, data: TaskUpdatePayload) => Promise<Task>;
@@ -53,6 +56,9 @@ interface GuidanceModalsProps {
   onCloseDefenseModal?: () => void;
   onSaveDefenseDate?: (dateIso: string) => Promise<void>;
   onDeleteDefenseDate?: () => Promise<void>;
+  onCloseCoadvisorModal?: () => void;
+  onSaveCoadvisor?: (email: string) => Promise<void>;
+  onDeleteCoadvisor?: () => Promise<void>;
 }
 
 export function GuidanceModals({
@@ -89,6 +95,11 @@ export function GuidanceModals({
   onCloseDefenseModal,
   onSaveDefenseDate,
   onDeleteDefenseDate,
+  isCoadvisorModalOpen,
+  guidanceCoadvisor,
+  onCloseCoadvisorModal,
+  onSaveCoadvisor,
+  onDeleteCoadvisor,
 }: GuidanceModalsProps) {
   return (
     <>
@@ -142,6 +153,18 @@ export function GuidanceModals({
           theme={guidanceTheme || ''}
           onSave={onSaveDefenseDate}
           onDelete={onDeleteDefenseDate}
+        />
+      )}
+
+      {isCoadvisorModalOpen && onCloseCoadvisorModal && onSaveCoadvisor && (
+        <CoadvisorModal
+          isOpen={isCoadvisorModalOpen}
+          onClose={onCloseCoadvisorModal}
+          currentCoadvisor={guidanceCoadvisor}
+          studentName={studentName}
+          theme={guidanceTheme}
+          onSave={onSaveCoadvisor}
+          onRemove={onDeleteCoadvisor}
         />
       )}
     </>

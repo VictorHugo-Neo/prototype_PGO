@@ -8,11 +8,35 @@ router = APIRouter(prefix="/meetings", tags=["meetings"])
 
 
 def verify_guidance_access(guidance: models.Guidance, user_id: int):
-    if not guidance or (guidance.advisor_id != user_id and guidance.student_id != user_id):
+    if not guidance or (
+        guidance.advisor_id != user_id
+        and guidance.coadvisor_id != user_id
+        and guidance.student_id != user_id
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Você não tem permissão para acessar esta orientação"
         )
+
+
+def format_meeting_response(
+    meeting: models.Meeting,
+    guidance: models.Guidance | None = None,
+) -> schemas.MeetingResponse:
+    target_guidance = guidance or meeting.guidance
+    role = None
+    if meeting.creator_id and target_guidance:
+        if meeting.creator_id == target_guidance.advisor_id:
+            role = "advisor"
+        elif meeting.creator_id == target_guidance.coadvisor_id:
+            role = "coadvisor"
+        elif meeting.creator_id == target_guidance.student_id:
+            role = "student"
+        elif meeting.creator:
+            role = meeting.creator.type
+    resp = schemas.MeetingResponse.model_validate(meeting)
+    resp.creator_role = role
+    return resp
 
 
 @router.post("/", response_model=schemas.MeetingResponse)
@@ -25,7 +49,8 @@ def create_meeting(
     if not guidance:
         raise HTTPException(status_code=404, detail="Orientação não encontrada")
     verify_guidance_access(guidance, current_user.id)
-    return crud.create_meeting(db, meeting)
+    created = crud.create_meeting(db, meeting, creator_id=current_user.id)
+    return format_meeting_response(created, guidance)
 
 
 @router.get("/guidance/{guidance_id}", response_model=List[schemas.MeetingResponse])
@@ -38,7 +63,8 @@ def get_meetings_by_guidance(
     if not guidance:
         raise HTTPException(status_code=404, detail="Orientação não encontrada")
     verify_guidance_access(guidance, current_user.id)
-    return crud.get_meetings_by_guidance(db, guidance_id)
+    meetings = crud.get_meetings_by_guidance(db, guidance_id)
+    return [format_meeting_response(m, guidance) for m in meetings]
 
 
 @router.get("/{meeting_id}", response_model=schemas.MeetingResponse)
@@ -52,7 +78,7 @@ def get_meeting(
         raise HTTPException(status_code=404, detail="Reunião não encontrada")
     guidance = db.query(models.Guidance).filter(models.Guidance.id == meeting.guidance_id).first()
     verify_guidance_access(guidance, current_user.id)
-    return meeting
+    return format_meeting_response(meeting, guidance)
 
 
 @router.put("/{meeting_id}", response_model=schemas.MeetingResponse)
@@ -69,7 +95,8 @@ def update_meeting(
     verify_guidance_access(guidance, current_user.id)
 
     update_data = meeting_update.model_dump(exclude_unset=True)
-    return crud.update_meeting(db, meeting_id, update_data)
+    updated = crud.update_meeting(db, meeting_id, update_data)
+    return format_meeting_response(updated, guidance)
 
 
 @router.patch("/{meeting_id}/status", response_model=schemas.MeetingResponse)
@@ -85,7 +112,8 @@ def update_meeting_status(
     guidance = db.query(models.Guidance).filter(models.Guidance.id == meeting.guidance_id).first()
     verify_guidance_access(guidance, current_user.id)
 
-    return crud.update_meeting_status(db, meeting_id, status_update.status)
+    updated = crud.update_meeting_status(db, meeting_id, status_update.status)
+    return format_meeting_response(updated, guidance)
 
 
 @router.delete("/{meeting_id}", status_code=status.HTTP_204_NO_CONTENT)

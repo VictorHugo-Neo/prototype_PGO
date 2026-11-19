@@ -9,8 +9,9 @@ interface KanbanCardProps {
 }
 
 export function KanbanCard({ task, index, onClick }: KanbanCardProps) {
-  const isAdvisor = task.creator?.type === 'advisor';
-  const isStudent = task.creator?.type === 'student';
+  const isCoadvisor = task.creator_role === 'coadvisor';
+  const isAdvisor = !isCoadvisor && (task.creator_role === 'advisor' || (!task.creator_role && task.creator?.type === 'advisor'));
+  const isStudent = task.creator_role === 'student' || (!task.creator_role && task.creator?.type === 'student');
 
   return (
     <Draggable draggableId={String(task.id)} index={index}>
@@ -34,6 +35,16 @@ export function KanbanCard({ task, index, onClick }: KanbanCardProps) {
         >
           {task.creator && (
             <div className="mb-2">
+              {isCoadvisor && (
+                <span
+                  data-testid="badge-coadvisor"
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80"
+                  title={`Criada pelo coorientador: ${task.creator.name}`}
+                >
+                  <GraduationCap size={11} aria-hidden="true" />
+                  Coorientador
+                </span>
+              )}
               {isAdvisor && (
                 <span
                   data-testid="badge-advisor"

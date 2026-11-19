@@ -182,27 +182,35 @@ export function TaskDetailsModal({
                     </div>
                   )}
 
-                  {task.creator && (
-                    <div
-                      data-testid="task-creator-info"
-                      className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded font-medium border ${
-                        task.creator.type === 'advisor'
-                          ? 'bg-purple-50 text-purple-700 border-purple-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}
-                      title={task.creator.email ? `E-mail: ${task.creator.email}` : undefined}
-                    >
-                      {task.creator.type === 'advisor' ? (
-                        <GraduationCap size={13} className="text-purple-600" aria-hidden="true" />
-                      ) : (
-                        <User size={13} className="text-emerald-600" aria-hidden="true" />
-                      )}
-                      <span>
-                        Criada por:{' '}
-                        <strong className="text-gray-800">{task.creator.name}</strong> ({task.creator.type === 'advisor' ? 'Orientador' : 'Aluno'})
-                      </span>
-                    </div>
-                  )}
+                  {task.creator && (() => {
+                    const creatorRole = task.creator_role || (task.creator.type === 'advisor' ? 'advisor' : 'student');
+                    const isCoadvisor = creatorRole === 'coadvisor';
+                    const isAdvisor = creatorRole === 'advisor';
+                    const roleLabel = isCoadvisor ? 'Coorientador' : (isAdvisor ? 'Orientador' : 'Aluno');
+                    const badgeClass = isCoadvisor
+                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                      : (isAdvisor
+                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+
+                    return (
+                      <div
+                        data-testid="task-creator-info"
+                        className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded font-medium border ${badgeClass}`}
+                        title={task.creator.email ? `E-mail: ${task.creator.email}` : undefined}
+                      >
+                        {isCoadvisor || isAdvisor ? (
+                          <GraduationCap size={13} className={isCoadvisor ? "text-indigo-600" : "text-purple-600"} aria-hidden="true" />
+                        ) : (
+                          <User size={13} className="text-emerald-600" aria-hidden="true" />
+                        )}
+                        <span>
+                          Criada por:{' '}
+                          <strong className="text-gray-800">{task.creator.name}</strong> ({roleLabel})
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </>
             ) : (
@@ -452,7 +460,20 @@ export function TaskDetailsModal({
                     comments.map((comment) => (
                       <div key={comment.id} className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                         <div className="flex justify-between items-center text-xs text-gray-400 mb-1">
-                          <span className="font-semibold text-gray-700">{comment.user_name}</span>
+                          <span className="font-semibold text-gray-700 flex items-center gap-1.5">
+                            {comment.user_name}
+                            {comment.user_role && (
+                              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                                comment.user_role === 'coadvisor'
+                                  ? 'bg-indigo-100 text-indigo-700'
+                                  : comment.user_role === 'advisor'
+                                  ? 'bg-purple-100 text-purple-700'
+                                  : 'bg-emerald-100 text-emerald-700'
+                              }`}>
+                                {comment.user_role === 'coadvisor' ? 'Coorientador' : comment.user_role === 'advisor' ? 'Orientador' : 'Aluno'}
+                              </span>
+                            )}
+                          </span>
                           <span>{new Date(comment.created_at).toLocaleString('pt-BR')}</span>
                         </div>
                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.content}</p>

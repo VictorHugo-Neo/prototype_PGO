@@ -11,7 +11,12 @@ import { LinkStudentSuccessView, type CreatedGuidanceSummary } from './LinkStude
 interface LinkStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLink: (email: string, theme: string, defenseDate?: string) => Promise<StudentGuidance | void>;
+  onLink: (
+    email: string,
+    theme: string,
+    defenseDate?: string,
+    coadvisorEmail?: string
+  ) => Promise<StudentGuidance | void>;
 }
 
 const THEME_PRESETS = [
@@ -29,6 +34,7 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<AvailableStudent | null>(null);
   const [theme, setTheme] = useState('');
+  const [coadvisorEmail, setCoadvisorEmail] = useState('');
   const [defenseDate, setDefenseDate] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +46,7 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
     setSearchQuery('');
     setSelectedStudent(null);
     setTheme('');
+    setCoadvisorEmail('');
     setDefenseDate('');
     setError('');
     setIsSubmitting(false);
@@ -143,7 +150,10 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
     setIsSubmitting(true);
     try {
       const defenseDateIso = defenseDate ? `${defenseDate}T14:00:00` : undefined;
-      const result = await onLink(targetEmail, theme.trim(), defenseDateIso);
+      const trimmedCoadvisor = coadvisorEmail.trim();
+      const result = trimmedCoadvisor
+        ? await onLink(targetEmail, theme.trim(), defenseDateIso, trimmedCoadvisor)
+        : await onLink(targetEmail, theme.trim(), defenseDateIso);
 
       const createdId = result && 'id' in result ? Number(result.id) : 0;
       setCreatedGuidance({
@@ -293,6 +303,23 @@ export function LinkStudentModal({ isOpen, onClose, onLink }: LinkStudentModalPr
               </div>
 
               <DefenseDatePicker defenseDate={defenseDate} onChangeDate={setDefenseDate} />
+
+              <div>
+                <label
+                  htmlFor="coadvisor-email"
+                  className="block text-xs font-semibold text-gray-700 mb-1.5"
+                >
+                  Coorientador (Opcional)
+                </label>
+                <input
+                  id="coadvisor-email"
+                  type="email"
+                  placeholder="Ex: coorientador@universidade.edu"
+                  value={coadvisorEmail}
+                  onChange={(e) => setCoadvisorEmail(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                />
+              </div>
 
               <div className="flex items-center gap-2 p-2.5 bg-blue-50/60 border border-blue-100 rounded-xl text-[11px] text-blue-700">
                 <Sparkles size={14} className="text-blue-600 shrink-0" />

@@ -63,9 +63,16 @@ export function GuidanceCard({ guidance, summary }: GuidanceCardProps) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors truncate text-sm">
-              {guidance.student.name}
-            </h3>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors truncate text-sm">
+                {guidance.student.name}
+              </h3>
+              {guidance.user_role === 'coadvisor' && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+                  Coorientador
+                </span>
+              )}
+            </div>
             <p className="text-xs text-gray-500 truncate" title={guidance.theme}>
               {guidance.theme}
             </p>

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @layer base {
-  /* Interactive element cursor affordances across the entire application */
   button,
   [role="button"],
   input[type="button"],
@@ -19,7 +18,6 @@
     cursor: not-allowed;
   }
 
-  /* Default smooth transition timing for interactive states */
   a,
   button,
   [role="button"] {

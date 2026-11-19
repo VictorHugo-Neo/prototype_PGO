@@ -27,6 +27,9 @@ class User(Base):
     guidelines_advisor = relationship("Guidance", 
                                     foreign_keys= "Guidance.advisor_id",
                                     back_populates="advisor")
+    guidelines_coadvisor = relationship("Guidance",
+                                      foreign_keys="Guidance.coadvisor_id",
+                                      back_populates="coadvisor")
     guidelines_student = relationship("Guidance",
                                     foreign_keys="Guidance.student_id",
                                     back_populates = "student")
@@ -37,16 +40,20 @@ class Guidance(Base):
     id = Column(Integer, primary_key = True, index=True)
     theme = Column(String)
     defense_date = Column(DateTime, nullable=True)
-    advisor_id = Column(Integer, ForeignKey('users.id'))
-    student_id = Column(Integer, ForeignKey('users.id'))
+    advisor_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    coadvisor_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    student_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     advisor = relationship("User",
                            foreign_keys=[advisor_id],
                            back_populates="guidelines_advisor")
+    coadvisor = relationship("User",
+                             foreign_keys=[coadvisor_id],
+                             back_populates="guidelines_coadvisor")
     student = relationship("User",
-                              foreign_keys=[student_id],
-                              back_populates="guidelines_student")
+                           foreign_keys=[student_id],
+                           back_populates="guidelines_student")
     tasks = relationship("Task",back_populates="guidance")
     meetings = relationship("Meeting", back_populates="guidance")
     kanban_columns = relationship("KanbanColumn", back_populates="guidance", order_by="KanbanColumn.order.asc()", cascade="all, delete-orphan")
@@ -127,5 +134,7 @@ class Meeting(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     guidance_id = Column(Integer, ForeignKey("guidances.id"))
+    creator_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     guidance = relationship("Guidance", back_populates="meetings")
+    creator = relationship("User", foreign_keys=[creator_id])

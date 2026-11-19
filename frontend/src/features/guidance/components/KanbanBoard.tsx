@@ -69,14 +69,16 @@ export function KanbanBoard({
 
   const [editingColumn, setEditingColumn] = useState<KanbanColumnItem | null>(null);
   const [deletingColumn, setDeletingColumn] = useState<KanbanColumnItem | null>(null);
-  const [creatorFilter, setCreatorFilter] = useState<'all' | 'advisor' | 'student'>('all');
+  const [creatorFilter, setCreatorFilter] = useState<'all' | 'advisor' | 'coadvisor' | 'student'>('all');
 
-  const countAdvisor = tasks.filter((t) => t.creator?.type === 'advisor').length;
-  const countStudent = tasks.filter((t) => t.creator?.type === 'student').length;
+  const countCoadvisor = tasks.filter((t) => t.creator_role === 'coadvisor').length;
+  const countAdvisor = tasks.filter((t) => t.creator_role === 'advisor' || (!t.creator_role && t.creator?.type === 'advisor')).length;
+  const countStudent = tasks.filter((t) => t.creator_role === 'student' || (!t.creator_role && t.creator?.type === 'student')).length;
 
   const filteredTasks = tasks.filter((t) => {
-    if (creatorFilter === 'advisor') return t.creator?.type === 'advisor';
-    if (creatorFilter === 'student') return t.creator?.type === 'student';
+    if (creatorFilter === 'coadvisor') return t.creator_role === 'coadvisor';
+    if (creatorFilter === 'advisor') return t.creator_role === 'advisor' || (!t.creator_role && t.creator?.type === 'advisor');
+    if (creatorFilter === 'student') return t.creator_role === 'student' || (!t.creator_role && t.creator?.type === 'student');
     return true;
   });
 
@@ -147,6 +149,18 @@ export function KanbanBoard({
             >
               <GraduationCap size={13} className="text-purple-600" aria-hidden="true" />
               Orientador ({countAdvisor})
+            </button>
+            <button
+              type="button"
+              onClick={() => setCreatorFilter('coadvisor')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-95 ${
+                creatorFilter === 'coadvisor'
+                  ? 'bg-white text-indigo-700 font-semibold shadow-xs ring-1 ring-indigo-200'
+                  : 'hover:text-indigo-700 hover:bg-indigo-50/70 text-gray-600'
+              }`}
+            >
+              <GraduationCap size={13} className="text-indigo-600" aria-hidden="true" />
+              Coorientador ({countCoadvisor})
             </button>
             <button
               type="button"

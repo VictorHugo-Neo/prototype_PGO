@@ -8,7 +8,11 @@ router = APIRouter(prefix="/kanban", tags=["kanban"])
 
 
 def verify_guidance_access(guidance: models.Guidance, user_id: int):
-    if not guidance or (guidance.advisor_id != user_id and guidance.student_id != user_id):
+    if not guidance or (
+        guidance.advisor_id != user_id
+        and guidance.coadvisor_id != user_id
+        and guidance.student_id != user_id
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Você não tem permissão para acessar esta orientação."
@@ -16,10 +20,13 @@ def verify_guidance_access(guidance: models.Guidance, user_id: int):
 
 
 def verify_advisor_access(guidance: models.Guidance, user_id: int):
-    if not guidance or guidance.advisor_id != user_id:
+    if not guidance or (
+        guidance.advisor_id != user_id
+        and guidance.coadvisor_id != user_id
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Apenas o orientador tem permissão para gerenciar as colunas do Kanban."
+            detail="Apenas o orientador ou coorientador tem permissão para gerenciar as colunas do Kanban."
         )
 
 

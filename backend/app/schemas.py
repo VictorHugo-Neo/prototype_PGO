@@ -52,18 +52,24 @@ class GuidanceCreate(BaseModel):
     theme: str 
     advisor_id: int
     student_id: int
+    coadvisor_id: Optional[int] = None
 
 class GuidanceUpdate(BaseModel):
     theme: Optional[str] = None
     defense_date: Optional[datetime] = None
+    coadvisor_id: Optional[int] = None
 
 class DefenseDateUpdate(BaseModel):
     defense_date: datetime
+
+class CoadvisorUpdate(BaseModel):
+    coadvisor_email: EmailStr
 
 class GuidanceLink(BaseModel):
     student_email: EmailStr
     theme: str
     defense_date: Optional[datetime] = None
+    coadvisor_email: Optional[EmailStr] = None
 
 class AvailableStudent(BaseModel):
     id: int
@@ -80,8 +86,10 @@ class GuidanceResponse(BaseModel):
     theme: str
     defense_date: Optional[datetime] = None
     advisor_id: Optional[int] = None
+    coadvisor_id: Optional[int] = None
     student_id: Optional[int] = None
     student: Optional[UserSimple] = None
+    coadvisor: Optional[UserSimple] = None
     model_config = ConfigDict(from_attributes=True)
 
 class GuidanceList(BaseModel):
@@ -89,8 +97,13 @@ class GuidanceList(BaseModel):
     theme: str
     defense_date: Optional[datetime] = None 
     created_at: datetime
+    advisor_id: Optional[int] = None
+    coadvisor_id: Optional[int] = None
+    student_id: Optional[int] = None
     student: UserSimple  
     advisor: Optional[UserSimple] = None
+    coadvisor: Optional[UserSimple] = None
+    user_role: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -105,6 +118,7 @@ class TaskResponse(TaskBase):
     status: str
     creator_id: Optional[int] = None
     creator: Optional[UserSimple] = None
+    creator_role: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class TaskUpdate(BaseModel):
@@ -156,6 +170,7 @@ class CommentResponse(BaseModel):
     created_at: datetime
     user_name: str
     user_id: int
+    user_role: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -201,6 +216,9 @@ class MeetingResponse(BaseModel):
     status: str
     created_at: datetime
     guidance_id: Optional[int] = None
+    creator_id: Optional[int] = None
+    creator: Optional[UserSimple] = None
+    creator_role: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
 

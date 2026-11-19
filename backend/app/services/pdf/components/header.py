@@ -53,6 +53,14 @@ def build_meta_table(guidance: models.Guidance, styles: Dict[str, ParagraphStyle
     defense_str = format_date(guidance.defense_date, include_time=True) if guidance.defense_date else "A definir"
     start_str = format_date(guidance.created_at, include_time=False) if guidance.created_at else "Data não registrada"
 
+    advisor_html = (
+        f"<b>Orientador(a):</b> {guidance.advisor.name}<br/>"
+        f"<b>E-mail:</b> {guidance.advisor.email}<br/>"
+    )
+    if getattr(guidance, "coadvisor", None):
+        advisor_html += f"<b>Coorientador(a):</b> {guidance.coadvisor.name}<br/>"
+    advisor_html += f"<b>Previsão de Banca:</b> {defense_str}"
+
     col_w = CONTENT_WIDTH / 2.0
     content = [
         [
@@ -62,12 +70,7 @@ def build_meta_table(guidance: models.Guidance, styles: Dict[str, ParagraphStyle
                 f"<b>Início da Orientação:</b> {start_str}",
                 styles["meta_text"],
             ),
-            Paragraph(
-                f"<b>Orientador(a):</b> {guidance.advisor.name}<br/>"
-                f"<b>E-mail:</b> {guidance.advisor.email}<br/>"
-                f"<b>Previsão de Banca:</b> {defense_str}",
-                styles["meta_text"],
-            ),
+            Paragraph(advisor_html, styles["meta_text"]),
         ],
         [
             Paragraph(f"<b>Tema da Pesquisa:</b> {guidance.theme}", styles["meta_text"]),

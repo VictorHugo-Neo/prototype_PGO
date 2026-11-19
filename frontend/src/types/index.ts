@@ -57,6 +57,7 @@ export interface Task {
   time_estimate?: string;
   creator_id?: number | null;
   creator?: TaskCreator | null;
+  creator_role?: 'advisor' | 'coadvisor' | 'student';
 }
 
 export interface TaskCreatePayload {
@@ -82,6 +83,7 @@ export interface Comment {
   created_at: string;
   user_name: string;
   user_id: number;
+  user_role?: 'advisor' | 'coadvisor' | 'student';
 }
 
 export interface Attachment {
@@ -99,6 +101,9 @@ export interface Meeting {
   status: MeetingStatus;
   guidance_id: number;
   created_at?: string;
+  creator_id?: number | null;
+  creator?: TaskCreator | null;
+  creator_role?: 'advisor' | 'coadvisor' | 'student';
 }
 
 export interface MeetingUpdatePayload {
@@ -129,6 +134,10 @@ export interface StudentGuidance {
   theme: string;
   defense_date?: string;
   created_at?: string;
+  advisor_id?: number;
+  coadvisor_id?: number | null;
+  student_id?: number;
+  user_role?: 'advisor' | 'coadvisor' | 'student';
   student: {
     id: number;
     name: string;
@@ -141,6 +150,12 @@ export interface StudentGuidance {
     email?: string;
     avatar_path?: string;
   };
+  coadvisor?: {
+    id: number;
+    name: string;
+    email?: string;
+    avatar_path?: string;
+  } | null;
 }
 
 export interface DashboardTaskStat {

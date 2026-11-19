@@ -132,13 +132,26 @@ export const guidanceService = {
     return response.data;
   },
 
-  linkStudent: async (email: string, theme: string, defenseDate?: string): Promise<StudentGuidance> => {
-    const payload: { student_email: string; theme: string; defense_date?: string } = {
+  linkStudent: async (
+    email: string,
+    theme: string,
+    defenseDate?: string,
+    coadvisorEmail?: string
+  ): Promise<StudentGuidance> => {
+    const payload: {
+      student_email: string;
+      theme: string;
+      defense_date?: string;
+      coadvisor_email?: string;
+    } = {
       student_email: email,
       theme,
     };
     if (defenseDate) {
       payload.defense_date = defenseDate;
+    }
+    if (coadvisorEmail && coadvisorEmail.trim()) {
+      payload.coadvisor_email = coadvisorEmail.trim();
     }
     const response = await api.post<StudentGuidance>('/guidances/link', payload);
     return response.data;
@@ -161,6 +174,18 @@ export const guidanceService = {
 
   removeDefenseDate: async (id: number): Promise<StudentGuidance> => {
     const response = await api.delete<StudentGuidance>(`/guidances/${id}/defense-date`);
+    return response.data;
+  },
+
+  addCoadvisor: async (guidanceId: number, coadvisorEmail: string): Promise<StudentGuidance> => {
+    const response = await api.put<StudentGuidance>(`/guidances/${guidanceId}/coadvisor`, {
+      coadvisor_email: coadvisorEmail,
+    });
+    return response.data;
+  },
+
+  removeCoadvisor: async (guidanceId: number): Promise<StudentGuidance> => {
+    const response = await api.delete<StudentGuidance>(`/guidances/${guidanceId}/coadvisor`);
     return response.data;
   },
 };

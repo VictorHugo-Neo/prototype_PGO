@@ -27,14 +27,16 @@ def test_create_user():
 
 
 def test_meeting_crud():
+    import random
     from datetime import datetime, timedelta
     db = SessionLocal()
+    suffix = random.randint(10000, 99999)
 
     advisor = crud.create_user(
         db,
         schemas.UserCreate(
             name="Advisor CRUD",
-            email="advisor_crud_meet@test.com",
+            email=f"advisor_crud_meet_{suffix}@test.com",
             type=models.TypeUser.ADVISOR,
             password="secretpassword123"
         )
@@ -43,7 +45,7 @@ def test_meeting_crud():
         db,
         schemas.UserCreate(
             name="Student CRUD",
-            email="student_crud_meet@test.com",
+            email=f"student_crud_meet_{suffix}@test.com",
             type=models.TypeUser.STUDENT,
             password="secretpassword123"
         )

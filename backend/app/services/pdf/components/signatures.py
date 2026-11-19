@@ -20,26 +20,51 @@ def build_validation_section(
         )
     )
 
-    col_w = (CONTENT_WIDTH - 20) / 2.0
-    sig_content = [
-        [
-            Paragraph(
-                f"________________________________________<br/>"
-                f"<b>{guidance.student.name}</b><br/>"
-                f"<font size='7.5' color='#475569'>Discente / Orientando(a)<br/>Data: _____/_____/_________</font>",
-                styles["signature_text"],
-            ),
-            "",
-            Paragraph(
-                f"________________________________________<br/>"
-                f"<b>{guidance.advisor.name}</b><br/>"
-                f"<font size='7.5' color='#475569'>Docente / Orientador(a)<br/>Data: _____/_____/_________</font>",
-                styles["signature_text"],
-            ),
+    if getattr(guidance, "coadvisor", None):
+        col_w = CONTENT_WIDTH / 3.0
+        sig_content = [
+            [
+                Paragraph(
+                    f"_______________________________<br/>"
+                    f"<b>{guidance.student.name}</b><br/>"
+                    f"<font size='7' color='#475569'>Discente / Orientando(a)<br/>Data: ___/___/______</font>",
+                    styles["signature_text"],
+                ),
+                Paragraph(
+                    f"_______________________________<br/>"
+                    f"<b>{guidance.advisor.name}</b><br/>"
+                    f"<font size='7' color='#475569'>Docente / Orientador(a)<br/>Data: ___/___/______</font>",
+                    styles["signature_text"],
+                ),
+                Paragraph(
+                    f"_______________________________<br/>"
+                    f"<b>{guidance.coadvisor.name}</b><br/>"
+                    f"<font size='7' color='#475569'>Docente / Coorientador(a)<br/>Data: ___/___/______</font>",
+                    styles["signature_text"],
+                ),
+            ]
         ]
-    ]
-
-    sig_table = Table(sig_content, colWidths=[col_w, 20, col_w])
+        sig_table = Table(sig_content, colWidths=[col_w, col_w, col_w])
+    else:
+        col_w = (CONTENT_WIDTH - 20) / 2.0
+        sig_content = [
+            [
+                Paragraph(
+                    f"________________________________________<br/>"
+                    f"<b>{guidance.student.name}</b><br/>"
+                    f"<font size='7.5' color='#475569'>Discente / Orientando(a)<br/>Data: _____/_____/_________</font>",
+                    styles["signature_text"],
+                ),
+                "",
+                Paragraph(
+                    f"________________________________________<br/>"
+                    f"<b>{guidance.advisor.name}</b><br/>"
+                    f"<font size='7.5' color='#475569'>Docente / Orientador(a)<br/>Data: _____/_____/_________</font>",
+                    styles["signature_text"],
+                ),
+            ]
+        ]
+        sig_table = Table(sig_content, colWidths=[col_w, 20, col_w])
     sig_table.setStyle(
         TableStyle(
             [

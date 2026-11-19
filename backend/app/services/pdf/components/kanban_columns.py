@@ -46,6 +46,7 @@ def _build_column_tasks_table(
     completed_slug: str,
     palette: dict,
     styles: Dict[str, ParagraphStyle],
+    guidance: Optional[models.Guidance] = None,
 ) -> Table:
     now = datetime.now()
     rows = [
@@ -66,7 +67,19 @@ def _build_column_tasks_table(
             desc_snippet = f"<br/><font size='7' color='#64748B'>{clean_desc}</font>"
 
         creator_tag = ""
-        if getattr(t, "creator", None):
+        creator_id = getattr(t, "creator_id", None)
+        if not creator_id and getattr(t, "creator", None):
+            creator_id = getattr(t.creator, "id", None)
+
+        if guidance and creator_id:
+            if creator_id == guidance.advisor_id:
+                creator_tag = " <font size='7' color='#7C3AED'><b>[Orientador]</b></font>"
+            elif guidance.coadvisor_id and creator_id == guidance.coadvisor_id:
+                creator_tag = " <font size='7' color='#4338CA'><b>[Coorientador]</b></font>"
+            elif creator_id == guidance.student_id:
+                creator_tag = " <font size='7' color='#059669'><b>[Aluno]</b></font>"
+
+        if not creator_tag and getattr(t, "creator", None):
             c_type = getattr(t.creator, "type", None)
             if c_type in (models.TypeUser.ADVISOR, "advisor"):
                 creator_tag = " <font size='7' color='#7C3AED'><b>[Orientador]</b></font>"
@@ -136,6 +149,7 @@ def build_kanban_columns_section(
     tasks: List[models.Task],
     completion_col: Optional[models.KanbanColumn],
     styles: Dict[str, ParagraphStyle],
+    guidance: Optional[models.Guidance] = None,
 ) -> List:
     elements = [
         Paragraph("1. Detalhamento das Tarefas por Coluna do Kanban", styles["section_title"]),
@@ -150,7 +164,7 @@ def build_kanban_columns_section(
 
         col_header = _build_column_header(col, len(col_tasks), palette, styles)
         col_content = (
-            _build_column_tasks_table(col_tasks, col, completed_slug, palette, styles)
+            _build_column_tasks_table(col_tasks, col, completed_slug, palette, styles, guidance=guidance)
             if col_tasks
             else _build_empty_column_table(styles)
         )

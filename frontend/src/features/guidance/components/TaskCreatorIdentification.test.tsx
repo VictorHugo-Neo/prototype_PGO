@@ -54,6 +54,23 @@ describe('Task Creator Identification', () => {
     },
   };
 
+  const coadvisorTask: Task = {
+    id: 4,
+    title: 'Modelagem Estatística Avançada',
+    description: 'Definir testes de hipótese e amostragem',
+    status: 'in_progress',
+    guidance_id: 10,
+    time_estimate: '2026-11-10T00:00:00Z',
+    creator_id: 303,
+    creator_role: 'coadvisor',
+    creator: {
+      id: 303,
+      name: 'Profa. Regina Coorientadora',
+      email: 'regina@universidade.edu',
+      type: 'advisor',
+    },
+  };
+
   const legacyTask: Task = {
     id: 3,
     title: 'Tarefa Antiga sem Criador',
@@ -77,6 +94,18 @@ describe('Task Creator Identification', () => {
       expect(badge).toHaveTextContent('Orientador');
       expect(badge).toHaveAttribute('title', expect.stringContaining('Prof. Carlos Alberto'));
       expect(screen.queryByTestId('badge-student')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('badge-coadvisor')).not.toBeInTheDocument();
+    });
+
+    it('renders "Coorientador" badge when creator is a coadvisor', () => {
+      renderKanbanCard(coadvisorTask);
+
+      const badge = screen.getByTestId('badge-coadvisor');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('Coorientador');
+      expect(badge).toHaveAttribute('title', expect.stringContaining('Profa. Regina Coorientadora'));
+      expect(screen.queryByTestId('badge-advisor')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('badge-student')).not.toBeInTheDocument();
     });
 
     it('renders "Aluno" badge when creator is a student', () => {
@@ -87,6 +116,7 @@ describe('Task Creator Identification', () => {
       expect(badge).toHaveTextContent('Aluno');
       expect(badge).toHaveAttribute('title', expect.stringContaining('Mariana Lima'));
       expect(screen.queryByTestId('badge-advisor')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('badge-coadvisor')).not.toBeInTheDocument();
     });
 
     it('renders card gracefully without badges when creator is missing', () => {
@@ -121,6 +151,28 @@ describe('Task Creator Identification', () => {
       expect(creatorInfo).toHaveTextContent('Orientador');
     });
 
+    it('displays creator name and role for coadvisor-created task', () => {
+      render(
+        <TaskDetailsModal
+          task={coadvisorTask}
+          comments={[]}
+          attachments={[]}
+          columns={sampleColumns}
+          onClose={() => {}}
+          onUpdateStatus={async () => {}}
+          onUpdateTask={async () => coadvisorTask}
+          onDeleteTask={async () => {}}
+          onAddComment={async () => {}}
+          onUploadAttachment={async () => {}}
+        />
+      );
+
+      const creatorInfo = screen.getByTestId('task-creator-info');
+      expect(creatorInfo).toBeInTheDocument();
+      expect(creatorInfo).toHaveTextContent('Profa. Regina Coorientadora');
+      expect(creatorInfo).toHaveTextContent('Coorientador');
+    });
+
     it('displays creator name and role for student-created task', () => {
       render(
         <TaskDetailsModal
@@ -145,7 +197,7 @@ describe('Task Creator Identification', () => {
   });
 
   describe('KanbanBoard author filtering', () => {
-    const allTasks = [advisorTask, studentTask, legacyTask];
+    const allTasks = [advisorTask, coadvisorTask, studentTask, legacyTask];
 
     it('shows filter toolbar with task counts and filters columns by author', () => {
       render(
@@ -158,29 +210,41 @@ describe('Task Creator Identification', () => {
         />
       );
 
-      expect(screen.getByRole('button', { name: /todas \(3\)/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /orientador \(1\)/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /aluno \(1\)/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^todas \(4\)$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^orientador \(1\)$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^coorientador \(1\)$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^aluno \(1\)$/i })).toBeInTheDocument();
 
       expect(screen.getByText('Capítulo 1 - Revisão Bibliográfica')).toBeInTheDocument();
+      expect(screen.getByText('Modelagem Estatística Avançada')).toBeInTheDocument();
       expect(screen.getByText('Coleta de Dados em Campo')).toBeInTheDocument();
       expect(screen.getByText('Tarefa Antiga sem Criador')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole('button', { name: /orientador \(1\)/i }));
+      fireEvent.click(screen.getByRole('button', { name: /^orientador \(1\)$/i }));
 
       expect(screen.getByText('Capítulo 1 - Revisão Bibliográfica')).toBeInTheDocument();
+      expect(screen.queryByText('Modelagem Estatística Avançada')).not.toBeInTheDocument();
       expect(screen.queryByText('Coleta de Dados em Campo')).not.toBeInTheDocument();
       expect(screen.queryByText('Tarefa Antiga sem Criador')).not.toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole('button', { name: /aluno \(1\)/i }));
+      fireEvent.click(screen.getByRole('button', { name: /^coorientador \(1\)$/i }));
+
+      expect(screen.getByText('Modelagem Estatística Avançada')).toBeInTheDocument();
+      expect(screen.queryByText('Capítulo 1 - Revisão Bibliográfica')).not.toBeInTheDocument();
+      expect(screen.queryByText('Coleta de Dados em Campo')).not.toBeInTheDocument();
+      expect(screen.queryByText('Tarefa Antiga sem Criador')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /^aluno \(1\)$/i }));
 
       expect(screen.getByText('Coleta de Dados em Campo')).toBeInTheDocument();
       expect(screen.queryByText('Capítulo 1 - Revisão Bibliográfica')).not.toBeInTheDocument();
+      expect(screen.queryByText('Modelagem Estatística Avançada')).not.toBeInTheDocument();
       expect(screen.queryByText('Tarefa Antiga sem Criador')).not.toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole('button', { name: /todas \(3\)/i }));
+      fireEvent.click(screen.getByRole('button', { name: /^todas \(4\)$/i }));
 
       expect(screen.getByText('Capítulo 1 - Revisão Bibliográfica')).toBeInTheDocument();
+      expect(screen.getByText('Modelagem Estatística Avançada')).toBeInTheDocument();
       expect(screen.getByText('Coleta de Dados em Campo')).toBeInTheDocument();
       expect(screen.getByText('Tarefa Antiga sem Criador')).toBeInTheDocument();
     });

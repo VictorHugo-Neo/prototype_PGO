@@ -251,12 +251,13 @@ def authenticate_user(db: Session, email: str, password: str):
     return user
 
 
-def create_meeting(db: Session, meeting: schemas.MeetingCreate):
+def create_meeting(db: Session, meeting: schemas.MeetingCreate, creator_id: int | None = None):
     db_meeting = models.Meeting(
         date=meeting.date,
         topic=meeting.topic,
         guidance_id=meeting.guidance_id,
-        status="pending"
+        status="pending",
+        creator_id=creator_id
     )
     db.add(db_meeting)
     db.commit()
@@ -265,12 +266,18 @@ def create_meeting(db: Session, meeting: schemas.MeetingCreate):
 
 
 def get_meeting_by_id(db: Session, meeting_id: int):
-    return db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+    return (
+        db.query(models.Meeting)
+        .options(joinedload(models.Meeting.creator))
+        .filter(models.Meeting.id == meeting_id)
+        .first()
+    )
 
 
 def get_meetings_by_guidance(db: Session, guidance_id: int):
     return (
         db.query(models.Meeting)
+        .options(joinedload(models.Meeting.creator))
         .filter(models.Meeting.guidance_id == guidance_id)
         .order_by(models.Meeting.date.asc())
         .all()

@@ -32,8 +32,9 @@ def generate_pdf_report(
         raise HTTPException(status_code=404, detail="Orientação não encontrada.")
 
     is_advisor = guidance.advisor_id == current_user.id
+    is_coadvisor = guidance.coadvisor_id == current_user.id
     is_student = guidance.student_id == current_user.id
-    if not is_advisor and not is_student:
+    if not is_advisor and not is_coadvisor and not is_student:
         raise HTTPException(
             status_code=403,
             detail="Você não tem permissão para acessar o relatório desta orientação.",

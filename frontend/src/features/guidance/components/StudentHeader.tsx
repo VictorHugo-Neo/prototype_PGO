@@ -34,6 +34,7 @@ interface StudentHeaderProps {
   onDownloadReport: () => void;
   onPreviewReport?: () => void;
   onOpenCreateTaskModal: () => void;
+  onOpenCoadvisorModal?: () => void;
 }
 
 function getDefenseDateMeta(defenseDate?: string | null) {
@@ -96,10 +97,15 @@ export function StudentHeader({
   onDownloadReport,
   onPreviewReport,
   onOpenCreateTaskModal,
+  onOpenCoadvisorModal,
 }: StudentHeaderProps) {
   const navigate = useNavigate();
   const isStudent = myUserId === guidance.student.id;
-  const isAdvisor = !isStudent || Boolean(guidance.advisor && myUserId === guidance.advisor.id);
+  const isPrincipalAdvisor = Boolean(guidance.advisor && myUserId === guidance.advisor.id);
+  const isAdvisor = !isStudent || Boolean(
+    isPrincipalAdvisor ||
+    (guidance.coadvisor && myUserId === guidance.coadvisor.id)
+  );
   const defenseMeta = getDefenseDateMeta(guidance.defense_date);
   const [isReportMenuOpen, setIsReportMenuOpen] = useState(false);
   const reportMenuRef = useRef<HTMLDivElement>(null);
@@ -185,9 +191,46 @@ export function StudentHeader({
 
             <div>
               <h1 className="text-xl font-bold text-gray-800">{guidance.student.name}</h1>
-              <p className="text-gray-500 text-xs mt-0.5 mb-1.5">
-                Tema: <span className="font-medium text-blue-600">{guidance.theme}</span>
-              </p>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-gray-500 text-xs mt-0.5 mb-1.5">
+                <span>
+                  Tema: <span className="font-medium text-blue-600">{guidance.theme}</span>
+                </span>
+                {guidance.advisor && (
+                  <span className="text-gray-400">
+                    • Orientador: <strong className="text-gray-700 font-medium">{guidance.advisor.name}</strong>
+                  </span>
+                )}
+                {guidance.coadvisor ? (
+                  <span className="inline-flex items-center gap-1 text-gray-400">
+                    • Coorientador: <strong className="text-indigo-700 font-medium">{guidance.coadvisor.name}</strong>
+                    {isPrincipalAdvisor && onOpenCoadvisorModal && (
+                      <button
+                        type="button"
+                        onClick={onOpenCoadvisorModal}
+                        data-testid="manage-coadvisor-btn"
+                        className="p-0.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all cursor-pointer"
+                        title="Alterar ou desvincular coorientador"
+                        aria-label="Alterar ou desvincular coorientador"
+                      >
+                        <Pencil size={11} />
+                      </button>
+                    )}
+                  </span>
+                ) : (
+                  isPrincipalAdvisor && onOpenCoadvisorModal && (
+                    <button
+                      type="button"
+                      onClick={onOpenCoadvisorModal}
+                      data-testid="add-coadvisor-btn"
+                      className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50/70 hover:bg-indigo-100/80 border border-indigo-200/60 px-2 py-0.5 rounded-md transition-all cursor-pointer ml-1"
+                      title="Adicionar docente coorientador a este projeto"
+                    >
+                      <GraduationCap size={12} aria-hidden="true" />
+                      <span>+ Coorientador</span>
+                    </button>
+                  )
+                )}
+              </div>
               {defenseMeta ? (
                 <div
                   data-testid="defense-date-badge"

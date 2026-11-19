@@ -44,6 +44,24 @@ def init_db():
                         ) THEN
                             ALTER TABLE tasks ADD COLUMN creator_id INTEGER REFERENCES users(id);
                         END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'guidances'
+                              AND column_name = 'coadvisor_id'
+                        ) THEN
+                            ALTER TABLE guidances ADD COLUMN coadvisor_id INTEGER REFERENCES users(id);
+                        END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'meetings'
+                              AND column_name = 'creator_id'
+                        ) THEN
+                            ALTER TABLE meetings ADD COLUMN creator_id INTEGER REFERENCES users(id);
+                        END IF;
                     END $$;
                 """))
         except Exception:
@@ -51,9 +69,17 @@ def init_db():
     elif engine.dialect.name == "sqlite":
         try:
             with engine.begin() as conn:
-                columns = [c[1] for c in conn.execute(text("PRAGMA table_info(tasks)")).fetchall()]
-                if columns and "creator_id" not in columns:
+                task_cols = [c[1] for c in conn.execute(text("PRAGMA table_info(tasks)")).fetchall()]
+                if task_cols and "creator_id" not in task_cols:
                     conn.execute(text("ALTER TABLE tasks ADD COLUMN creator_id INTEGER REFERENCES users(id)"))
+
+                guidance_cols = [c[1] for c in conn.execute(text("PRAGMA table_info(guidances)")).fetchall()]
+                if guidance_cols and "coadvisor_id" not in guidance_cols:
+                    conn.execute(text("ALTER TABLE guidances ADD COLUMN coadvisor_id INTEGER REFERENCES users(id)"))
+
+                meeting_cols = [c[1] for c in conn.execute(text("PRAGMA table_info(meetings)")).fetchall()]
+                if meeting_cols and "creator_id" not in meeting_cols:
+                    conn.execute(text("ALTER TABLE meetings ADD COLUMN creator_id INTEGER REFERENCES users(id)"))
         except Exception:
             pass
 

@@ -23,6 +23,7 @@ export default function StudentDetails() {
     createTaskStatus,
     isMeetingModalOpen,
     isDefenseModalOpen,
+    isCoadvisorModalOpen,
     imageSrc,
     isCropModalOpen,
     imgError,
@@ -30,6 +31,7 @@ export default function StudentDetails() {
     setIsCreateModalOpen,
     setIsMeetingModalOpen,
     setIsDefenseModalOpen,
+    setIsCoadvisorModalOpen,
     setIsCropModalOpen,
     setImageSrc,
     setImgError,
@@ -53,6 +55,8 @@ export default function StudentDetails() {
     handleUpdateDefenseDate,
     handleSaveDefenseDate,
     handleDeleteDefenseDate,
+    handleSaveCoadvisor,
+    handleDeleteCoadvisor,
     handleDownloadReport,
     handlePreviewReport,
     isGeneratingPdf,
@@ -72,7 +76,10 @@ export default function StudentDetails() {
     );
   }
 
-  const isAdvisor = Boolean(guidance.advisor && myUserId === guidance.advisor.id);
+  const isAdvisor = Boolean(
+    (guidance.advisor && myUserId === guidance.advisor.id) ||
+    (guidance.coadvisor && myUserId === guidance.coadvisor.id)
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -93,6 +100,7 @@ export default function StudentDetails() {
         onOpenCreateTaskModal={() =>
           handleOpenCreateTask(columns && columns.length > 0 ? (columns[0].slug as TaskStatus) : 'pending')
         }
+        onOpenCoadvisorModal={() => setIsCoadvisorModalOpen(true)}
       />
 
       <KanbanBoard
@@ -145,6 +153,11 @@ export default function StudentDetails() {
         onCloseDefenseModal={() => setIsDefenseModalOpen(false)}
         onSaveDefenseDate={handleSaveDefenseDate}
         onDeleteDefenseDate={handleDeleteDefenseDate}
+        isCoadvisorModalOpen={isCoadvisorModalOpen}
+        guidanceCoadvisor={guidance.coadvisor}
+        onCloseCoadvisorModal={() => setIsCoadvisorModalOpen(false)}
+        onSaveCoadvisor={handleSaveCoadvisor}
+        onDeleteCoadvisor={handleDeleteCoadvisor}
       />
     </div>
   );

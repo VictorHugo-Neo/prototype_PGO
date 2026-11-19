@@ -1,5 +1,6 @@
 from collections import defaultdict
 from fastapi import APIRouter, Depends
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from .. import models, deps
 from ..database import get_db
@@ -28,7 +29,12 @@ def get_dashboard_stats(
     current_user: models.User = Depends(deps.get_current_user)
 ):
     if current_user.type == 'advisor':
-        guidances = db.query(models.Guidance).filter(models.Guidance.advisor_id == current_user.id).all()
+        guidances = db.query(models.Guidance).filter(
+            or_(
+                models.Guidance.advisor_id == current_user.id,
+                models.Guidance.coadvisor_id == current_user.id
+            )
+        ).all()
     else:
         guidances = db.query(models.Guidance).filter(models.Guidance.student_id == current_user.id).all()
 

@@ -30,6 +30,7 @@ def build_kanban_summary(
     meetings: List[models.Meeting],
     completion_col: Optional[models.KanbanColumn],
     styles: Dict[str, ParagraphStyle],
+    guidance: Optional[models.Guidance] = None,
 ) -> List:
     known_slugs = {col.slug for col in columns}
     kanban_tasks = [t for t in tasks if t.status in known_slugs]
@@ -72,6 +73,18 @@ def build_kanban_summary(
         f"<b>Etapa Final ({completion_col.title if completion_col else 'Concluído'}):</b> {completed_tasks} ({pct}%) &nbsp;&nbsp;|&nbsp;&nbsp; "
         f"<b>Reuniões Realizadas:</b> {confirmed_meetings} de {total_meetings}"
     )
+
+    if guidance:
+        adv_count = sum(1 for t in kanban_tasks if getattr(t, "creator_id", None) == guidance.advisor_id)
+        coadv_count = sum(1 for t in kanban_tasks if guidance.coadvisor_id and getattr(t, "creator_id", None) == guidance.coadvisor_id)
+        stud_count = sum(1 for t in kanban_tasks if getattr(t, "creator_id", None) == guidance.student_id)
+
+        author_parts = [f"Orientador: <b>{adv_count}</b>"]
+        if guidance.coadvisor_id:
+            author_parts.append(f"Coorientador: <b>{coadv_count}</b>")
+        author_parts.append(f"Aluno: <b>{stud_count}</b>")
+        overview_text += f"<br/><font size='7.5' color='#475569'><b>Origem das Atividades:</b> {' &nbsp;|&nbsp; '.join(author_parts)}</font>"
+
     overview_p = Paragraph(overview_text, styles["table_cell"])
 
     w_done = max(1.0, CONTENT_WIDTH * (pct / 100.0)) if pct > 0 else 0.0

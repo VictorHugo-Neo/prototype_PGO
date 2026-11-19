@@ -27,6 +27,7 @@ export function useStudentGuidance(id?: string) {
   const [createTaskStatus, setCreateTaskStatus] = useState<TaskStatus>('pending');
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isDefenseModalOpen, setIsDefenseModalOpen] = useState(false);
+  const [isCoadvisorModalOpen, setIsCoadvisorModalOpen] = useState(false);
 
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
@@ -357,6 +358,44 @@ export function useStudentGuidance(id?: string) {
     }
   };
 
+  const handleSaveCoadvisor = async (email: string) => {
+    if (!id || !guidance) return;
+    try {
+      const updated = await guidanceService.addCoadvisor(Number(id), email);
+      setGuidance((prev) =>
+        prev
+          ? {
+              ...prev,
+              coadvisor: updated.coadvisor,
+              coadvisor_id: updated.coadvisor_id,
+            }
+          : null
+      );
+    } catch (error) {
+      console.error('Erro ao salvar coorientador:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteCoadvisor = async () => {
+    if (!id || !guidance) return;
+    try {
+      await guidanceService.removeCoadvisor(Number(id));
+      setGuidance((prev) =>
+        prev
+          ? {
+              ...prev,
+              coadvisor: null,
+              coadvisor_id: null,
+            }
+          : null
+      );
+    } catch (error) {
+      console.error('Erro ao remover coorientador:', error);
+      throw error;
+    }
+  };
+
   const handleDownloadReport = async () => {
     if (!id || isGeneratingPdf) return;
     setIsGeneratingPdf(true);
@@ -419,6 +458,7 @@ export function useStudentGuidance(id?: string) {
     isCreateModalOpen,
     isMeetingModalOpen,
     isDefenseModalOpen,
+    isCoadvisorModalOpen,
     imageSrc,
     isCropModalOpen,
     imgError,
@@ -426,6 +466,7 @@ export function useStudentGuidance(id?: string) {
     setIsCreateModalOpen,
     setIsMeetingModalOpen,
     setIsDefenseModalOpen,
+    setIsCoadvisorModalOpen,
     setIsCropModalOpen,
     setImageSrc,
     setImgError,
@@ -451,6 +492,8 @@ export function useStudentGuidance(id?: string) {
     handleUpdateDefenseDate,
     handleSaveDefenseDate,
     handleDeleteDefenseDate,
+    handleSaveCoadvisor,
+    handleDeleteCoadvisor,
     handleDownloadReport,
     handlePreviewReport,
     isGeneratingPdf,

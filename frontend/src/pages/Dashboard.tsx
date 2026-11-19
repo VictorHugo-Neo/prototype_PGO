@@ -46,8 +46,13 @@ export default function Dashboard() {
     loadDashboard();
   }, [loadDashboard]);
 
-  const handleLinkStudent = async (email: string, theme: string, defenseDate?: string) => {
-    const created = await guidanceService.linkStudent(email, theme, defenseDate);
+  const handleLinkStudent = async (
+    email: string,
+    theme: string,
+    defenseDate?: string,
+    coadvisorEmail?: string
+  ) => {
+    const created = await guidanceService.linkStudent(email, theme, defenseDate, coadvisorEmail);
     await loadDashboard();
     return created;
   };

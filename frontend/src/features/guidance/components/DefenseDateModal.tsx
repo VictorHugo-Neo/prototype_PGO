@@ -37,7 +37,6 @@ function getInitialDateParts(currentDate?: string | null) {
         };
       }
     } catch {
-      // Ignore invalid date string and fallback to default 30-day projection
     }
   }
 
