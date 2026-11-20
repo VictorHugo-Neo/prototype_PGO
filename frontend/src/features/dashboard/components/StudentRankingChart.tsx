@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ResponsiveContainer,
@@ -8,7 +9,9 @@ import {
   CartesianGrid,
   Tooltip,
   Cell,
+  ReferenceLine,
 } from 'recharts';
+import { TrendingUp, Award, Layers } from 'lucide-react';
 import type { StudentRanking } from '../../../types';
 
 interface StudentRankingChartProps {
@@ -19,6 +22,16 @@ export function StudentRankingChart({ data = [] }: StudentRankingChartProps) {
   const navigate = useNavigate();
   const hasData = data && data.length > 0;
 
+  const { avgProgress, completedStudentsCount } = useMemo(() => {
+    if (!data || data.length === 0) return { avgProgress: 0, completedStudentsCount: 0 };
+    const sum = data.reduce((acc, curr) => acc + (curr.progress || 0), 0);
+    const completed = data.filter((d) => d.progress === 100).length;
+    return {
+      avgProgress: Math.round(sum / data.length),
+      completedStudentsCount: completed,
+    };
+  }, [data]);
+
   const handleBarClick = (entry: StudentRanking) => {
     if (entry.guidance_id) {
       navigate(`/guidance/${entry.guidance_id}`);
@@ -26,80 +39,152 @@ export function StudentRankingChart({ data = [] }: StudentRankingChartProps) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-w-0">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-base font-bold text-gray-800">Progresso dos Alunos (%)</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Clique na barra para acessar o quadro Kanban da orientação
-          </p>
+    <div className="bg-white p-5 rounded-2xl shadow-2xs border border-gray-150/80 flex flex-col justify-between min-w-0 transition-all duration-200 hover:shadow-xs">
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-bold text-gray-800">Progresso dos Alunos (%)</h3>
+              {hasData && (
+                <span className="text-[11px] font-semibold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                  {data.length} {data.length === 1 ? 'aluno' : 'alunos'}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Clique na barra para acessar o quadro Kanban da orientação
+            </p>
+          </div>
+
+          {hasData && (
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-700 bg-blue-50/80 px-2.5 py-1 rounded-lg border border-blue-200/60 shadow-2xs">
+                <TrendingUp size={13} className="text-blue-600" />
+                <span>Média da Turma: <strong>{avgProgress}%</strong></span>
+              </div>
+              {completedStudentsCount > 0 && (
+                <div className="hidden sm:flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50/80 px-2.5 py-1 rounded-lg border border-emerald-200/60 shadow-2xs">
+                  <Award size={13} className="text-emerald-600" />
+                  <span>{completedStudentsCount} pronto(s)</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+        {!hasData ? (
+          <div className="h-60 flex flex-col items-center justify-center text-center p-6 bg-gray-50/60 rounded-xl border border-dashed border-gray-200 space-y-2">
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+              <Layers size={18} aria-hidden="true" />
+            </div>
+            <p className="text-xs font-semibold text-gray-700">Nenhum aluno com progresso registrado</p>
+            <p className="text-[11px] text-gray-400 max-w-xs">
+              Conclua tarefas nas colunas dos quadros Kanban para calcular o progresso individual e o ranking.
+            </p>
+          </div>
+        ) : (
+          <div className="h-60 w-full min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 300, height: 240 }}>
+              <BarChart data={data} layout="vertical" margin={{ left: 5, right: 25, top: 5, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  axisLine={{ stroke: '#e2e8f0' }}
+                  tickLine={false}
+                  unit="%"
+                />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={85}
+                  tick={{ fontSize: 11, fill: '#475569', fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: 'rgba(59, 130, 246, 0.04)' }}
+                  formatter={(val: unknown, _name: unknown, props: { payload?: StudentRanking }) => {
+                    const entry = props.payload;
+                    const total = entry?.total_tasks ?? 0;
+                    const completed = entry?.completed_tasks ?? 0;
+                    const taskInfo = total > 0 ? ` (${completed}/${total} tarefas)` : '';
+                    return [`${val}%${taskInfo}`, 'Progresso no Kanban'];
+                  }}
+                  labelFormatter={(_label: unknown, payload: readonly { payload?: StudentRanking }[]) => {
+                    const item = payload?.[0]?.payload;
+                    return item?.full_name || item?.name || '';
+                  }}
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '0.75rem',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
+                    padding: '8px 12px',
+                  }}
+                />
+                {avgProgress > 0 && (
+                  <ReferenceLine
+                    x={avgProgress}
+                    stroke="#94a3b8"
+                    strokeDasharray="4 4"
+                    strokeWidth={1.5}
+                    label={{
+                      value: `Média (${avgProgress}%)`,
+                      fill: '#64748b',
+                      fontSize: 10,
+                      fontWeight: 600,
+                      position: 'insideTopRight',
+                    }}
+                  />
+                )}
+                <Bar
+                  dataKey="progress"
+                  radius={[0, 8, 8, 0]}
+                  barSize={18}
+                  className="cursor-pointer"
+                  onClick={(entry: unknown) => {
+                    const item = (entry as { payload?: StudentRanking })?.payload;
+                    if (item) {
+                      handleBarClick(item);
+                    }
+                  }}
+                >
+                  {data.map((item, index) => {
+                    const color =
+                      item.progress === 100
+                        ? '#10B981'
+                        : item.progress >= 50
+                        ? '#2563EB'
+                        : item.progress > 0
+                        ? '#3B82F6'
+                        : '#CBD5E1';
+                    return <Cell key={`bar-${index}`} fill={color} />;
+                  })}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
 
-      {!hasData ? (
-        <div className="h-64 flex flex-col items-center justify-center text-sm text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
-          <p>Nenhum aluno com progresso registrado.</p>
-          <p className="text-xs text-gray-400 mt-1">Conclua tarefas no Kanban para calcular o progresso.</p>
-        </div>
-      ) : (
-        <div className="h-64 w-full min-w-0">
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 300, height: 256 }}>
-            <BarChart data={data} layout="vertical" margin={{ left: 10, right: 25, top: 5, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3f4f6" />
-              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11, fill: '#9ca3af' }} unit="%" />
-              <YAxis
-                dataKey="name"
-                type="category"
-                width={85}
-                tick={{ fontSize: 12, fill: '#4b5563', fontWeight: 500 }}
-              />
-              <Tooltip
-                cursor={{ fill: 'rgba(59, 130, 246, 0.06)' }}
-                formatter={(val: unknown, _name: unknown, props: { payload?: StudentRanking }) => {
-                  const entry = props.payload;
-                  const total = entry?.total_tasks ?? 0;
-                  const completed = entry?.completed_tasks ?? 0;
-                  const taskInfo = total > 0 ? ` (${completed}/${total} tarefas)` : '';
-                  return [`${val}%${taskInfo}`, 'Progresso no Kanban'];
-                }}
-                labelFormatter={(_label: unknown, payload: readonly { payload?: StudentRanking }[]) => {
-                  const item = payload?.[0]?.payload;
-                  return item?.full_name || item?.name || '';
-                }}
-                contentStyle={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '0.75rem',
-                  border: '1px solid #e5e7eb',
-                  fontSize: '12px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                }}
-              />
-              <Bar
-                dataKey="progress"
-                radius={[0, 6, 6, 0]}
-                barSize={20}
-                className="cursor-pointer"
-                onClick={(entry: unknown) => {
-                  const item = (entry as { payload?: StudentRanking })?.payload;
-                  if (item) {
-                    handleBarClick(item);
-                  }
-                }}
-              >
-                {data.map((item, index) => {
-                  const color =
-                    item.progress === 100
-                      ? '#10B981'
-                      : item.progress >= 50
-                      ? '#2563EB'
-                      : item.progress > 0
-                      ? '#3B82F6'
-                      : '#9CA3AF';
-                  return <Cell key={`bar-${index}`} fill={color} />;
-                })}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {hasData && (
+        <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" /> 100% Concluído
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-blue-600" /> ≥ 50%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-slate-300" /> &lt; 50%
+            </span>
+          </div>
+          <span className="text-blue-600 font-medium">Linha pontilhada: Média da turma</span>
         </div>
       )}
     </div>

@@ -50,7 +50,7 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
 
   return (
     <div
-      className="bg-white p-6 rounded-2xl shadow-xs border border-gray-100 flex flex-col justify-between min-w-0 transition-all duration-200 hover:shadow-md"
+      className="bg-white p-5 rounded-2xl shadow-2xs border border-gray-150/80 flex flex-col justify-between min-w-0 transition-all duration-200 hover:shadow-xs"
       role="region"
       aria-label="Gráfico de distribuição de tarefas no fluxo Kanban"
     >
@@ -62,106 +62,108 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
         })}
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-gray-800">Distribuição no Kanban</h3>
-            {hasData && (
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 bg-gray-100 text-gray-700 rounded-full">
-                {totalTasks} {totalTasks === 1 ? 'tarefa' : 'tarefas'}
-              </span>
-            )}
+      <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-bold text-gray-800">Distribuição no Kanban</h3>
+              {hasData && (
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200/60 rounded-full">
+                  {totalTasks} {totalTasks === 1 ? 'tarefa' : 'tarefas'}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Carga de trabalho por coluna do fluxo dos seus orientandos
+            </p>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Carga de trabalho por coluna do fluxo dos seus orientandos
-          </p>
+
+          {hasData && (
+            <div className="flex items-center gap-1.5 self-start sm:self-auto">
+              <div
+                className="flex items-center bg-gray-100/90 p-0.5 rounded-xl border border-gray-200/70 text-xs shadow-2xs"
+                role="tablist"
+                aria-label="Layout do gráfico de colunas"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={orientation === 'columns'}
+                  aria-label="Visualização em Colunas Kanban"
+                  onClick={() => setOrientation('columns')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                    orientation === 'columns'
+                      ? 'bg-white text-blue-700 font-semibold shadow-2xs'
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+                  }`}
+                  title="Exibir como Colunas verticais do Kanban"
+                >
+                  <BarChart3 size={13} aria-hidden="true" />
+                  <span className="hidden xs:inline">Colunas</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={orientation === 'horizontal'}
+                  aria-label="Visualização em Barras Horizontais"
+                  onClick={() => setOrientation('horizontal')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                    orientation === 'horizontal'
+                      ? 'bg-white text-blue-700 font-semibold shadow-2xs'
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+                  }`}
+                  title="Exibir como Barras horizontais"
+                >
+                  <AlignLeft size={13} aria-hidden="true" />
+                  <span className="hidden xs:inline">Barras</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {hasData && (
-          <div className="flex items-center gap-1.5 self-start sm:self-auto">
-            <div
-              className="flex items-center bg-gray-100/90 p-1 rounded-xl border border-gray-200/70 text-xs shadow-2xs"
-              role="tablist"
-              aria-label="Layout do gráfico de colunas"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={orientation === 'columns'}
-                aria-label="Visualização em Colunas Kanban"
-                onClick={() => setOrientation('columns')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-                  orientation === 'columns'
-                    ? 'bg-white text-blue-700 font-semibold shadow-xs'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
-                }`}
-                title="Exibir como Colunas verticais do Kanban"
-              >
-                <BarChart3 size={14} aria-hidden="true" />
-                <span className="hidden xs:inline">Colunas</span>
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={orientation === 'horizontal'}
-                aria-label="Visualização em Barras Horizontais"
-                onClick={() => setOrientation('horizontal')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-                  orientation === 'horizontal'
-                    ? 'bg-white text-blue-700 font-semibold shadow-xs'
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
-                }`}
-                title="Exibir como Barras horizontais"
-              >
-                <AlignLeft size={14} aria-hidden="true" />
-                <span className="hidden xs:inline">Barras</span>
-              </button>
+        {!hasData ? (
+          <div className="h-60 flex flex-col items-center justify-center text-center p-6 bg-gray-50/60 rounded-xl border border-dashed border-gray-200 space-y-2">
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+              <Layers size={18} aria-hidden="true" />
             </div>
+            <p className="text-xs font-semibold text-gray-700">Nenhuma tarefa computada nos quadros Kanban</p>
+            <p className="text-[11px] text-gray-400 max-w-xs">
+              Crie tarefas nos quadros de orientação dos seus alunos para visualizar a distribuição e os gargalos do fluxo.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <TaskDistributionPipeline
+              data={data}
+              totalTasks={totalTasks}
+              completionRate={completionRate}
+              effectiveIndex={effectiveIndex}
+              selectedSlug={selectedSlug}
+            />
+
+            <TaskDistributionBars
+              data={data}
+              orientation={orientation}
+              totalTasks={totalTasks}
+              effectiveIndex={effectiveIndex}
+              selectedSlug={selectedSlug}
+              onItemToggle={handleItemToggle}
+              onHoverIndex={setActiveIndex}
+            />
+
+            <TaskDistributionLegend
+              data={data}
+              totalTasks={totalTasks}
+              activeIndex={activeIndex}
+              selectedSlug={selectedSlug}
+              onItemToggle={handleItemToggle}
+              onHoverIndex={setActiveIndex}
+              onClearSelection={handleClearSelection}
+            />
           </div>
         )}
       </div>
-
-      {!hasData ? (
-        <div className="h-64 flex flex-col items-center justify-center text-center p-6 bg-gray-50/60 rounded-xl border border-dashed border-gray-200">
-          <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-3">
-            <Layers size={22} aria-hidden="true" />
-          </div>
-          <p className="text-sm font-semibold text-gray-700">Nenhuma tarefa computada nos quadros Kanban</p>
-          <p className="text-xs text-gray-400 mt-1 max-w-sm">
-            Crie tarefas nos quadros de orientação dos seus alunos para visualizar a distribuição e os gargalos do fluxo.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <TaskDistributionPipeline
-            data={data}
-            totalTasks={totalTasks}
-            completionRate={completionRate}
-            effectiveIndex={effectiveIndex}
-            selectedSlug={selectedSlug}
-          />
-
-          <TaskDistributionBars
-            data={data}
-            orientation={orientation}
-            totalTasks={totalTasks}
-            effectiveIndex={effectiveIndex}
-            selectedSlug={selectedSlug}
-            onItemToggle={handleItemToggle}
-            onHoverIndex={setActiveIndex}
-          />
-
-          <TaskDistributionLegend
-            data={data}
-            totalTasks={totalTasks}
-            activeIndex={activeIndex}
-            selectedSlug={selectedSlug}
-            onItemToggle={handleItemToggle}
-            onHoverIndex={setActiveIndex}
-            onClearSelection={handleClearSelection}
-          />
-        </div>
-      )}
 
       {hasData && <TaskDistributionInsight insight={executiveInsight} />}
     </div>

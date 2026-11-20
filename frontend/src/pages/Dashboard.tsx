@@ -1,18 +1,20 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Plus, User, LogOut, Search, BellRing } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Calendar, BarChart3, ChevronDown } from 'lucide-react';
 
 import type { StudentGuidance, DashboardStats } from '../types';
 import { guidanceService, statsService, authService } from '../services/api';
 
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
+import { DashboardHeader } from '../features/dashboard/components/DashboardHeader';
 import { KpiCards } from '../features/dashboard/components/KpiCards';
 import { TaskStatusChart } from '../features/dashboard/components/TaskStatusChart';
 import { StudentRankingChart } from '../features/dashboard/components/StudentRankingChart';
 import { GuidanceCard } from '../features/dashboard/components/GuidanceCard';
+import { GuidanceFilterBar, type GuidanceFilterType } from '../features/dashboard/components/GuidanceFilterBar';
+import { AdvisorPracticalMetrics } from '../features/dashboard/components/AdvisorPracticalMetrics';
 import { LinkStudentModal } from '../features/dashboard/components/LinkStudentModal';
-import { NotificationBell } from '../features/notifications/components/NotificationBell';
 import { SendNotificationModal } from '../features/notifications/components/SendNotificationModal';
 
 export default function Dashboard() {
@@ -24,7 +26,14 @@ export default function Dashboard() {
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [selectedStudentForNotif, setSelectedStudentForNotif] = useState<number | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<'all' | 'in_progress' | 'completed' | 'pending_meetings'>('all');
+  const [activeFilter, setActiveFilter] = useState<GuidanceFilterType>('all');
+  
+  const [showCharts, setShowCharts] = useState<boolean>(() => {
+    const saved = localStorage.getItem('pgo_advisor_show_charts');
+    return saved === null ? true : saved === 'true';
+  });
+
+  const [metricsTab, setMetricsTab] = useState<'practical' | 'kanban'>('practical');
 
   const loadDashboard = useCallback(async () => {
     try {
@@ -66,6 +75,14 @@ export default function Dashboard() {
     navigate('/');
   };
 
+  const toggleCharts = () => {
+    setShowCharts((prev) => {
+      const next = !prev;
+      localStorage.setItem('pgo_advisor_show_charts', String(next));
+      return next;
+    });
+  };
+
   const filteredGuidances = useMemo(() => {
     return guidances.filter((g) => {
       const summary = stats?.guidances_summary?.[String(g.id)];
@@ -95,138 +112,120 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-              Dashboard de Orientação
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Visão geral integrada com os fluxos e quadros Kanban dos seus orientandos
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <NotificationBell />
-            <button
-              type="button"
-              onClick={() => navigate('/profile')}
-              className="p-2.5 text-gray-600 bg-white hover:bg-gray-100 hover:text-gray-900 rounded-lg border border-gray-200 hover:border-gray-300 shadow-2xs hover:shadow-xs active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              title="Meu Perfil"
-              aria-label="Meu Perfil"
-            >
-              <User size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="p-2.5 text-red-600 bg-white hover:bg-red-50 hover:text-red-700 rounded-lg border border-gray-200 hover:border-red-200 shadow-2xs hover:shadow-xs active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-              title="Sair"
-              aria-label="Sair"
-            >
-              <LogOut size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedStudentForNotif(undefined);
-                setIsNotificationModalOpen(true);
-              }}
-              className="bg-white hover:bg-gray-50 hover:shadow-2xs text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-300 px-3.5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-2xs active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              title="Criar e enviar notificação para orientandos"
-            >
-              <BellRing size={17} className="text-blue-600" />
-              <span className="hidden sm:inline">Notificar Orientandos</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsLinkModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] text-white px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
-            >
-              <Plus size={18} /> Nova Orientação
-            </button>
-          </div>
-        </header>
+    <div className="min-h-screen bg-gray-50/70 p-5 sm:p-7 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <DashboardHeader
+          onLogout={handleLogout}
+          onOpenNotificationModal={() => {
+            setSelectedStudentForNotif(undefined);
+            setIsNotificationModalOpen(true);
+          }}
+          onOpenLinkModal={() => setIsLinkModalOpen(true)}
+        />
 
         <section aria-label="Indicadores chave">
           <KpiCards stats={stats} />
         </section>
 
-        <section aria-label="Gráficos de desempenho" className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <TaskStatusChart data={stats?.task_stats} />
-          <StudentRankingChart data={stats?.student_ranking} />
+        <section aria-label="Painel de métricas e acompanhamento" className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white px-4 py-2.5 rounded-2xl border border-gray-150/80 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-800">Painel do Orientador</span>
+              <span className="text-gray-300">|</span>
+              <p className="text-[11px] text-gray-500">
+                {metricsTab === 'practical'
+                  ? 'Prazos de bancas, acompanhamento preventivo e reuniões pendentes'
+                  : 'Distribuição agregada das colunas do Kanban e ranking'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <div className="flex items-center bg-gray-100/80 p-0.5 rounded-xl border border-gray-200/80 text-xs shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => setMetricsTab('practical')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                    metricsTab === 'practical'
+                      ? 'bg-white text-blue-700 shadow-2xs'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  <Calendar size={13} />
+                  <span>Prazos & Atenção</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMetricsTab('kanban')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                    metricsTab === 'kanban'
+                      ? 'bg-white text-blue-700 shadow-2xs'
+                      : 'text-gray-500 hover:text-gray-900'
+                  }`}
+                >
+                  <BarChart3 size={13} />
+                  <span>Fluxo Kanban</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleCharts}
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                title={showCharts ? 'Recolher métricas' : 'Expandir métricas'}
+                aria-label={showCharts ? 'Recolher métricas' : 'Expandir métricas'}
+              >
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform duration-200 ${showCharts ? 'rotate-180' : ''}`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {showCharts && (
+            <div className="animate-fadeIn">
+              {metricsTab === 'practical' ? (
+                <AdvisorPracticalMetrics
+                  guidances={guidances}
+                  stats={stats}
+                  onNotifyStudent={(studentId) => {
+                    setSelectedStudentForNotif(studentId);
+                    setIsNotificationModalOpen(true);
+                  }}
+                />
+              ) : (
+                <section aria-label="Gráficos de desempenho" className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                  <TaskStatusChart data={stats?.task_stats} />
+                  <StudentRankingChart data={stats?.student_ranking} />
+                </section>
+              )}
+            </div>
+          )}
         </section>
 
         <section aria-label="Orientações ativas" className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-gray-800">Suas Orientações ({guidances.length})</h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Acompanhe o progresso do Kanban e as reuniões de cada estudante
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                  Suas Orientações
+                </h2>
+                <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                  {guidances.length}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Acompanhe o progresso das tarefas e reuniões de cada estudante
               </p>
             </div>
 
             {guidances.length > 0 && (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div className="relative">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar aluno ou tema..."
-                    className="pl-9 pr-3 py-1.5 bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-700 w-full sm:w-56 shadow-2xs transition-colors"
-                  />
-                </div>
-
-                <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-gray-200 shadow-2xs text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setActiveFilter('all')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
-                      activeFilter === 'all'
-                        ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs'
-                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
-                    }`}
-                  >
-                    Todos
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFilter('in_progress')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
-                      activeFilter === 'in_progress'
-                        ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs'
-                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
-                    }`}
-                  >
-                    Em Andamento
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFilter('completed')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
-                      activeFilter === 'completed'
-                        ? 'bg-emerald-50 text-emerald-700 font-semibold shadow-2xs'
-                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
-                    }`}
-                  >
-                    Concluídos
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFilter('pending_meetings')}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer active:scale-95 ${
-                      activeFilter === 'pending_meetings'
-                        ? 'bg-amber-50 text-amber-700 font-semibold shadow-2xs'
-                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/70'
-                    }`}
-                  >
-                    Reuniões
-                  </button>
-                </div>
-              </div>
+              <GuidanceFilterBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+              />
             )}
           </div>
 
@@ -254,7 +253,7 @@ export default function Dashboard() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredGuidances.map((guidance) => (
                 <GuidanceCard
                   key={guidance.id}

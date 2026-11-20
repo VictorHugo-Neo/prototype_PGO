@@ -45,31 +45,31 @@ export function TaskDistributionBars({
   };
 
   return (
-    <div className="h-56 w-full min-w-0">
-      <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 300, height: 224 }}>
+    <div className="h-60 w-full min-w-0">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 300, height: 240 }}>
         {orientation === 'columns' ? (
           <BarChart
             data={data}
-            margin={{ top: 22, right: 10, left: -20, bottom: 5 }}
+            margin={{ top: 24, right: 10, left: -20, bottom: 5 }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
             <XAxis
               dataKey="name"
-              tick={{ fontSize: 11, fill: '#4b5563', fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: '#475569', fontWeight: 600 }}
               axisLine={{ stroke: '#e2e8f0' }}
               tickLine={false}
               interval={0}
             />
             <YAxis
               allowDecimals={false}
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: '#94a3b8' }}
               axisLine={false}
               tickLine={false}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }}
+              cursor={{ fill: 'rgba(59, 130, 246, 0.04)' }}
               formatter={(value: unknown, _name: unknown, props: { payload?: DashboardTaskStat }) => {
                 const num = Number(value) || 0;
                 const pct = totalTasks > 0 ? Math.round((num / totalTasks) * 100) : 0;
@@ -79,17 +79,17 @@ export function TaskDistributionBars({
               contentStyle={{
                 backgroundColor: '#ffffff',
                 borderRadius: '0.75rem',
-                border: '1px solid #e5e7eb',
+                border: '1px solid #e2e8f0',
                 fontSize: '12px',
-                fontWeight: 500,
-                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                fontWeight: 600,
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)',
                 padding: '8px 12px',
               }}
             />
             <Bar
               dataKey="value"
-              radius={[8, 8, 0, 0]}
-              maxBarSize={48}
+              radius={[8, 8, 2, 2]}
+              maxBarSize={44}
               cursor="pointer"
               onClick={(_, index) => onItemToggle(index)}
             >
@@ -105,10 +105,10 @@ export function TaskDistributionBars({
                   <Cell
                     key={`col-cell-${index}`}
                     fill={entry.color}
-                    opacity={isHighlighted ? 1 : 0.35}
-                    stroke={effectiveIndex === index ? '#1E293B' : 'transparent'}
+                    opacity={isHighlighted ? 1 : 0.3}
+                    stroke={effectiveIndex === index ? '#0f172a' : 'transparent'}
                     strokeWidth={effectiveIndex === index ? 2 : 0}
-                    style={{ transition: 'opacity 200ms ease' }}
+                    style={{ transition: 'opacity 200ms ease, transform 200ms ease' }}
                   />
                 );
               })}
@@ -118,7 +118,7 @@ export function TaskDistributionBars({
           <BarChart
             data={data}
             layout="vertical"
-            margin={{ top: 5, right: 35, left: 10, bottom: 5 }}
+            margin={{ top: 10, right: 40, left: 10, bottom: 5 }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
           >
@@ -126,7 +126,7 @@ export function TaskDistributionBars({
             <XAxis
               type="number"
               allowDecimals={false}
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: '#94a3b8' }}
               axisLine={{ stroke: '#e2e8f0' }}
               tickLine={false}
             />
@@ -134,12 +134,12 @@ export function TaskDistributionBars({
               dataKey="name"
               type="category"
               width={90}
-              tick={{ fontSize: 11, fill: '#4b5563', fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: '#475569', fontWeight: 600 }}
               axisLine={false}
               tickLine={false}
             />
             <Tooltip
-              cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }}
+              cursor={{ fill: 'rgba(59, 130, 246, 0.04)' }}
               formatter={(value: unknown, _name: unknown, props: { payload?: DashboardTaskStat }) => {
                 const num = Number(value) || 0;
                 const pct = totalTasks > 0 ? Math.round((num / totalTasks) * 100) : 0;
@@ -149,17 +149,17 @@ export function TaskDistributionBars({
               contentStyle={{
                 backgroundColor: '#ffffff',
                 borderRadius: '0.75rem',
-                border: '1px solid #e5e7eb',
+                border: '1px solid #e2e8f0',
                 fontSize: '12px',
-                fontWeight: 500,
-                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                fontWeight: 600,
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
                 padding: '8px 12px',
               }}
             />
             <Bar
               dataKey="value"
               radius={[0, 8, 8, 0]}
-              maxBarSize={24}
+              maxBarSize={22}
               cursor="pointer"
               onClick={(_, index) => onItemToggle(index)}
             >
@@ -180,8 +180,8 @@ export function TaskDistributionBars({
                   <Cell
                     key={`horiz-cell-${index}`}
                     fill={entry.color}
-                    opacity={isHighlighted ? 1 : 0.35}
-                    stroke={effectiveIndex === index ? '#1E293B' : 'transparent'}
+                    opacity={isHighlighted ? 1 : 0.3}
+                    stroke={effectiveIndex === index ? '#0f172a' : 'transparent'}
                     strokeWidth={effectiveIndex === index ? 2 : 0}
                     style={{ transition: 'opacity 200ms ease' }}
                   />

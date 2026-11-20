@@ -46,11 +46,11 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
       }}
       role="button"
       tabIndex={0}
-      className="bg-white rounded-2xl p-5 shadow-xs border border-gray-100 hover:shadow-lg hover:-translate-y-1 hover:border-blue-200 transition-all duration-200 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-[0.99] flex flex-col justify-between"
+      className="bg-white rounded-2xl p-5 shadow-2xs border border-gray-100 hover:border-blue-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-[0.99] flex flex-col justify-between"
     >
       <div>
-        <div className="flex items-center gap-3.5 mb-4">
-          <div className="w-12 h-12 rounded-full bg-blue-50 overflow-hidden flex items-center justify-center border border-gray-100 shrink-0">
+        <div className="flex items-start gap-3.5 mb-3.5">
+          <div className="w-10 h-10 rounded-full bg-blue-50 overflow-hidden flex items-center justify-center border border-gray-100 shrink-0 mt-0.5">
             {guidance.student.avatar_path ? (
               <img
                 src={`${API_BASE_URL}/${guidance.student.avatar_path.replace(/\\/g, '/')}`}
@@ -58,21 +58,23 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-sm font-bold text-blue-600">
+              <span className="text-xs font-bold text-blue-600">
                 {guidance.student.name.substring(0, 2).toUpperCase()}
               </span>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors truncate text-sm">
-                {guidance.student.name}
-              </h3>
-              {guidance.user_role === 'coadvisor' && (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
-                  Coorientador
-                </span>
-              )}
+            <div className="flex items-center gap-1.5 justify-between">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate text-sm">
+                  {guidance.student.name}
+                </h3>
+                {guidance.user_role === 'coadvisor' && (
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 shrink-0">
+                    Coorientador
+                  </span>
+                )}
+              </div>
               {onNotify && (
                 <button
                   type="button"
@@ -80,7 +82,7 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
                     e.stopPropagation();
                     onNotify(guidance.student.id);
                   }}
-                  className="ml-auto p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                  className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer shrink-0"
                   title={`Notificar ${guidance.student.name}`}
                   aria-label={`Notificar ${guidance.student.name}`}
                 >
@@ -88,24 +90,24 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
                 </button>
               )}
             </div>
-            <p className="text-xs text-gray-500 truncate" title={guidance.theme}>
+            <p className="text-xs text-gray-500 truncate mt-0.5" title={guidance.theme}>
               {guidance.theme}
             </p>
           </div>
         </div>
 
-        <div className="bg-gray-50/70 rounded-xl p-3 mb-3 border border-gray-100/80 space-y-2">
+        <div className="my-3 py-2.5 px-3 bg-gray-50/70 rounded-xl border border-gray-100/80 space-y-1.5">
           <div className="flex justify-between items-center text-xs">
-            <span className="font-semibold text-gray-700 flex items-center gap-1.5">
-              <KanbanSquare size={13} className="text-blue-600" aria-hidden="true" />
+            <span className="font-medium text-gray-600 flex items-center gap-1.5">
+              <KanbanSquare size={13} className="text-blue-500" aria-hidden="true" />
               Progresso no Kanban
             </span>
-            <span className={`font-bold ${progressTextColor}`}>{progress}%</span>
+            <span className={`font-bold text-xs ${progressTextColor}`}>{progress}%</span>
           </div>
 
-          <div className="w-full bg-gray-200/80 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-gray-200/70 rounded-full h-1.5 overflow-hidden">
             <div
-              className={`h-2 rounded-full transition-all duration-500 ${progressColor}`}
+              className={`h-1.5 rounded-full transition-all duration-500 ${progressColor}`}
               style={{ width: `${progress}%` }}
               aria-hidden="true"
             />
@@ -115,7 +117,7 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
             <span>
               {totalTasks > 0 ? (
                 <>
-                  <strong className="text-gray-700">{completedTasks}</strong> de {totalTasks} concluídas
+                  <strong className="text-gray-700 font-semibold">{completedTasks}</strong> de {totalTasks} concluídas
                 </>
               ) : (
                 'Nenhuma tarefa criada'
@@ -134,44 +136,42 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
             {summary.columns.map((col) => (
               <span
                 key={col.slug}
-                className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${col.color} text-gray-700 border border-gray-200/60 hover:border-gray-300 transition-colors`}
+                className="px-2 py-0.5 rounded-md text-[10px] text-gray-600 bg-white border border-gray-200/70 transition-colors"
                 title={`${col.title}: ${col.task_count} tarefas`}
               >
-                {col.title}: <strong>{col.task_count}</strong>
+                {col.title}: <strong className="font-semibold text-gray-800">{col.task_count}</strong>
               </span>
             ))}
           </div>
         )}
       </div>
 
-      <div>
-        <div className="flex justify-between items-center text-xs text-gray-500 pt-3 border-t border-gray-100">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1 text-[11px]">
-              <Calendar size={13} className="text-gray-400" aria-hidden="true" />
-              <span>
-                {guidance.defense_date
-                  ? new Date(guidance.defense_date).toLocaleDateString('pt-BR')
-                  : 'Banca a definir'}
-              </span>
-            </div>
-
-            {pendingMeetings > 0 && (
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200"
-                title={`${pendingMeetings} reunião(ões) pendente(s)`}
-              >
-                <Clock size={10} aria-hidden="true" />
-                {pendingMeetings} {pendingMeetings === 1 ? 'reunião' : 'reuniões'}
-              </span>
-            )}
+      <div className="pt-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 text-[11px] text-gray-400">
+            <Calendar size={12} className="text-gray-400" aria-hidden="true" />
+            <span>
+              {guidance.defense_date
+                ? new Date(guidance.defense_date).toLocaleDateString('pt-BR')
+                : 'Banca a definir'}
+            </span>
           </div>
 
-          <span className="text-xs font-semibold text-blue-600 group-hover:text-blue-700 flex items-center gap-1 group-hover:translate-x-1 transition-all">
-            Ver Kanban
-            <ArrowRight size={14} aria-hidden="true" className="group-hover:translate-x-0.5 transition-transform" />
-          </span>
+          {pendingMeetings > 0 && (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80"
+              title={`${pendingMeetings} reunião(ões) pendente(s)`}
+            >
+              <Clock size={10} aria-hidden="true" />
+              {pendingMeetings} {pendingMeetings === 1 ? 'reunião' : 'reuniões'}
+            </span>
+          )}
         </div>
+
+        <span className="text-xs font-semibold text-blue-600 group-hover:text-blue-700 flex items-center gap-1 group-hover:translate-x-0.5 transition-all">
+          Ver Kanban
+          <ArrowRight size={13} aria-hidden="true" />
+        </span>
       </div>
     </div>
   );
