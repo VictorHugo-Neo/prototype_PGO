@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     WHATSAPP_PROVIDER: str = "mock"
     WHATSAPP_API_URL: str = ""
     WHATSAPP_API_KEY: str = ""
-    WHATSAPP_INSTANCE_ID: str = ""
-    REQUEST_TIMEOUT_SECONDS: float = 5.0
+    WHATSAPP_INSTANCE_ID: str = "pgo"
+    REQUEST_TIMEOUT_SECONDS: float = 8.0
     IDEMPOTENCY_TTL_HOURS: int = 24
     
     model_config = SettingsConfigDict(

@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.0
+    container_name: evolution_api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_PORT=8080
+      - SERVER_URL=http://localhost:8080
+      - AUTHENTICATION_API_KEY=pgo_evolution_secret_key_123
+      - AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://evolution:evolution_pass@postgres-evolution:5432/evolution_db?schema=public
+      - DATABASE_CONNECTION_CLIENT_NAME=evolution_pgo
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis-evolution:6379/1
+      - CACHE_REDIS_PREFIX_KEY=evolution
+      - QRCODE_LIMIT=30
+      - DEL_INSTANCE=false
+      - CONFIG_SESSION_PHONE_CLIENT=Chrome
+      - CONFIG_SESSION_PHONE_NAME=Chrome
+      - LOG_LEVEL=INFO
+      - WEBSOCKET_ENABLED=true
+    depends_on:
+      postgres-evolution:
+        condition: service_healthy
+      redis-evolution:
+        condition: service_healthy
+    volumes:
+      - evolution_instances:/evolution/instances
+
+  postgres-evolution:
+    image: postgres:15-alpine
+    container_name: postgres_evolution
+    restart: always
+    environment:
+      - POSTGRES_USER=evolution
+      - POSTGRES_PASSWORD=evolution_pass
+      - POSTGRES_DB=evolution_db
+    volumes:
+      - evolution_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis-evolution:
+    image: redis:7-alpine
+    container_name: redis_evolution
+    restart: always
+    volumes:
+      - evolution_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  evolution_instances:
+    name: evolution_instances
+  evolution_pgdata:
+    name: evolution_pgdata
+  evolution_redisdata:
+    name: evolution_redisdata

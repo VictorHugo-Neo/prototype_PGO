@@ -76,6 +76,7 @@ backend/static/avatars/*
 *.sqlite
 *.sqlite3
 *.db
+qrcode.png
 
 # Operating System & IDE
 .DS_Store

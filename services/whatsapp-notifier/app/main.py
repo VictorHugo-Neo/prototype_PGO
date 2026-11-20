@@ -9,7 +9,12 @@ from .schemas import (
     HealthResponse,
     MetricsResponse,
 )
-from .providers import WhatsAppProvider, MockWhatsAppProvider, WebhookWhatsAppProvider
+from .providers import (
+    WhatsAppProvider,
+    MockWhatsAppProvider,
+    WebhookWhatsAppProvider,
+    EvolutionWhatsAppProvider,
+)
 from .services import NotificationService
 
 logging.basicConfig(
@@ -18,7 +23,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger(settings.SERVICE_NAME)
 
-provider: WhatsAppProvider = MockWhatsAppProvider()
+def resolve_provider() -> WhatsAppProvider:
+    provider_name = settings.WHATSAPP_PROVIDER.lower().strip()
+    if provider_name == "evolution" and settings.WHATSAPP_API_URL:
+        return EvolutionWhatsAppProvider(
+            api_url=settings.WHATSAPP_API_URL,
+            api_key=settings.WHATSAPP_API_KEY,
+            instance_id=settings.WHATSAPP_INSTANCE_ID or "pgo",
+            timeout=settings.REQUEST_TIMEOUT_SECONDS,
+        )
+    elif provider_name == "webhook" and settings.WHATSAPP_API_URL:
+        return WebhookWhatsAppProvider(
+            api_url=settings.WHATSAPP_API_URL,
+            api_key=settings.WHATSAPP_API_KEY,
+            instance_id=settings.WHATSAPP_INSTANCE_ID,
+            timeout=settings.REQUEST_TIMEOUT_SECONDS,
+        )
+    return MockWhatsAppProvider()
+
+provider: WhatsAppProvider = resolve_provider()
 notifier_service: NotificationService = NotificationService(
     provider=provider,
     idempotency_ttl_seconds=settings.IDEMPOTENCY_TTL_HOURS * 3600
@@ -28,16 +51,7 @@ notifier_service: NotificationService = NotificationService(
 async def lifespan(app: FastAPI):
     global provider, notifier_service
     logger.info("Iniciando %s na porta %s...", settings.SERVICE_NAME, settings.SERVICE_PORT)
-    
-    if settings.WHATSAPP_PROVIDER.lower() == "webhook" and settings.WHATSAPP_API_URL:
-        provider = WebhookWhatsAppProvider(
-            api_url=settings.WHATSAPP_API_URL,
-            api_key=settings.WHATSAPP_API_KEY,
-            timeout=settings.REQUEST_TIMEOUT_SECONDS,
-        )
-    else:
-        provider = MockWhatsAppProvider()
-
+    provider = resolve_provider()
     notifier_service = NotificationService(
         provider=provider,
         idempotency_ttl_seconds=settings.IDEMPOTENCY_TTL_HOURS * 3600

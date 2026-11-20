@@ -6,13 +6,17 @@ from .base import WhatsAppProvider
 logger = logging.getLogger("whatsapp_notifier.webhook")
 
 class WebhookWhatsAppProvider(WhatsAppProvider):
-    def __init__(self, api_url: str, api_key: str = "", timeout: float = 5.0):
+    def __init__(self, api_url: str, api_key: str = "", instance_id: str = "", timeout: float = 5.0):
         self.api_url = api_url.rstrip("/")
         self.api_key = api_key
+        self.instance_id = instance_id.strip() if instance_id else ""
         self.timeout = timeout
 
     async def send_message(self, phone: str, message: str) -> Dict[str, Any]:
         cleaned_phone = "".join(filter(str.isdigit, phone))
+        if len(cleaned_phone) in (10, 11) and not cleaned_phone.startswith("55"):
+            cleaned_phone = f"55{cleaned_phone}"
+
         headers = {
             "Content-Type": "application/json",
         }
@@ -26,10 +30,12 @@ class WebhookWhatsAppProvider(WhatsAppProvider):
             "message": message,
         }
 
+        url = f"{self.api_url}/message/sendText/{self.instance_id}" if self.instance_id else f"{self.api_url}/message/sendText"
+
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
-                    f"{self.api_url}/message/sendText",
+                    url,
                     json=payload,
                     headers=headers,
                 )
