@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, AlertCircle } from 'lucide-react';
+import { LogOut, AlertCircle, User as UserIcon } from 'lucide-react';
 import { guidanceService, authService } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -54,13 +54,23 @@ export default function Trail() {
           Solicite ao seu professor orientador que cadastre uma nova orientação usando o mesmo e-mail institucional do seu cadastro.
         </p>
 
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium px-4 py-2 hover:bg-red-50 rounded-lg transition-all active:scale-95 cursor-pointer mx-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-        >
-          <LogOut size={16} /> Sair do Sistema
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium px-4 py-2 hover:bg-blue-50 rounded-lg transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            <UserIcon size={16} /> Meu Perfil
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium px-4 py-2 hover:bg-red-50 rounded-lg transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+          >
+            <LogOut size={16} /> Sair do Sistema
+          </button>
+        </div>
       </div>
     </div>
   );

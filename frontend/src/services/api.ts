@@ -94,7 +94,7 @@ export const userService = {
     return response.data;
   },
 
-  updateMe: async (data: { name?: string; email?: string; password?: string }): Promise<User> => {
+  updateMe: async (data: { name?: string; email?: string; phone?: string; password?: string }): Promise<User> => {
     const response = await api.put<User>('/users/me', data);
     return response.data;
   },
@@ -106,6 +106,15 @@ export const userService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
+  },
+
+  deleteAvatar: async (): Promise<User> => {
+    const response = await api.delete<User>('/users/me/avatar');
+    return response.data;
+  },
+
+  deleteMe: async (): Promise<void> => {
+    await api.delete('/users/me');
   },
 };
 

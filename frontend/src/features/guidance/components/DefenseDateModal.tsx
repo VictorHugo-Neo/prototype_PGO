@@ -37,6 +37,7 @@ function getInitialDateParts(currentDate?: string | null) {
         };
       }
     } catch {
+      void 0;
     }
   }
 

@@ -24,7 +24,8 @@ class UserResponse(UserBase):
     email: str
     type: str
     phone: Optional[str] = None
-    avatar_path: Optional[str] = None 
+    avatar_path: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 

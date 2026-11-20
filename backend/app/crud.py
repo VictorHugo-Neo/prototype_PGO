@@ -1,3 +1,4 @@
+import os
 import re
 import unicodedata
 from sqlalchemy.orm import Session, joinedload
@@ -229,16 +230,68 @@ def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
     if not db_user:
         return None
     
-    if user_update.name:
+    if user_update.name is not None:
         db_user.name = user_update.name
-    if user_update.email:
+    if user_update.email is not None:
         db_user.email = user_update.email
+    if user_update.phone is not None:
+        db_user.phone = user_update.phone
     if user_update.password:
         db_user.hashed_password = security.get_password_hash(user_update.password)
     
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def delete_user_avatar(db: Session, user_id: int):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        return None
+    if db_user.avatar_path and os.path.exists(db_user.avatar_path):
+        try:
+            os.remove(db_user.avatar_path)
+        except OSError:
+            pass
+    db_user.avatar_path = None
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def delete_user(db: Session, user_id: int):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        return False
+
+    if db_user.avatar_path and os.path.exists(db_user.avatar_path):
+        try:
+            os.remove(db_user.avatar_path)
+        except OSError:
+            pass
+
+    guidances = db.query(models.Guidance).filter(
+        (models.Guidance.student_id == user_id) |
+        (models.Guidance.advisor_id == user_id) |
+        (models.Guidance.coadvisor_id == user_id)
+    ).all()
+    for g in guidances:
+        tasks = db.query(models.Task).filter(models.Task.guidance_id == g.id).all()
+        for t in tasks:
+            for att in t.attachments:
+                if att.file_path and os.path.exists(att.file_path):
+                    try:
+                        os.remove(att.file_path)
+                    except OSError:
+                        pass
+        db.delete(g)
+
+    db.query(models.Notification).filter(models.Notification.user_id == user_id).delete(synchronize_session=False)
+    db.query(models.Comment).filter(models.Comment.user_id == user_id).delete(synchronize_session=False)
+    db.query(models.Task).filter(models.Task.creator_id == user_id).update({models.Task.creator_id: None}, synchronize_session=False)
+    db.query(models.Meeting).filter(models.Meeting.creator_id == user_id).update({models.Meeting.creator_id: None}, synchronize_session=False)
+
+    db.delete(db_user)
+    db.commit()
+    return True
 
 def authenticate_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email=email)

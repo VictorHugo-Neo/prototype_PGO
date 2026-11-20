@@ -40,11 +40,37 @@ def upload_avatar(
     except Exception as e:
         raise HTTPException(500, f"Erro ao salvar arquivo: {str(e)}")
 
+    if current_user.avatar_path and os.path.exists(current_user.avatar_path):
+        try:
+            os.remove(current_user.avatar_path)
+        except OSError:
+            pass
+
     current_user.avatar_path = file_path 
     db.commit()     
     db.refresh(current_user) 
     
     return current_user
+
+@router.delete("/me/avatar", response_model=schemas.UserResponse)
+def remove_avatar(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    updated_user = crud.delete_user_avatar(db, current_user.id)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    return updated_user
+
+@router.delete("/me", status_code=204)
+def delete_user_me(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    success = crud.delete_user(db, current_user.id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    return None
 
 @router.put("/me", response_model=schemas.UserResponse)
 def update_user_me(

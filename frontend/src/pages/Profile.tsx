@@ -1,30 +1,41 @@
 import { useEffect, useState, useCallback } from 'react';
-import { User as UserIcon, Mail, Lock, ArrowLeft, Loader2, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { userService } from '../services/api';
+import { Check, Trash2 } from 'lucide-react';
+import { userService, guidanceService, authService } from '../services/api';
+import type { User, StudentGuidance } from '../types';
+import type { ProfileFormData, ProfileStatusMessage } from '../features/profile/types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ProfileHeader } from '../features/profile/components/ProfileHeader';
+import { ProfileAvatarSection } from '../features/profile/components/ProfileAvatarSection';
+import { ProfileAcademicCard } from '../features/profile/components/ProfileAcademicCard';
+import { ProfilePersonalForm } from '../features/profile/components/ProfilePersonalForm';
+import { ProfileSecurityForm } from '../features/profile/components/ProfileSecurityForm';
+import { ProfileDeleteModal } from '../features/profile/components/ProfileDeleteModal';
 
 export default function Profile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [guidance, setGuidance] = useState<StudentGuidance | null>(null);
+  const [isSavingPersonal, setIsSavingPersonal] = useState(false);
+  const [isSavingSecurity, setIsSavingSecurity] = useState(false);
+  const [isAvatarBusy, setIsAvatarBusy] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<ProfileStatusMessage | null>(null);
 
   const loadProfile = useCallback(async () => {
     try {
-      const user = await userService.getMe();
-      setFormData((prev) => ({
-        ...prev,
-        name: user.name,
-        email: user.email,
-      }));
+      const userData = await userService.getMe();
+      setUser(userData);
+      if (userData.type === 'student') {
+        try {
+          const guidanceData = await guidanceService.getStudentGuidance();
+          setGuidance(guidanceData);
+        } catch {
+          setGuidance(null);
+        }
+      }
     } catch {
       navigate('/');
     } finally {
@@ -36,161 +47,147 @@ export default function Profile() {
     loadProfile();
   }, [loadProfile]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSavePersonal = async (data: ProfileFormData) => {
+    setIsSavingPersonal(true);
     setStatusMessage(null);
-
-    if (formData.password && formData.password !== formData.confirmPassword) {
-      setStatusMessage({ type: 'error', text: 'As novas senhas não coincidem.' });
-      return;
-    }
-
-    if (formData.password && formData.password.length < 6) {
-      setStatusMessage({ type: 'error', text: 'A nova senha deve ter no mínimo 6 caracteres.' });
-      return;
-    }
-
-    setSaving(true);
     try {
-      const payload: { name?: string; email?: string; password?: string } = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-      };
-      if (formData.password) {
-        payload.password = formData.password;
-      }
-
-      await userService.updateMe(payload);
-      setStatusMessage({ type: 'success', text: 'Dados cadastrais atualizados com sucesso!' });
-      setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { detail?: string } } };
-      const msg = axiosError.response?.data?.detail || 'Erro ao atualizar dados.';
-      setStatusMessage({ type: 'error', text: msg });
+      const updated = await userService.updateMe({
+        name: data.name.trim(),
+        email: data.email.trim(),
+        phone: data.phone.trim(),
+      });
+      setUser(updated);
+      setStatusMessage({ type: 'success', text: 'Dados pessoais atualizados com sucesso!' });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      setStatusMessage({ type: 'error', text: axiosErr.response?.data?.detail || 'Erro ao atualizar dados.' });
     } finally {
-      setSaving(false);
+      setIsSavingPersonal(false);
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner fullScreen message="Carregando perfil..." />;
+  const handleSaveSecurity = async (password: string) => {
+    setIsSavingSecurity(true);
+    setStatusMessage(null);
+    try {
+      await userService.updateMe({ password });
+      setStatusMessage({ type: 'success', text: 'Senha de acesso atualizada com sucesso!' });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      setStatusMessage({ type: 'error', text: axiosErr.response?.data?.detail || 'Erro ao atualizar senha.' });
+    } finally {
+      setIsSavingSecurity(false);
+    }
+  };
+
+  const handleUploadAvatar = async (file: File) => {
+    setIsAvatarBusy(true);
+    setStatusMessage(null);
+    try {
+      const updated = await userService.uploadAvatar(file);
+      setUser(updated);
+      setStatusMessage({ type: 'success', text: 'Foto de perfil atualizada!' });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      setStatusMessage({ type: 'error', text: axiosErr.response?.data?.detail || 'Erro ao enviar foto.' });
+    } finally {
+      setIsAvatarBusy(false);
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    setIsAvatarBusy(true);
+    setStatusMessage(null);
+    try {
+      const updated = await userService.deleteAvatar();
+      setUser(updated);
+      setStatusMessage({ type: 'success', text: 'Foto de perfil removida!' });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      setStatusMessage({ type: 'error', text: axiosErr.response?.data?.detail || 'Erro ao remover foto.' });
+    } finally {
+      setIsAvatarBusy(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    try {
+      await userService.deleteMe();
+      authService.logout();
+      navigate('/');
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      setStatusMessage({ type: 'error', text: axiosErr.response?.data?.detail || 'Erro ao excluir conta.' });
+      setIsDeletingAccount(false);
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  if (loading || !user) {
+    return <LoadingSpinner fullScreen message="Carregando dados do perfil..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex justify-center items-start">
-      <div className="max-w-2xl w-full">
-        <header className="flex items-center gap-4 mb-6">
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 flex justify-center items-start">
+      <div className="max-w-2xl w-full space-y-6">
+        <ProfileHeader userType={user.type} onBack={() => navigate(-1)} />
+
+        {statusMessage && (
+          <div
+            role={statusMessage.type === 'error' ? 'alert' : 'status'}
+            className={`p-4 rounded-xl text-xs font-medium flex items-center gap-2 ${
+              statusMessage.type === 'error'
+                ? 'bg-red-50 text-red-600 border border-red-200'
+                : 'bg-green-50 text-green-700 border border-green-200'
+            }`}
+          >
+            {statusMessage.type === 'success' && <Check size={16} />}
+            <span>{statusMessage.text}</span>
+          </div>
+        )}
+
+        <ProfileAvatarSection
+          name={user.name}
+          avatarPath={user.avatar_path}
+          onUpload={handleUploadAvatar}
+          onDelete={handleDeleteAvatar}
+          isLoading={isAvatarBusy}
+        />
+
+        <ProfileAcademicCard isStudent={user.type === 'student'} guidance={guidance} />
+
+        <ProfilePersonalForm
+          initialData={{ name: user.name, email: user.email, phone: user.phone || '' }}
+          onSubmit={handleSavePersonal}
+          isSaving={isSavingPersonal}
+        />
+
+        <ProfileSecurityForm onSubmit={handleSaveSecurity} isSaving={isSavingSecurity} />
+
+        <div className="p-5 bg-white rounded-2xl border border-red-100 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xs font-bold text-red-600">Zona de Perigo</h2>
+            <p className="text-[11px] text-gray-500 mt-0.5">
+              Excluir definitivamente sua conta e dados do sistema.
+            </p>
+          </div>
           <button
             type="button"
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-200 hover:text-gray-900 rounded-full transition-all text-gray-600 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-            aria-label="Voltar"
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 rounded-lg transition-all active:scale-95 cursor-pointer"
           >
-            <ArrowLeft size={20} />
+            <Trash2 size={13} />
+            <span>Excluir Conta</span>
           </button>
-          <h1 className="text-2xl font-bold text-gray-800">Meu Perfil</h1>
-        </header>
-
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          {statusMessage && (
-            <div
-              role={statusMessage.type === 'error' ? 'alert' : 'status'}
-              className={`p-4 rounded-xl text-xs font-medium mb-6 flex items-center gap-2 ${
-                statusMessage.type === 'error'
-                  ? 'bg-red-50 text-red-600 border border-red-200'
-                  : 'bg-green-50 text-green-700 border border-green-200'
-              }`}
-            >
-              {statusMessage.type === 'success' && <Check size={16} />}
-              {statusMessage.text}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="profile-name" className="block text-xs font-semibold text-gray-600 mb-1">
-                Nome Completo
-              </label>
-              <div className="relative">
-                <UserIcon className="absolute left-3 top-3 text-gray-400" size={18} />
-                <input
-                  id="profile-name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="profile-email" className="block text-xs font-semibold text-gray-600 mb-1">
-                E-mail Institucional
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 text-gray-400" size={18} />
-                <input
-                  id="profile-email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-gray-100 space-y-4">
-              <h2 className="text-sm font-bold text-gray-700">Alterar Senha (Opcional)</h2>
-
-              <div>
-                <label htmlFor="profile-pwd" className="block text-xs font-semibold text-gray-600 mb-1">
-                  Nova Senha
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
-                  <input
-                    id="profile-pwd"
-                    type="password"
-                    placeholder="Deixe em branco para manter a atual"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="profile-confirm-pwd" className="block text-xs font-semibold text-gray-600 mb-1">
-                  Confirmar Nova Senha
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
-                  <input
-                    id="profile-confirm-pwd"
-                    type="password"
-                    placeholder="Repita a nova senha"
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <button
-                type="submit"
-                disabled={saving}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-6 py-2 rounded-lg text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              >
-                {saving && <Loader2 size={16} className="animate-spin" />}
-                {saving ? 'Salvando...' : 'Salvar Alterações'}
-              </button>
-            </div>
-          </form>
         </div>
+
+        <ProfileDeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteAccount}
+          isDeleting={isDeletingAccount}
+        />
       </div>
     </div>
   );

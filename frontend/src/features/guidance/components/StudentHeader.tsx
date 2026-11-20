@@ -15,6 +15,7 @@ import {
   Clock,
   Pencil,
   Trash2,
+  User as UserIcon,
 } from 'lucide-react';
 import type { StudentGuidance } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
@@ -305,6 +306,16 @@ export function StudentHeader({
           </div>
 
           <div className="flex flex-wrap gap-2.5 items-center">
+            <button
+              type="button"
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-1.5 text-gray-700 hover:text-blue-600 text-xs font-medium bg-gray-50 hover:bg-blue-50/80 px-3 py-2 rounded-lg transition-all border border-gray-200 hover:border-blue-200 hover:shadow-2xs active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label="Acessar Meu Perfil"
+            >
+              <UserIcon size={16} aria-hidden="true" />
+              <span>Meu Perfil</span>
+            </button>
+
             <button
               type="button"
               onClick={onOpenMeetingsModal}
