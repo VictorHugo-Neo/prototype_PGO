@@ -12,6 +12,8 @@ import type {
   AvailableStudent,
   Attachment,
   Notification,
+  NotificationSendPayload,
+  NotificationSendSummary,
   Meeting,
   MeetingStatus,
   MeetingUpdatePayload,
@@ -264,8 +266,22 @@ export const notificationService = {
     return response.data;
   },
 
+  getSent: async (): Promise<Notification[]> => {
+    const response = await api.get<Notification[]>('/notifications/sent');
+    return response.data;
+  },
+
   markAsRead: async (id: number): Promise<void> => {
     await api.patch(`/notifications/${id}/read`);
+  },
+
+  markAllAsRead: async (): Promise<void> => {
+    await api.patch('/notifications/read-all');
+  },
+
+  sendNotification: async (payload: NotificationSendPayload): Promise<NotificationSendSummary> => {
+    const response = await api.post<NotificationSendSummary>('/notifications/send', payload);
+    return response.data;
   },
 };
 

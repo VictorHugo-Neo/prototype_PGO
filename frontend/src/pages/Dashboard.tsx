@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Plus, User, LogOut, Search } from 'lucide-react';
+import { Plus, User, LogOut, Search, BellRing } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import type { StudentGuidance, DashboardStats } from '../types';
@@ -12,6 +12,8 @@ import { TaskStatusChart } from '../features/dashboard/components/TaskStatusChar
 import { StudentRankingChart } from '../features/dashboard/components/StudentRankingChart';
 import { GuidanceCard } from '../features/dashboard/components/GuidanceCard';
 import { LinkStudentModal } from '../features/dashboard/components/LinkStudentModal';
+import { NotificationBell } from '../features/notifications/components/NotificationBell';
+import { SendNotificationModal } from '../features/notifications/components/SendNotificationModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'in_progress' | 'completed' | 'pending_meetings'>('all');
 
@@ -104,6 +107,7 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <button
               type="button"
               onClick={() => navigate('/profile')}
@@ -121,6 +125,15 @@ export default function Dashboard() {
               aria-label="Sair"
             >
               <LogOut size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsNotificationModalOpen(true)}
+              className="bg-white hover:bg-gray-50 hover:shadow-2xs text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-300 px-3.5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-2xs active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              title="Criar e enviar notificação para orientandos"
+            >
+              <BellRing size={17} className="text-blue-600" />
+              <span className="hidden sm:inline">Notificar Orientandos</span>
             </button>
             <button
               type="button"
@@ -254,6 +267,12 @@ export default function Dashboard() {
         isOpen={isLinkModalOpen}
         onClose={() => setIsLinkModalOpen(false)}
         onLink={handleLinkStudent}
+      />
+
+      <SendNotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        guidances={guidances}
       />
     </div>
   );

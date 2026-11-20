@@ -123,7 +123,13 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     user_id = Column(Integer, ForeignKey("users.id"))
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    title = Column(String, nullable=True)
+    channel = Column(String, default="platform")
     link = Column(String, nullable=True)
+
+    user = relationship("User", foreign_keys=[user_id])
+    sender = relationship("User", foreign_keys=[sender_id])
 
 class Meeting(Base):
     __tablename__ = 'meetings'

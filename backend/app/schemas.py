@@ -199,8 +199,36 @@ class NotificationResponse(BaseModel):
     read: bool
     created_at: datetime
     link: Optional[str] = None
+    sender_id: Optional[int] = None
+    sender_name: Optional[str] = None
+    title: Optional[str] = None
+    channel: Optional[str] = None
     
     model_config = ConfigDict(from_attributes=True)
+
+class NotificationSendRequest(BaseModel):
+    target_type: str
+    student_id: Optional[int] = None
+    channel: str = "both"
+    title: Optional[str] = None
+    message: str
+
+class RecipientDispatchResult(BaseModel):
+    student_id: int
+    student_name: str
+    student_phone: Optional[str] = None
+    platform_success: bool = False
+    whatsapp_success: bool = False
+    whatsapp_skipped_no_phone: bool = False
+    whatsapp_error: Optional[str] = None
+
+class NotificationSendSummaryResponse(BaseModel):
+    total_targeted: int
+    platform_count: int
+    whatsapp_count: int
+    whatsapp_skipped_no_phone_count: int
+    whatsapp_failed_count: int
+    results: List[RecipientDispatchResult]
 
 class MeetingCreate(BaseModel):
     date: datetime

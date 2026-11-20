@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { TaskStatus } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -5,9 +6,14 @@ import { StudentHeader } from '../features/guidance/components/StudentHeader';
 import { KanbanBoard } from '../features/guidance/components/KanbanBoard';
 import { GuidanceModals } from '../features/guidance/components/GuidanceModals';
 import { useStudentGuidance } from '../features/guidance/hooks/useStudentGuidance';
+import { SendNotificationModal } from '../features/notifications/components/SendNotificationModal';
+import { StudentNotificationBanner } from '../features/notifications/components/StudentNotificationBanner';
+import { StudentNotificationsModal } from '../features/notifications/components/StudentNotificationsModal';
 
 export default function StudentDetails() {
   const { id } = useParams<{ id: string }>();
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isStudentNotifsModalOpen, setIsStudentNotifsModalOpen] = useState(false);
 
   const {
     guidance,
@@ -101,7 +107,14 @@ export default function StudentDetails() {
           handleOpenCreateTask(columns && columns.length > 0 ? (columns[0].slug as TaskStatus) : 'pending')
         }
         onOpenCoadvisorModal={() => setIsCoadvisorModalOpen(true)}
+        onOpenNotificationModal={() => setIsNotificationModalOpen(true)}
       />
+
+      {!isAdvisor && (
+        <StudentNotificationBanner
+          onOpenAllNotifications={() => setIsStudentNotifsModalOpen(true)}
+        />
+      )}
 
       <KanbanBoard
         tasks={tasks}
@@ -158,6 +171,19 @@ export default function StudentDetails() {
         onCloseCoadvisorModal={() => setIsCoadvisorModalOpen(false)}
         onSaveCoadvisor={handleSaveCoadvisor}
         onDeleteCoadvisor={handleDeleteCoadvisor}
+      />
+
+      <SendNotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        guidances={[guidance]}
+        initialStudentId={guidance.student?.id}
+        initialTargetType="individual"
+      />
+
+      <StudentNotificationsModal
+        isOpen={isStudentNotifsModalOpen}
+        onClose={() => setIsStudentNotifsModalOpen(false)}
       />
     </div>
   );

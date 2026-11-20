@@ -145,3 +145,44 @@ def check_and_notify_upcoming_deadlines(
         "skipped_no_phone": skipped_no_phone,
         "service_online": is_whatsapp_service_online(),
     }
+
+def dispatch_whatsapp_custom_message(
+    advisor_name: str,
+    student_name: str,
+    student_phone: str,
+    message: str,
+    title: Optional[str] = None,
+    guidance_theme: Optional[str] = None,
+) -> Dict[str, Any]:
+    if not student_phone or not student_phone.strip():
+        logger.info("Aluno %s não possui telefone cadastrado. WhatsApp ignorado.", student_name)
+        return {"success": False, "reason": "no_phone"}
+
+    payload = {
+        "advisor_name": advisor_name,
+        "student_name": student_name,
+        "student_phone": student_phone,
+        "message": message,
+        "title": title,
+        "guidance_theme": guidance_theme,
+    }
+
+    url = f"{settings.WHATSAPP_SERVICE_URL.rstrip('/')}/notify/custom"
+
+    try:
+        with httpx.Client(timeout=settings.WHATSAPP_TIMEOUT_SECONDS) as client:
+            response = client.post(url, json=payload)
+            if response.status_code == 200:
+                data = response.json()
+                logger.info("WhatsApp custom enviado para %s", student_name)
+                return {"success": True, "data": data}
+            else:
+                logger.warning("Falha ao enviar WhatsApp custom para %s (HTTP %s): %s", student_name, response.status_code, response.text)
+                return {"success": False, "status_code": response.status_code, "error": response.text}
+    except (httpx.ConnectError, httpx.TimeoutException) as exc:
+        logger.warning("Microserviço WhatsApp indisponível: %s", exc.__class__.__name__)
+        return {"success": False, "reason": "service_unavailable", "error": str(exc)}
+    except Exception as exc:
+        logger.error("Erro ao contactar microserviço WhatsApp: %s", exc)
+        return {"success": False, "reason": "unexpected_error", "error": str(exc)}
+

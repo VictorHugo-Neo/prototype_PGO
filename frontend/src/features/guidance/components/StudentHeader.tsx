@@ -16,9 +16,11 @@ import {
   Pencil,
   Trash2,
   User as UserIcon,
+  BellRing,
 } from 'lucide-react';
 import type { StudentGuidance } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
+import { NotificationBell } from '../../notifications/components/NotificationBell';
 
 interface StudentHeaderProps {
   guidance: StudentGuidance;
@@ -36,6 +38,7 @@ interface StudentHeaderProps {
   onPreviewReport?: () => void;
   onOpenCreateTaskModal: () => void;
   onOpenCoadvisorModal?: () => void;
+  onOpenNotificationModal?: () => void;
 }
 
 function getDefenseDateMeta(defenseDate?: string | null) {
@@ -99,6 +102,7 @@ export function StudentHeader({
   onPreviewReport,
   onOpenCreateTaskModal,
   onOpenCoadvisorModal,
+  onOpenNotificationModal,
 }: StudentHeaderProps) {
   const navigate = useNavigate();
   const isStudent = myUserId === guidance.student.id;
@@ -306,6 +310,7 @@ export function StudentHeader({
           </div>
 
           <div className="flex flex-wrap gap-2.5 items-center">
+            <NotificationBell />
             <button
               type="button"
               onClick={() => navigate('/profile')}
@@ -324,6 +329,18 @@ export function StudentHeader({
               <Users size={16} aria-hidden="true" />
               Reuniões ({meetingsCount})
             </button>
+
+            {isAdvisor && onOpenNotificationModal && (
+              <button
+                type="button"
+                onClick={onOpenNotificationModal}
+                className="flex items-center gap-1.5 text-gray-700 hover:text-blue-600 text-xs font-medium bg-gray-50 hover:bg-blue-50/80 px-3 py-2 rounded-lg transition-all border border-gray-200 hover:border-blue-200 hover:shadow-2xs active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                title="Enviar notificação direta para este aluno"
+              >
+                <BellRing size={16} className="text-blue-600" aria-hidden="true" />
+                <span>Notificar Aluno</span>
+              </button>
+            )}
 
             <div className="relative" ref={reportMenuRef}>
               <button

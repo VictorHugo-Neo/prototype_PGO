@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, AlertCircle, User as UserIcon } from 'lucide-react';
 import { guidanceService, authService } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { NotificationBell } from '../features/notifications/components/NotificationBell';
 
 export default function Trail() {
   const navigate = useNavigate();
@@ -41,8 +42,15 @@ export default function Trail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center max-w-md w-full">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="w-full bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <span className="font-bold text-gray-800 text-lg">PGO</span>
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+        </div>
+      </header>
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center max-w-md w-full">
         <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-100">
           <AlertCircle size={28} aria-hidden="true" />
         </div>
@@ -73,5 +81,6 @@ export default function Trail() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

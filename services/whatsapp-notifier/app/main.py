@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException, status
 from .config import settings
 from .schemas import (
     NotificationRequest,
+    CustomNotificationRequest,
     NotificationResponse,
     HealthResponse,
     MetricsResponse,
@@ -34,10 +35,8 @@ async def lifespan(app: FastAPI):
             api_key=settings.WHATSAPP_API_KEY,
             timeout=settings.REQUEST_TIMEOUT_SECONDS,
         )
-        logger.info("Provedor configurado: WebhookWhatsAppProvider (%s)", settings.WHATSAPP_API_URL)
     else:
         provider = MockWhatsAppProvider()
-        logger.info("Provedor configurado: MockWhatsAppProvider (desenvolvimento/testes)")
 
     notifier_service = NotificationService(
         provider=provider,
@@ -83,6 +82,20 @@ async def notify_task_deadline(request: NotificationRequest):
             detail="Número de telefone do aluno é obrigatório para envio de WhatsApp.",
         )
     return await notifier_service.notify_deadline(request)
+
+@app.post("/notify/custom", response_model=NotificationResponse, tags=["Notifications"])
+async def notify_custom_message(request: CustomNotificationRequest):
+    if not request.student_phone or not request.student_phone.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Número de telefone do aluno é obrigatório para envio de WhatsApp.",
+        )
+    if not request.message or not request.message.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Conteúdo da mensagem é obrigatório.",
+        )
+    return await notifier_service.notify_custom(request)
 
 @app.get("/metrics", response_model=MetricsResponse, tags=["Metrics"])
 def get_metrics():

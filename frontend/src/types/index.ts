@@ -114,12 +114,47 @@ export interface MeetingUpdatePayload {
   status?: MeetingStatus;
 }
 
+export type NotificationChannel = 'platform' | 'whatsapp' | 'both';
+
+export type NotificationTargetType = 'individual' | 'all';
+
+export interface NotificationSendPayload {
+  target_type: NotificationTargetType;
+  student_id?: number;
+  channel: NotificationChannel;
+  title?: string;
+  message: string;
+}
+
+export interface RecipientDispatchResult {
+  student_id: number;
+  student_name: string;
+  student_phone?: string | null;
+  platform_success: boolean;
+  whatsapp_success: boolean;
+  whatsapp_skipped_no_phone: boolean;
+  whatsapp_error?: string | null;
+}
+
+export interface NotificationSendSummary {
+  total_targeted: number;
+  platform_count: number;
+  whatsapp_count: number;
+  whatsapp_skipped_no_phone_count: number;
+  whatsapp_failed_count: number;
+  results: RecipientDispatchResult[];
+}
+
 export interface Notification {
   id: number;
   message: string;
   read: boolean;
   created_at: string;
   link?: string;
+  sender_id?: number;
+  sender_name?: string;
+  title?: string;
+  channel?: string;
 }
 
 export interface AvailableStudent {

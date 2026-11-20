@@ -11,6 +11,15 @@ class NotificationRequest(BaseModel):
     guidance_theme: Optional[str] = "Orientação Acadêmica"
     urgency_level: Optional[str] = Field(default="warning", pattern="^(warning|urgent|overdue)$")
 
+class CustomNotificationRequest(BaseModel):
+    student_name: str
+    student_phone: str
+    advisor_name: str
+    message: str
+    guidance_theme: Optional[str] = None
+    title: Optional[str] = None
+    idempotency_key: Optional[str] = None
+
 class NotificationResponse(BaseModel):
     success: bool
     message_id: str

@@ -1,5 +1,5 @@
 import pytest
-from app.schemas import NotificationRequest
+from app.schemas import NotificationRequest, CustomNotificationRequest
 from app.providers.mock_provider import MockWhatsAppProvider
 from app.services.notifier import NotificationService
 
@@ -53,6 +53,37 @@ async def test_notifier_enforces_idempotency_to_prevent_spam():
     assert len(provider.sent_messages) == 1
 
     res2 = await service.notify_deadline(req)
+    assert res2.success is True
+    assert res2.status == "skipped_duplicate"
+    assert len(provider.sent_messages) == 1
+
+@pytest.mark.anyio
+async def test_notifier_formats_and_dispatches_custom_notification():
+    provider = MockWhatsAppProvider()
+    service = NotificationService(provider=provider, idempotency_ttl_seconds=3600)
+
+    req = CustomNotificationRequest(
+        student_name="Ana Clara",
+        student_phone="5511944443333",
+        advisor_name="Dra. Helena",
+        title="Prazo de Submissão",
+        message="O artigo foi aceito no simpósio! Favor verificar os ajustes finais.",
+        guidance_theme="Bioinformática",
+    )
+
+    formatted = service.format_custom_message(req)
+    assert "Ana Clara" in formatted
+    assert "Dra. Helena" in formatted
+    assert "Prazo de Submissão" in formatted
+    assert "O artigo foi aceito no simpósio!" in formatted
+    assert "Bioinformática" in formatted
+
+    res1 = await service.notify_custom(req)
+    assert res1.success is True
+    assert res1.status == "sent"
+    assert len(provider.sent_messages) == 1
+
+    res2 = await service.notify_custom(req)
     assert res2.success is True
     assert res2.status == "skipped_duplicate"
     assert len(provider.sent_messages) == 1

@@ -71,6 +71,33 @@ def init_db():
                         ) THEN
                             ALTER TABLE users ADD COLUMN phone VARCHAR;
                         END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'notifications'
+                              AND column_name = 'sender_id'
+                        ) THEN
+                            ALTER TABLE notifications ADD COLUMN sender_id INTEGER REFERENCES users(id);
+                        END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'notifications'
+                              AND column_name = 'title'
+                        ) THEN
+                            ALTER TABLE notifications ADD COLUMN title VARCHAR;
+                        END IF;
+
+                        IF NOT EXISTS (
+                            SELECT 1
+                            FROM information_schema.columns
+                            WHERE table_name = 'notifications'
+                              AND column_name = 'channel'
+                        ) THEN
+                            ALTER TABLE notifications ADD COLUMN channel VARCHAR DEFAULT 'platform';
+                        END IF;
                     END $$;
                 """))
         except Exception:
@@ -93,6 +120,15 @@ def init_db():
                 user_cols = [c[1] for c in conn.execute(text("PRAGMA table_info(users)")).fetchall()]
                 if user_cols and "phone" not in user_cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR"))
+
+                notif_cols = [c[1] for c in conn.execute(text("PRAGMA table_info(notifications)")).fetchall()]
+                if notif_cols:
+                    if "sender_id" not in notif_cols:
+                        conn.execute(text("ALTER TABLE notifications ADD COLUMN sender_id INTEGER REFERENCES users(id)"))
+                    if "title" not in notif_cols:
+                        conn.execute(text("ALTER TABLE notifications ADD COLUMN title VARCHAR"))
+                    if "channel" not in notif_cols:
+                        conn.execute(text("ALTER TABLE notifications ADD COLUMN channel VARCHAR DEFAULT 'platform'"))
         except Exception:
             pass
 
