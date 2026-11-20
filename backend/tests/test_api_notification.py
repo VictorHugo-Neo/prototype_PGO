@@ -205,3 +205,40 @@ def test_get_sent_notifications_by_advisor(client):
     assert len(sent_list) == 1
     assert sent_list[0]["title"] == "Envio Histórico"
     db.close()
+
+def test_get_whatsapp_status(client):
+    db = TestingSessionLocal()
+    advisor = create_user(db, "Prof. Gilberto", "gilberto@test.com", models.TypeUser.ADVISOR)
+    headers = make_auth_headers(advisor)
+
+    with patch("app.services.whatsapp_client.is_whatsapp_service_online", return_value=True):
+        res = client.get("/notifications/whatsapp-status", headers=headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert data["online"] is True
+        assert "instance_id" in data
+        assert "service_url" in data
+    db.close()
+
+def test_notify_deadlines_endpoint(client):
+    db = TestingSessionLocal()
+    advisor = create_user(db, "Prof. Helena", "helena@test.com", models.TypeUser.ADVISOR)
+    student = create_user(db, "Aluno Gabriel", "gabriel@test.com", models.TypeUser.STUDENT, phone="5511999990000")
+    guidance = create_guidance(db, advisor.id, student.id, "Bioinformática")
+
+    headers = make_auth_headers(advisor)
+    with patch("app.services.whatsapp_client.check_and_notify_upcoming_deadlines") as mock_check:
+        mock_check.return_value = {
+            "tasks_analyzed": 2,
+            "whatsapp_dispatched": 1,
+            "skipped_no_phone": 0,
+            "failed_dispatched": 0,
+            "service_online": True,
+        }
+        res = client.post(f"/notifications/notify-deadlines?guidance_id={guidance.id}", headers=headers)
+        assert res.status_code == 200
+        data = res.json()
+        assert data["tasks_analyzed"] == 2
+        assert data["whatsapp_dispatched"] == 1
+    db.close()
+

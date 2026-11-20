@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { X, Send, BellRing, Loader2, AlertCircle } from 'lucide-react';
+import { X, Send, BellRing, Loader2, AlertCircle, Zap, CheckCircle2 } from 'lucide-react';
 import { notificationService } from '../../../services/api';
 import type { NotificationChannel, NotificationTargetType, NotificationSendSummary } from '../../../types';
 import type { SendNotificationModalProps, RecipientOption } from '../types';
@@ -24,6 +24,9 @@ export function SendNotificationModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [summary, setSummary] = useState<NotificationSendSummary | null>(null);
+  const [whatsappOnline, setWhatsAppOnline] = useState<boolean | null>(null);
+  const [isCheckingDeadlines, setIsCheckingDeadlines] = useState(false);
+  const [deadlineAlertSuccess, setDeadlineAlertSuccess] = useState<string | null>(null);
 
   const recipients: RecipientOption[] = useMemo(() => {
     const map = new Map<number, RecipientOption>();
@@ -53,6 +56,13 @@ export function SendNotificationModal({
       }
       setSummary(null);
       setErrorMessage(null);
+      setDeadlineAlertSuccess(null);
+      if (typeof notificationService.getWhatsAppStatus === 'function') {
+        notificationService
+          .getWhatsAppStatus()
+          .then((res) => setWhatsAppOnline(Boolean(res?.online)))
+          .catch(() => setWhatsAppOnline(false));
+      }
     }
   }, [isOpen, initialStudentId, initialTargetType, recipients]);
 
@@ -73,11 +83,36 @@ export function SendNotificationModal({
     setMessage('');
     setTitle('');
     setErrorMessage(null);
+    setDeadlineAlertSuccess(null);
   };
 
   const handleClose = () => {
     handleReset();
     onClose();
+  };
+
+  const handleNotifyDeadlines = async () => {
+    setIsCheckingDeadlines(true);
+    setErrorMessage(null);
+    setDeadlineAlertSuccess(null);
+    try {
+      if (typeof notificationService.notifyDeadlines === 'function') {
+        const res = await notificationService.notifyDeadlines({
+          guidance_id: targetType === 'individual' ? selectedStudentId : undefined,
+          hours_ahead: 48,
+        });
+        setDeadlineAlertSuccess(
+          `Alertas de prazos processados com sucesso! ${res.tasks_analyzed} tarefa(s) verificada(s), ${res.whatsapp_dispatched} enviada(s) via WhatsApp.`
+        );
+      }
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      setErrorMessage(
+        axiosErr?.response?.data?.detail || 'Erro ao disparar alertas de prazos.'
+      );
+    } finally {
+      setIsCheckingDeadlines(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,15 +173,38 @@ export function SendNotificationModal({
               <h2 id="modal-notif-title" className="text-base font-bold text-gray-800">
                 Enviar Notificação
               </h2>
-              <p className="text-xs text-gray-500">
-                Notifique seus orientandos via Plataforma PGO e/ou WhatsApp
-              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                <p className="text-xs text-gray-500">
+                  Notifique seus orientandos via Plataforma PGO e/ou WhatsApp
+                </p>
+                {whatsappOnline !== null && (
+                  <span
+                    className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                      whatsappOnline
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border border-amber-200'
+                    }`}
+                    title={
+                      whatsappOnline
+                        ? 'Evolution API / WhatsApp conectado e pronto para envio'
+                        : 'WhatsApp offline. Mensagens serão entregues na plataforma.'
+                    }
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        whatsappOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                      }`}
+                    />
+                    {whatsappOnline ? 'WhatsApp Online' : 'WhatsApp Offline'}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isCheckingDeadlines}
             className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             aria-label="Fechar modal"
           >
@@ -155,6 +213,13 @@ export function SendNotificationModal({
         </header>
 
         <div className="p-6 overflow-y-auto space-y-5">
+          {deadlineAlertSuccess && (
+            <div className="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+              <span>{deadlineAlertSuccess}</span>
+            </div>
+          )}
+
           {errorMessage && (
             <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs">
               <AlertCircle size={16} className="mt-0.5 shrink-0" />
@@ -185,6 +250,40 @@ export function SendNotificationModal({
                 onChange={setChannel}
                 disabled={isSubmitting}
               />
+
+              <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="p-1.5 bg-blue-100 text-blue-700 rounded-lg shrink-0 mt-0.5">
+                    <Zap size={15} />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-blue-900">
+                      Disparo Automático de Prazos Críticos (48h)
+                    </span>
+                    <span className="block text-[11px] text-blue-700/80">
+                      Varre tarefas pendentes próximas do vencimento e envia alerta no WhatsApp.
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={isSubmitting || isCheckingDeadlines}
+                  onClick={handleNotifyDeadlines}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-lg text-xs font-semibold shadow-2xs transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  {isCheckingDeadlines ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin" />
+                      <span>Verificando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={13} />
+                      <span>Disparar Prazos</span>
+                    </>
+                  )}
+                </button>
+              </div>
 
               <NotificationMessageForm
                 title={title}

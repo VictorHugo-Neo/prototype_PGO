@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [selectedStudentForNotif, setSelectedStudentForNotif] = useState<number | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'in_progress' | 'completed' | 'pending_meetings'>('all');
 
@@ -128,7 +129,10 @@ export default function Dashboard() {
             </button>
             <button
               type="button"
-              onClick={() => setIsNotificationModalOpen(true)}
+              onClick={() => {
+                setSelectedStudentForNotif(undefined);
+                setIsNotificationModalOpen(true);
+              }}
               className="bg-white hover:bg-gray-50 hover:shadow-2xs text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-300 px-3.5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-2xs active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               title="Criar e enviar notificação para orientandos"
             >
@@ -256,6 +260,10 @@ export default function Dashboard() {
                   key={guidance.id}
                   guidance={guidance}
                   summary={stats?.guidances_summary?.[String(guidance.id)]}
+                  onNotify={(studentId) => {
+                    setSelectedStudentForNotif(studentId);
+                    setIsNotificationModalOpen(true);
+                  }}
                 />
               ))}
             </div>
@@ -271,8 +279,13 @@ export default function Dashboard() {
 
       <SendNotificationModal
         isOpen={isNotificationModalOpen}
-        onClose={() => setIsNotificationModalOpen(false)}
+        onClose={() => {
+          setIsNotificationModalOpen(false);
+          setSelectedStudentForNotif(undefined);
+        }}
         guidances={guidances}
+        initialStudentId={selectedStudentForNotif}
+        initialTargetType={selectedStudentForNotif ? 'individual' : 'all'}
       />
     </div>
   );

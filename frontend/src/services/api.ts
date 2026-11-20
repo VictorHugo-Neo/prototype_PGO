@@ -14,6 +14,8 @@ import type {
   Notification,
   NotificationSendPayload,
   NotificationSendSummary,
+  WhatsAppStatusResponse,
+  NotifyDeadlinesResponse,
   Meeting,
   MeetingStatus,
   MeetingUpdatePayload,
@@ -281,6 +283,16 @@ export const notificationService = {
 
   sendNotification: async (payload: NotificationSendPayload): Promise<NotificationSendSummary> => {
     const response = await api.post<NotificationSendSummary>('/notifications/send', payload);
+    return response.data;
+  },
+
+  getWhatsAppStatus: async (): Promise<WhatsAppStatusResponse> => {
+    const response = await api.get<WhatsAppStatusResponse>('/notifications/whatsapp-status');
+    return response.data;
+  },
+
+  notifyDeadlines: async (params?: { guidance_id?: number; hours_ahead?: number }): Promise<NotifyDeadlinesResponse> => {
+    const response = await api.post<NotifyDeadlinesResponse>('/notifications/notify-deadlines', null, { params });
     return response.data;
   },
 };

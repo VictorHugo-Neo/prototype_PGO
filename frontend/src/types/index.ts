@@ -179,20 +179,39 @@ export interface StudentGuidance {
     id: number;
     name: string;
     email: string;
+    phone?: string;
     avatar_path?: string;
   };
   advisor?: {
     id: number;
     name: string;
     email?: string;
+    phone?: string;
     avatar_path?: string;
   };
   coadvisor?: {
     id: number;
     name: string;
     email?: string;
+    phone?: string;
     avatar_path?: string;
   } | null;
+}
+
+export interface WhatsAppStatusResponse {
+  online: boolean;
+  service_url?: string;
+  api_url?: string;
+  instance_id?: string;
+  provider?: string;
+}
+
+export interface NotifyDeadlinesResponse {
+  tasks_analyzed: number;
+  whatsapp_dispatched: number;
+  skipped_no_phone: number;
+  failed_dispatched?: number;
+  service_online: boolean;
 }
 
 export interface DashboardTaskStat {
@@ -255,4 +274,5 @@ export interface RegisterPayload {
   email: string;
   password: string;
   type: UserType;
+  phone?: string;
 }

@@ -207,3 +207,43 @@ def send_notification(
         whatsapp_failed_count=whatsapp_failed_count,
         results=results,
     )
+
+
+@router.get("/whatsapp-status")
+def get_whatsapp_status(
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    from ..services.whatsapp_client import is_whatsapp_service_online
+    from ..config import settings
+    return {
+        "online": is_whatsapp_service_online(),
+        "service_url": getattr(settings, "WHATSAPP_SERVICE_URL", "http://localhost:8001"),
+        "api_url": getattr(settings, "WHATSAPP_API_URL", "http://localhost:8080"),
+        "instance_id": getattr(settings, "WHATSAPP_INSTANCE_ID", "pgo"),
+        "provider": getattr(settings, "WHATSAPP_PROVIDER", "evolution"),
+    }
+
+
+@router.post("/notify-deadlines")
+def notify_deadlines(
+    guidance_id: int | None = None,
+    hours_ahead: int = 48,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user),
+):
+    if current_user.type != models.TypeUser.ADVISOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Apenas orientadores podem disparar notificações de prazos."
+        )
+
+    if guidance_id:
+        guidance = db.query(models.Guidance).filter(models.Guidance.id == guidance_id).first()
+        if not guidance:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Orientação não encontrada.")
+        if guidance.advisor_id != current_user.id and guidance.coadvisor_id != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não tem acesso a esta orientação.")
+
+    from ..services.whatsapp_client import check_and_notify_upcoming_deadlines
+    return check_and_notify_upcoming_deadlines(db, hours_ahead=hours_ahead, guidance_id=guidance_id)
+

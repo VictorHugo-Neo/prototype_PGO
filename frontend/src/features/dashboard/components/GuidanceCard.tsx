@@ -1,14 +1,15 @@
 import { useNavigate } from 'react-router-dom';
-import { Calendar, ArrowRight, KanbanSquare, Clock } from 'lucide-react';
+import { Calendar, ArrowRight, KanbanSquare, Clock, BellRing } from 'lucide-react';
 import type { StudentGuidance, GuidanceKanbanSummary } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
 
 interface GuidanceCardProps {
   guidance: StudentGuidance;
   summary?: GuidanceKanbanSummary;
+  onNotify?: (studentId: number) => void;
 }
 
-export function GuidanceCard({ guidance, summary }: GuidanceCardProps) {
+export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps) {
   const navigate = useNavigate();
 
   const progress = summary?.progress ?? 0;
@@ -71,6 +72,20 @@ export function GuidanceCard({ guidance, summary }: GuidanceCardProps) {
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
                   Coorientador
                 </span>
+              )}
+              {onNotify && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNotify(guidance.student.id);
+                  }}
+                  className="ml-auto p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                  title={`Notificar ${guidance.student.name}`}
+                  aria-label={`Notificar ${guidance.student.name}`}
+                >
+                  <BellRing size={14} />
+                </button>
               )}
             </div>
             <p className="text-xs text-gray-500 truncate" title={guidance.theme}>

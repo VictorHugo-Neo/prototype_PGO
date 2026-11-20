@@ -6,7 +6,9 @@ from .base import WhatsAppProvider
 logger = logging.getLogger("whatsapp_notifier.evolution")
 
 def normalize_phone_number(phone: str) -> str:
-    cleaned = "".join(filter(str.isdigit, phone))
+    cleaned = "".join(filter(str.isdigit, phone or ""))
+    if cleaned.startswith("0"):
+        cleaned = cleaned.lstrip("0")
     if len(cleaned) in (10, 11) and not cleaned.startswith("55"):
         cleaned = f"55{cleaned}"
     return cleaned

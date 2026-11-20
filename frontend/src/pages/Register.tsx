@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, GraduationCap, School, CheckCircle, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, GraduationCap, School, CheckCircle, Loader2 } from 'lucide-react';
 import type { UserType } from '../types';
 import { authService } from '../services/api';
 
@@ -10,6 +10,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
   });
@@ -43,6 +44,7 @@ export default function Register() {
         email: formData.email.trim(),
         password: formData.password,
         type: role,
+        phone: formData.phone.trim() || undefined,
       });
 
       setSuccess('Cadastro realizado com sucesso! Redirecionando para login...');
@@ -157,6 +159,27 @@ export default function Register() {
                 onChange={handleChange}
               />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="reg-phone" className="block text-xs font-semibold text-gray-600 mb-1">
+              Telefone / WhatsApp (Opcional)
+            </label>
+            <div className="relative">
+              <Phone size={16} className="absolute left-3 top-3 text-gray-400" />
+              <input
+                id="reg-phone"
+                name="phone"
+                type="tel"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="(11) 98765-4321"
+                value={formData.phone}
+                onChange={handleChange}
+              />
+            </div>
+            <p className="text-[11px] text-gray-400 mt-0.5">
+              Receba lembretes automáticos de prazos de TCC pelo WhatsApp.
+            </p>
           </div>
 
           <div>

@@ -3,12 +3,14 @@
 import sys
 import os
 
-if sys.version_info[0] < 3:
+try:
+    import httpx
+except ImportError:
     script_dir = os.path.dirname(os.path.abspath(__file__))
     venv_py = os.path.abspath(os.path.join(script_dir, "../../backend/venv/bin/python"))
-    target_py = venv_py if os.path.isfile(venv_py) else "python3"
-    args = [target_py, os.path.join(script_dir, "manage_evolution.py")] + sys.argv[1:]
-    os.execv(target_py, args)
+    if os.path.isfile(venv_py) and sys.executable != venv_py:
+        args = [venv_py, os.path.join(script_dir, "manage_evolution.py")] + sys.argv[1:]
+        os.execv(venv_py, args)
 
 from app.evolution_cli import main
 

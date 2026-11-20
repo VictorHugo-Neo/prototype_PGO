@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     WHATSAPP_SERVICE_URL: str = "http://localhost:8001"
     WHATSAPP_TIMEOUT_SECONDS: float = 3.0
+    WHATSAPP_API_URL: str = "http://localhost:8080"
+    WHATSAPP_API_KEY: str = "pgo_evolution_secret_key_123"
+    WHATSAPP_INSTANCE_ID: str = "pgo"
+    WHATSAPP_PROVIDER: str = "evolution"
     model_config = ConfigDict(
         env_file=".env",
         extra ="ignore"
