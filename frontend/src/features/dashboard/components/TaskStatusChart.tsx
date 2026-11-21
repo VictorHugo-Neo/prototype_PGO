@@ -50,7 +50,7 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
 
   return (
     <div
-      className="bg-white p-5 rounded-2xl shadow-2xs border border-gray-150/80 flex flex-col justify-between min-w-0 transition-all duration-200 hover:shadow-xs"
+      className="bg-white p-5 rounded-2xl shadow-xs flex flex-col justify-between min-w-0 transition-all duration-200 hover:shadow-sm"
       role="region"
       aria-label="Gráfico de distribuição de tarefas no fluxo Kanban"
     >
@@ -63,12 +63,12 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
       </div>
 
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-1">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-gray-800">Distribuição no Kanban</h3>
+              <h3 className="text-sm sm:text-base font-bold text-gray-900">Distribuição no Kanban</h3>
               {hasData && (
-                <span className="text-[11px] font-semibold px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200/60 rounded-full">
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full">
                   {totalTasks} {totalTasks === 1 ? 'tarefa' : 'tarefas'}
                 </span>
               )}
@@ -81,7 +81,7 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
           {hasData && (
             <div className="flex items-center gap-1.5 self-start sm:self-auto">
               <div
-                className="flex items-center bg-gray-100/90 p-0.5 rounded-xl border border-gray-200/70 text-xs shadow-2xs"
+                className="flex items-center bg-gray-100/90 p-0.5 rounded-xl text-xs"
                 role="tablist"
                 aria-label="Layout do gráfico de colunas"
               >
@@ -93,7 +93,7 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
                   onClick={() => setOrientation('columns')}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                     orientation === 'columns'
-                      ? 'bg-white text-blue-700 font-semibold shadow-2xs'
+                      ? 'bg-white text-blue-700 font-semibold shadow-xs'
                       : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
                   }`}
                   title="Exibir como Colunas verticais do Kanban"
@@ -109,7 +109,7 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
                   onClick={() => setOrientation('horizontal')}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                     orientation === 'horizontal'
-                      ? 'bg-white text-blue-700 font-semibold shadow-2xs'
+                      ? 'bg-white text-blue-700 font-semibold shadow-xs'
                       : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
                   }`}
                   title="Exibir como Barras horizontais"
@@ -123,7 +123,7 @@ export function TaskStatusChart({ data = [] }: TaskStatusChartProps) {
         </div>
 
         {!hasData ? (
-          <div className="h-60 flex flex-col items-center justify-center text-center p-6 bg-gray-50/60 rounded-xl border border-dashed border-gray-200 space-y-2">
+          <div className="h-60 flex flex-col items-center justify-center text-center p-6 bg-gray-50/70 rounded-xl space-y-2">
             <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
               <Layers size={18} aria-hidden="true" />
             </div>

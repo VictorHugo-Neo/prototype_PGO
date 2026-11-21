@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Calendar, ArrowRight, KanbanSquare, Clock, BellRing } from 'lucide-react';
+import { Calendar, ArrowRight, KanbanSquare, Clock, BellRing, UserCheck } from 'lucide-react';
 import type { StudentGuidance, GuidanceKanbanSummary } from '../../../types';
 import { API_BASE_URL } from '../../../services/api';
 
@@ -46,11 +46,12 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
       }}
       role="button"
       tabIndex={0}
-      className="bg-white rounded-2xl p-5 shadow-2xs border border-gray-100 hover:border-blue-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-[0.99] flex flex-col justify-between"
+      aria-label={`Quadro de orientação de ${guidance.student.name}`}
+      className="bg-white rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all duration-200 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-[0.99] flex flex-col justify-between"
     >
       <div>
         <div className="flex items-start gap-3.5 mb-3.5">
-          <div className="w-10 h-10 rounded-full bg-blue-50 overflow-hidden flex items-center justify-center border border-gray-100 shrink-0 mt-0.5">
+          <div className="w-10 h-10 rounded-full bg-blue-50 overflow-hidden flex items-center justify-center shrink-0 mt-0.5">
             {guidance.student.avatar_path ? (
               <img
                 src={`${API_BASE_URL}/${guidance.student.avatar_path.replace(/\\/g, '/')}`}
@@ -70,7 +71,8 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
                   {guidance.student.name}
                 </h3>
                 {guidance.user_role === 'coadvisor' && (
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 shrink-0">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 shrink-0 flex items-center gap-0.5">
+                    <UserCheck size={9} />
                     Coorientador
                   </span>
                 )}
@@ -81,6 +83,11 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
                   onClick={(e) => {
                     e.stopPropagation();
                     onNotify(guidance.student.id);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation();
+                    }
                   }}
                   className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer shrink-0"
                   title={`Notificar ${guidance.student.name}`}
@@ -96,7 +103,7 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
           </div>
         </div>
 
-        <div className="my-3 py-2.5 px-3 bg-gray-50/70 rounded-xl border border-gray-100/80 space-y-1.5">
+        <div className="my-3 py-2.5 px-3 bg-gray-50/80 rounded-xl space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-medium text-gray-600 flex items-center gap-1.5">
               <KanbanSquare size={13} className="text-blue-500" aria-hidden="true" />
@@ -105,7 +112,7 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
             <span className={`font-bold text-xs ${progressTextColor}`}>{progress}%</span>
           </div>
 
-          <div className="w-full bg-gray-200/70 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-gray-200/60 rounded-full h-1.5 overflow-hidden">
             <div
               className={`h-1.5 rounded-full transition-all duration-500 ${progressColor}`}
               style={{ width: `${progress}%` }}
@@ -136,7 +143,7 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
             {summary.columns.map((col) => (
               <span
                 key={col.slug}
-                className="px-2 py-0.5 rounded-md text-[10px] text-gray-600 bg-white border border-gray-200/70 transition-colors"
+                className="px-2 py-0.5 rounded-md text-[10px] text-gray-600 bg-gray-100/70 transition-colors"
                 title={`${col.title}: ${col.task_count} tarefas`}
               >
                 {col.title}: <strong className="font-semibold text-gray-800">{col.task_count}</strong>
@@ -146,9 +153,9 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
         )}
       </div>
 
-      <div className="pt-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
+      <div className="pt-2 flex justify-between items-center text-xs text-gray-500">
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1 text-[11px] text-gray-400">
+          <div className="flex items-center gap-1 text-[11px] text-gray-500">
             <Calendar size={12} className="text-gray-400" aria-hidden="true" />
             <span>
               {guidance.defense_date
@@ -159,7 +166,7 @@ export function GuidanceCard({ guidance, summary, onNotify }: GuidanceCardProps)
 
           {pendingMeetings > 0 && (
             <span
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700"
               title={`${pendingMeetings} reunião(ões) pendente(s)`}
             >
               <Clock size={10} aria-hidden="true" />

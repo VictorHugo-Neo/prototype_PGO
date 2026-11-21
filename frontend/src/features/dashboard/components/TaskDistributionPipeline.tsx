@@ -16,7 +16,7 @@ export function TaskDistributionPipeline({
   selectedSlug,
 }: TaskDistributionPipelineProps) {
   return (
-    <div className="space-y-2 p-3 bg-gray-50/70 rounded-xl border border-gray-100">
+    <div className="space-y-2 p-3 bg-gray-50/80 rounded-xl">
       <div className="flex justify-between items-center text-xs">
         <span className="font-semibold text-gray-700">Esteira Contínua do Fluxo</span>
         <div className="flex items-center gap-1.5">
@@ -26,7 +26,7 @@ export function TaskDistributionPipeline({
       </div>
 
       <div
-        className="w-full h-3 rounded-full overflow-hidden flex bg-gray-200/80 p-0.5 gap-0.5 shadow-inner"
+        className="w-full h-3 rounded-full overflow-hidden flex bg-gray-200/70 p-0.5 gap-0.5 shadow-inner"
         role="progressbar"
         aria-valuenow={completionRate}
         aria-valuemin={0}

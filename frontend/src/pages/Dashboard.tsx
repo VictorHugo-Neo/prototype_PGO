@@ -12,7 +12,12 @@ import { KpiCards } from '../features/dashboard/components/KpiCards';
 import { TaskStatusChart } from '../features/dashboard/components/TaskStatusChart';
 import { StudentRankingChart } from '../features/dashboard/components/StudentRankingChart';
 import { GuidanceCard } from '../features/dashboard/components/GuidanceCard';
-import { GuidanceFilterBar, type GuidanceFilterType } from '../features/dashboard/components/GuidanceFilterBar';
+import { GuidanceCompactList } from '../features/dashboard/components/GuidanceCompactList';
+import {
+  GuidanceFilterBar,
+  type GuidanceFilterType,
+  type GuidanceSortOption,
+} from '../features/dashboard/components/GuidanceFilterBar';
 import { AdvisorPracticalMetrics } from '../features/dashboard/components/AdvisorPracticalMetrics';
 import { LinkStudentModal } from '../features/dashboard/components/LinkStudentModal';
 import { SendNotificationModal } from '../features/notifications/components/SendNotificationModal';
@@ -27,7 +32,12 @@ export default function Dashboard() {
   const [selectedStudentForNotif, setSelectedStudentForNotif] = useState<number | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<GuidanceFilterType>('all');
-  
+  const [sortBy, setSortBy] = useState<GuidanceSortOption>('name');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('pgo_advisor_view_mode');
+    return saved === 'list' ? 'list' : 'grid';
+  });
+
   const [showCharts, setShowCharts] = useState<boolean>(() => {
     const saved = localStorage.getItem('pgo_advisor_show_charts');
     return saved === null ? true : saved === 'true';
@@ -83,8 +93,35 @@ export default function Dashboard() {
     });
   };
 
-  const filteredGuidances = useMemo(() => {
-    return guidances.filter((g) => {
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    localStorage.setItem('pgo_advisor_view_mode', mode);
+  };
+
+  const filterCounts = useMemo(() => {
+    let completed = 0;
+    let inProgress = 0;
+    let pendingMeetings = 0;
+
+    guidances.forEach((g) => {
+      const summary = stats?.guidances_summary?.[String(g.id)];
+      const prog = summary?.progress ?? 0;
+      if (prog === 100) completed++;
+      else inProgress++;
+
+      if ((summary?.pending_meetings ?? 0) > 0) pendingMeetings++;
+    });
+
+    return {
+      all: guidances.length,
+      in_progress: inProgress,
+      completed,
+      pending_meetings: pendingMeetings,
+    };
+  }, [guidances, stats]);
+
+  const filteredAndSortedGuidances = useMemo(() => {
+    const filtered = guidances.filter((g) => {
       const summary = stats?.guidances_summary?.[String(g.id)];
       const matchesSearch =
         searchQuery.trim() === '' ||
@@ -105,14 +142,34 @@ export default function Dashboard() {
 
       return true;
     });
-  }, [guidances, stats, searchQuery, activeFilter]);
+
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.student.name.localeCompare(b.student.name, 'pt-BR');
+      }
+      const progA = stats?.guidances_summary?.[String(a.id)]?.progress ?? 0;
+      const progB = stats?.guidances_summary?.[String(b.id)]?.progress ?? 0;
+      if (sortBy === 'progress_desc') {
+        return progB - progA;
+      }
+      if (sortBy === 'progress_asc') {
+        return progA - progB;
+      }
+      if (sortBy === 'defense_date') {
+        if (!a.defense_date) return 1;
+        if (!b.defense_date) return -1;
+        return new Date(a.defense_date).getTime() - new Date(b.defense_date).getTime();
+      }
+      return 0;
+    });
+  }, [guidances, stats, searchQuery, activeFilter, sortBy]);
 
   if (loading) {
     return <LoadingSpinner fullScreen message="Carregando painel de orientações..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/70 p-5 sm:p-7 md:p-8">
+    <div className="min-h-screen bg-slate-50/60 p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <DashboardHeader
           onLogout={handleLogout}
@@ -128,9 +185,9 @@ export default function Dashboard() {
         </section>
 
         <section aria-label="Painel de métricas e acompanhamento" className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white px-4 py-2.5 rounded-2xl border border-gray-150/80 shadow-2xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white px-4 py-2.5 rounded-2xl shadow-xs">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-gray-800">Painel do Orientador</span>
+              <span className="text-xs font-bold text-gray-900">Painel do Orientador</span>
               <span className="text-gray-300">|</span>
               <p className="text-[11px] text-gray-500">
                 {metricsTab === 'practical'
@@ -140,13 +197,13 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <div className="flex items-center bg-gray-100/80 p-0.5 rounded-xl border border-gray-200/80 text-xs shadow-2xs">
+              <div className="flex items-center bg-gray-100/90 p-0.5 rounded-xl text-xs">
                 <button
                   type="button"
                   onClick={() => setMetricsTab('practical')}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                     metricsTab === 'practical'
-                      ? 'bg-white text-blue-700 shadow-2xs'
+                      ? 'bg-white text-blue-700 shadow-xs'
                       : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
@@ -158,7 +215,7 @@ export default function Dashboard() {
                   onClick={() => setMetricsTab('kanban')}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                     metricsTab === 'kanban'
-                      ? 'bg-white text-blue-700 shadow-2xs'
+                      ? 'bg-white text-blue-700 shadow-xs'
                       : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
@@ -207,10 +264,10 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                   Suas Orientações
                 </h2>
-                <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                <span className="text-xs font-semibold px-2.5 py-0.5 bg-gray-100 text-gray-600 rounded-full">
                   {guidances.length}
                 </span>
               </div>
@@ -225,6 +282,11 @@ export default function Dashboard() {
                 onSearchChange={setSearchQuery}
                 activeFilter={activeFilter}
                 onFilterChange={setActiveFilter}
+                counts={filterCounts}
+                sortBy={sortBy}
+                onSortByChange={setSortBy}
+                viewMode={viewMode}
+                onViewModeChange={handleViewModeChange}
               />
             )}
           </div>
@@ -238,8 +300,8 @@ export default function Dashboard() {
                 onClick: () => setIsLinkModalOpen(true),
               }}
             />
-          ) : filteredGuidances.length === 0 ? (
-            <div className="p-8 bg-white rounded-2xl border border-gray-100 text-center space-y-2">
+          ) : filteredAndSortedGuidances.length === 0 ? (
+            <div className="p-8 bg-white rounded-2xl text-center space-y-2 shadow-xs">
               <p className="text-sm font-medium text-gray-700">Nenhuma orientação encontrada com os filtros atuais.</p>
               <button
                 type="button"
@@ -252,9 +314,19 @@ export default function Dashboard() {
                 Limpar filtros de busca
               </button>
             </div>
+          ) : viewMode === 'list' ? (
+            <GuidanceCompactList
+              guidances={filteredAndSortedGuidances}
+              stats={stats}
+              onNotifyStudent={(studentId) => {
+                setSelectedStudentForNotif(studentId);
+                setIsNotificationModalOpen(true);
+              }}
+              onNavigateGuidance={(id) => navigate(`/guidance/${id}`)}
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredGuidances.map((guidance) => (
+              {filteredAndSortedGuidances.map((guidance) => (
                 <GuidanceCard
                   key={guidance.id}
                   guidance={guidance}

@@ -58,7 +58,7 @@ export function TaskDistributionBars({
             <XAxis
               dataKey="name"
               tick={{ fontSize: 11, fill: '#475569', fontWeight: 600 }}
-              axisLine={{ stroke: '#e2e8f0' }}
+              axisLine={false}
               tickLine={false}
               interval={0}
             />
@@ -79,10 +79,10 @@ export function TaskDistributionBars({
               contentStyle={{
                 backgroundColor: '#ffffff',
                 borderRadius: '0.75rem',
-                border: '1px solid #e2e8f0',
+                border: 'none',
                 fontSize: '12px',
                 fontWeight: 600,
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                 padding: '8px 12px',
               }}
             />
@@ -127,7 +127,7 @@ export function TaskDistributionBars({
               type="number"
               allowDecimals={false}
               tick={{ fontSize: 11, fill: '#94a3b8' }}
-              axisLine={{ stroke: '#e2e8f0' }}
+              axisLine={false}
               tickLine={false}
             />
             <YAxis
@@ -149,10 +149,10 @@ export function TaskDistributionBars({
               contentStyle={{
                 backgroundColor: '#ffffff',
                 borderRadius: '0.75rem',
-                border: '1px solid #e2e8f0',
+                border: 'none',
                 fontSize: '12px',
                 fontWeight: 600,
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
                 padding: '8px 12px',
               }}
             />

@@ -21,7 +21,7 @@ export function TaskDistributionLegend({
 }: TaskDistributionLegendProps) {
   return (
     <div
-      className="flex justify-center flex-wrap gap-2 pt-3 border-t border-gray-100"
+      className="flex justify-center flex-wrap gap-2 pt-2"
       role="list"
       aria-label="Colunas e volumes do Kanban"
     >
@@ -47,10 +47,10 @@ export function TaskDistributionLegend({
             onBlur={() => {
               if (selectedSlug === null) onHoverIndex(null);
             }}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 border ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
               isActive
-                ? 'bg-blue-50/70 border-blue-200 text-gray-900 shadow-2xs'
-                : 'bg-white border-gray-150 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                ? 'bg-blue-50 text-blue-800 font-semibold shadow-xs'
+                : 'bg-gray-50/80 text-gray-600 hover:bg-gray-100/80'
             }`}
           >
             <span
