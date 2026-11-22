@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import type { TaskStatus } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { StudentHeader } from '../features/guidance/components/StudentHeader';
+import { StudentProgressOverview } from '../features/guidance/components/progress/StudentProgressOverview';
 import { KanbanBoard } from '../features/guidance/components/KanbanBoard';
 import { GuidanceModals } from '../features/guidance/components/GuidanceModals';
 import { useStudentGuidance } from '../features/guidance/hooks/useStudentGuidance';
@@ -115,6 +116,17 @@ export default function StudentDetails() {
           onOpenAllNotifications={() => setIsStudentNotifsModalOpen(true)}
         />
       )}
+
+      <StudentProgressOverview
+        tasks={tasks}
+        columns={columns}
+        meetings={meetings}
+        onTaskClick={handleTaskClick}
+        onOpenCreateTask={() =>
+          handleOpenCreateTask(columns && columns.length > 0 ? (columns[0].slug as TaskStatus) : 'pending')
+        }
+        onOpenMeetingsModal={() => setIsMeetingModalOpen(true)}
+      />
 
       <KanbanBoard
         tasks={tasks}
